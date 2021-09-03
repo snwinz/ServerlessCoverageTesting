@@ -1,0 +1,25 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Maven
+log/
+target/
+
+### Gradle ###
+.gradle
+/build/
+
+settings.xml
+/.gradle/
+
+# Logging
+Logging.html
+Logging.txt
+*.lck
