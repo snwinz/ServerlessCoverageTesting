@@ -59,7 +59,7 @@ public class FunctionInputFormatView extends Stage {
         });
         Button showPotentialJson = new Button("Show potential input");
         showPotentialJson.setOnAction(e -> controller.showPotentialInput(functionInputFormat));
-        Button showPotentialJsonWithContent = new Button("Show potential input");
+        Button showPotentialJsonWithContent = new Button("Show potential input with content");
         showPotentialJsonWithContent.setOnAction(e -> controller.showPotentialInputWithContent(functionInputFormat));
         final HBox hbox = new HBox();
         hbox.getChildren().addAll(showPotentialJson, showPotentialJsonWithContent, updateButton);
