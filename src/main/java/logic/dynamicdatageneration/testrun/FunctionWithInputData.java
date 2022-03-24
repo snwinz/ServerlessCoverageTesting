@@ -107,14 +107,42 @@ public class FunctionWithInputData {
                     var inputValues = testData.getInputValues().get(inputData.getKey());
                     setRandomEntryOfListAsValue(inputData, inputValues);
                 } else if (decisionRandomOutputAsValue < testData.getProbRandomOutputAsValue()) {
-                    var inputValues = testData.getOutputValues().values().stream()
-                            .flatMap(Collection::stream).collect(Collectors.toList());
-                    setRandomEntryOfListAsValue(inputData, inputValues);
+                    var inputValues = testData.getOutputValues().entrySet().stream().map(entry -> {
+                        var key = entry.getKey();
+                        var values = entry.getValue();
+                        List<Pair> result = new ArrayList<>();
+                        for (int i = 0; i < values.size(); i++) {
+                            var value = values.get(i);
+                            result.add(new Pair(key, value, i));
+                        }
+                        return result;
+                    }).flatMap(List::stream).collect(Collectors.toList());
+                    setRandomEntryOfOutputAsValue(inputData, inputValues);
                 } else if (decisionSimilarOutputAsValue < testData.getProbSimilarOutputAsValue()) {
-                    var inputValues = testData.getOutputValues().get(inputData.getKey());
-                    setRandomEntryOfListAsValue(inputData, inputValues);
+                    var inputValues = testData.getOutputValues().entrySet().stream()
+                            .filter(entry -> entry.getKey().equals(inputData.getKey()))
+                            .map(entry -> {
+                                var key = entry.getKey();
+                                var values = entry.getValue();
+                                List<Pair> result = new ArrayList<>();
+                                for (int i = 0; i < values.size(); i++) {
+                                    var value = values.get(i);
+                                    result.add(new Pair(key, value, i));
+                                }
+                                return result;
+                            }).flatMap(List::stream).collect(Collectors.toList());
+                    setRandomEntryOfOutputAsValue(inputData, inputValues);
                 }
             }
+        }
+
+    }
+
+    private void setRandomEntryOfOutputAsValue(GeneralInput inputData, List<Pair> inputValues) {
+        if (inputValues != null && inputValues.size() > 0) {
+            var item = getRandomItem2(inputValues);
+            var inputText = String.format("##PREVIOUSOUTPUT__%s__%s__PREVIOUSOUTPUT##", item.getKey(),item.getOccurence());
+            inputData.setGeneratedValue(inputText);
         }
 
     }
@@ -130,5 +158,35 @@ public class FunctionWithInputData {
     private <T> T getRandomItem(List<T> list) {
         int entryNumber = rn.nextInt(list.size());
         return list.get(entryNumber);
+    }
+
+    private <T> T getRandomItem2(List<T> list) {
+        int entryNumber = rn.nextInt(list.size());
+        return list.get(entryNumber);
+    }
+
+
+    private final class Pair {
+        private final String key;
+        private final String value;
+        private final int occurence;
+
+        Pair(String key, String value, int occurence) {
+            this.key = key;
+            this.value = value;
+            this.occurence = occurence;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public int getOccurence() {
+            return occurence;
+        }
     }
 }

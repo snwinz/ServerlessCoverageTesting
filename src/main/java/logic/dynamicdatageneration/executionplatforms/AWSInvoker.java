@@ -11,6 +11,7 @@ import com.amazonaws.services.logs.model.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AWSInvoker implements Executor {
     protected AWSLambda amazonLambda;
@@ -23,10 +24,14 @@ public class AWSInvoker implements Executor {
 
 
     @Override
-    public String invokeFunction(String functionName, String json) {
+    public String invokeFunction(String functionName, String json, Map<String, List<String>> outputValues) {
         InvokeRequest invokeRequest = new InvokeRequest()
                 .withFunctionName(functionName);
         json = json.replaceAll("'", "\"");
+
+        json = setOutputsOfPreviousFunctions(json, outputValues);
+
+
         invokeRequest.setPayload(json);
 
         InvokeResult invokeResult = amazonLambda.invoke(invokeRequest);
@@ -36,6 +41,24 @@ public class AWSInvoker implements Executor {
             Thread.currentThread().interrupt();
         }
         return new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
+    }
+
+    private String setOutputsOfPreviousFunctions(String json, Map<String, List<String>> outputValues) {
+        while (json.contains("##PREVIOUSOUTPUT__")) {
+            String key = json.split("##PREVIOUSOUTPUT")[1].split("__")[1];
+            var occurence = Integer.parseInt(json.split("##PREVIOUSOUTPUT")[1].split("__")[2]);
+            if (outputValues.containsKey(key) && outputValues.get(key).size()>occurence) {
+                    String value = outputValues.get(key).get(occurence);
+               var jsonFirstPart= json.split("##PREVIOUSOUTPUT")[0];
+               var jsonSecondPart= json.split("PREVIOUSOUTPUT##",2)[1];
+               json = jsonFirstPart+value+jsonSecondPart;
+            }
+            else {
+                break;
+            }
+
+        }
+        return json;
     }
 
 

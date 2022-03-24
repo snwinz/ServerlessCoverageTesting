@@ -7,6 +7,8 @@ import logic.dynamicdatageneration.testrun.FunctionWithInputData;
 import logic.dynamicdatageneration.testrun.TestData;
 import logic.model.Testcase;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -36,32 +38,37 @@ public class TestcaseSimulator {
         TestData testDataCreated = new TestData(testcase.getFunctions(), commands);
 
         for (int actualRun = 1; actualRun <= maximalNumberOfTries; actualRun++) {
+            try {
+                resetApplication();
+                executeFunctions(testcase, testDataCreated, actualRun);
+                var logList = executor.getAllNewLogs(0L);
+                LOGGER.info("Logs for Call of run " + actualRun + ":\n" + String.join("\n", logList));
+                List<String> specificTargetsToBeCovered = getAllTestTargets(testcase);
+                boolean allGeneralTestTargetsCovered = areAllTestTargetsCovered(testDataCreated, logList, testcase.getLogsOfTarget());
+                boolean allSpecificTargetsCovered = areAllTestTargetsCovered(testDataCreated, logList, specificTargetsToBeCovered);
 
-            resetApplication();
-            executeFunctions(testcase, testDataCreated, actualRun);
-            var logList = executor.getAllNewLogs(0L);
-            LOGGER.info("Logs for Call of run " + actualRun + ":\n" + String.join("\n", logList));
-            List<String> specificTargetsToBeCovered = getAllTestTargets(testcase);
-            boolean allGeneralTestTargetsCovered = areAllTestTargetsCovered(testDataCreated, logList, testcase.getLogsOfTarget());
-            boolean allSpecificTargetsCovered = areAllTestTargetsCovered(testDataCreated, logList, specificTargetsToBeCovered);
-
-            if (allSpecificTargetsCovered) {
-                testcase.addTextToWriteOutput("Successfully covered in run " + actualRun + ":\n" + testDataCreated + "\n");
-                testcase.setCovered(true);
-                testcase.setTestData(testDataCreated);
-                testcase.setSpecificTargetCovered(true);
-                testcase.setTestTargetData(testDataCreated);
-                testcase.setNumberOfRuns(actualRun);
-                return Optional.of(testDataCreated);
-            } else if (allGeneralTestTargetsCovered) {
-                testcase.addTextToWriteOutput("Successfully covered in run " + actualRun + ":\n" + testDataCreated + "\n");
-                if (!testcase.isCovered()) {
+                if (allSpecificTargetsCovered) {
+                    testcase.addTextToWriteOutput("Successfully covered in run " + actualRun + ":\n" + testDataCreated + "\n");
                     testcase.setCovered(true);
+                    testcase.setTestData(testDataCreated);
+                    testcase.setSpecificTargetCovered(true);
                     testcase.setTestTargetData(testDataCreated);
                     testcase.setNumberOfRuns(actualRun);
+                    return Optional.of(testDataCreated);
+                } else if (allGeneralTestTargetsCovered) {
+                    testcase.addTextToWriteOutput("Successfully covered in run " + actualRun + ":\n" + testDataCreated + "\n");
+                    if (!testcase.isCovered()) {
+                        testcase.setCovered(true);
+                        testcase.setTestTargetData(testDataCreated);
+                        testcase.setNumberOfRuns(actualRun);
+                    }
                 }
+                /* quite generic and has to be more specific */
+            } catch (Exception e) {
+                String message = String.format("Error occurred in run%d: %s", actualRun, e.getMessage());
+                System.err.println(message);
+                LOGGER.warning(message);
             }
-
 
         }
         return Optional.empty();
@@ -69,7 +76,7 @@ public class TestcaseSimulator {
 
     public void resetApplication() {
         if (resetFunctionName != null) {
-            executor.invokeFunction(resetFunctionName, "{}");
+            executor.invokeFunction(resetFunctionName, "{}", new HashMap<>());
         }
         executor.deleteOldLogs();
     }
@@ -114,7 +121,7 @@ public class TestcaseSimulator {
             LOGGER.info(invocation);
             testcase.addTextToWriteOutput(invocation);
 
-            String result = executor.invokeFunction(functionName, jsonData);
+            String result = executor.invokeFunction(functionName, jsonData, testData.getOutputValues());
             testData.addResultToOutput(result);
             String resultFormatted = String.format("result: %s", result);
 
@@ -132,7 +139,8 @@ public class TestcaseSimulator {
             String invocation = String.format("invoke function '%s' with json '%s'", functionName, jsonData);
             LOGGER.info(invocation);
             testcase.addTextToWriteOutput(invocation);
-            String result = executor.invokeFunction(functionName, jsonData);
+            String result = executor.invokeFunction(functionName, jsonData, testData.getOutputValues());
+            testData.addResultToOutput(result);
             String resultFormatted = String.format("result: %s", result);
             LOGGER.info(resultFormatted);
             testcase.addTextToWriteOutput(resultFormatted);
