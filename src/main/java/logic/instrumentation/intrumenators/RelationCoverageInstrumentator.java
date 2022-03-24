@@ -2,9 +2,7 @@ package logic.instrumentation.intrumenators;
 
 import logic.model.LogLine;
 import logic.model.SourceCode;
-import logic.model.SourceCodeLine;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.LOGDELIMITER;

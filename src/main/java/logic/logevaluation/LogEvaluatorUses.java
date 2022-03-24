@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class LogEvaluatorUses extends LogEvaluator {
 
-    List<String> logs = new ArrayList<>();
+    final List<String> logs = new ArrayList<>();
 
     public LogEvaluatorUses(List<String> logStatements) {
         for (String statement : logStatements) {
@@ -27,8 +27,7 @@ public class LogEvaluatorUses extends LogEvaluator {
         List<String> coveredUnits =
                 logs.stream().filter(s -> s.startsWith(LogNameConfiguration.DEFLOG_MARKER)).collect(Collectors.toList());
 
-        Map<String, Integer> unitsCovered = countNumberOfOccurrences(coveredUnits);
-        return unitsCovered;
+        return countNumberOfOccurrences(coveredUnits);
     }
 
     @Override

@@ -1,10 +1,12 @@
 package gui.view;
 
+import gui.controller.FunctionInputFormatViewController;
 import gui.controller.NodeCreatorController;
 import gui.controller.dto.NodeInputData;
 import gui.model.FunctionInputFormat;
-import gui.model.NodeType;
+import shared.model.NodeType;
 import gui.model.SourceCodeLine;
+import gui.view.wrapper.ComboBoxItemWrap;
 import gui.view.wrapper.SourceEntryWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -50,7 +52,7 @@ public class NodeCreatorView extends Stage {
                 );
         nodeTypeCombobox = new ComboBox<>(options);
         nodeTypeCombobox.getSelectionModel().selectFirst();
-        linkViewsForCombobox(x, y);
+        linkViewsForComboBox(x, y);
 
 
         var grid = getStandardNode(x, y);
@@ -58,7 +60,7 @@ public class NodeCreatorView extends Stage {
         this.setScene(scene);
     }
 
-    private void linkViewsForCombobox(double x, double y) {
+    private void linkViewsForComboBox(double x, double y) {
         nodeTypeCombobox.valueProperty().addListener((ov, t, typeOfEnum) -> {
             switch (typeOfEnum) {
                 case FUNCTION: {
@@ -184,8 +186,8 @@ public class NodeCreatorView extends Stage {
     }
 
     private void editFunctionInputFormat() {
-        FunctionInputFormatView view = new FunctionInputFormatView(functionInputFormat);
-        view.show();
+        FunctionInputFormatViewController controller = new FunctionInputFormatViewController();
+        controller.setup(functionInputFormat);
     }
 
 
@@ -195,26 +197,27 @@ public class NodeCreatorView extends Stage {
 
     private EventHandler<ActionEvent> getCreateButtonHandler() {
         return event -> {
-            var infos = new NodeInputData();
-            infos.setNodeType(nodeTypeCombobox.getValue());
-            infos.setName(nodeNameArea.getText());
-            List<SourceEntryWrapper> sourceList = new ArrayList<>(tableView.getItems());
-            var sourceListUnwrapped = sourceList.stream().map(SourceEntryWrapper::getSourceEntry).collect(Collectors.toList());
-
-            infos.setSourceData(sourceListUnwrapped);
-            infos.setInputFormats(functionInputFormat);
+            var info = new NodeInputData();
+            info.setNodeType(nodeTypeCombobox.getValue());
+            info.setName(nodeNameArea.getText());
+            if(nodeTypeCombobox.getValue().equals(NodeType.FUNCTION)){
+                List<SourceEntryWrapper> sourceList = new ArrayList<>(tableView.getItems());
+                var sourceListUnwrapped = sourceList.stream().map(SourceEntryWrapper::getSourceEntry).collect(Collectors.toList());
+                info.setSourceData(sourceListUnwrapped);
+                info.setInputFormats(functionInputFormat);
+            }
             try {
                 var x = Double.parseDouble(xArea.getText());
                 var y = Double.parseDouble(yArea.getText());
-                infos.setX(x);
-                infos.setY(y);
+                info.setX(x);
+                info.setY(y);
             } catch
             (NumberFormatException e) {
                 System.err.printf("Values x: %s and y: %s could not be parsed. Default value 100 for each is used.", xArea.getText(), yArea.getText());
-                infos.setX(100);
-                infos.setY(100);
+                info.setX(100);
+                info.setY(100);
             }
-            controller.addNodeToGraph(infos);
+            controller.addNodeToGraph(info);
         };
     }
 
@@ -237,16 +240,16 @@ public class NodeCreatorView extends Stage {
         PropertyValueFactory<SourceEntryWrapper, String> defContainerFactory = new PropertyValueFactory<>("defContainer");
         defContainerColumn.setCellValueFactory(defContainerFactory);
 
-        TableColumn<SourceEntryWrapper, ComboBox> defInfluenceColumn = new TableColumn<>("relation influenced by def");
-        PropertyValueFactory<SourceEntryWrapper, ComboBox> defInfluenceFactory = new PropertyValueFactory<>("relationsDefs");
+        TableColumn<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>> > defInfluenceColumn = new TableColumn<>("relation influenced by def");
+        PropertyValueFactory<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>> > defInfluenceFactory = new PropertyValueFactory<>("relationsDefs");
         defInfluenceColumn.setCellValueFactory(defInfluenceFactory);
 
         TableColumn<SourceEntryWrapper, String> useColumn = new TableColumn<>("use");
         PropertyValueFactory<SourceEntryWrapper, String> useFactory = new PropertyValueFactory<>("use statement");
         useColumn.setCellValueFactory(useFactory);
 
-        TableColumn<SourceEntryWrapper, ComboBox> useInfluenceColumn = new TableColumn<>("relation influencing use");
-        PropertyValueFactory<SourceEntryWrapper, ComboBox> useInfluenceFactory = new PropertyValueFactory<>("relationsUses");
+        TableColumn<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>> > useInfluenceColumn = new TableColumn<>("relation influencing use");
+        PropertyValueFactory<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>> > useInfluenceFactory = new PropertyValueFactory<>("relationsUses");
         useInfluenceColumn.setCellValueFactory(useInfluenceFactory);
 
         tableView.getColumns().clear();

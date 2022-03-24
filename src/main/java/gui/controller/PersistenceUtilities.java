@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import gui.controller.dto.ArrowInputData;
 import gui.controller.dto.NodeInputData;
 import gui.model.Graph;
+import shared.model.NodeType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,7 +43,9 @@ public class PersistenceUtilities {
                 inputNode.setX(node.getX());
                 inputNode.setY(node.getY());
                 inputNode.setId(node.getIdentifier());
-                inputNode.setInputFormats(node.getInputFormats());
+                if (inputNode.getNodeType().equals(NodeType.FUNCTION)) {
+                    inputNode.setInputFormats(node.getInputFormats());
+                }
                 model.addNode(inputNode);
             }
             for (var arrow : arrows) {

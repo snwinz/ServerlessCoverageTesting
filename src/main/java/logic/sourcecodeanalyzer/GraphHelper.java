@@ -8,35 +8,35 @@ import java.util.Optional;
 
 public class GraphHelper {
     public static boolean isIdentifierUsage(ParseTree ctx) {
-        ParseTree anchor;
+        ParseTree secondAnchor = ctx;
+        ParseTree firstAnchor = secondAnchor.getParent();
         while (ctx.getParent() != null) {
-            anchor = ctx;
+            secondAnchor = firstAnchor;
+            firstAnchor = ctx;
             ctx = ctx.getParent();
-            if (ctx instanceof ArgumentContext) {
-                return true;
-            }
-            if (ctx instanceof PropertyNameContext) {
-                return true;
-            }
-            if (ctx instanceof IdentifierNameContext) {
-                return false;
-            }
-            if (ctx instanceof ExpressionSequenceContext) {
-                return true;
-            }
-            if (ctx instanceof PropertyAssignmentContext) {
-                return false;
-            }
-            if (ctx instanceof AssignableContext) {
-                return false;
-            }
-            if ("=".equals(ctx.getText())) {
-                if (anchor == ctx.getChild(0)) {
-                    return false;
+
+            if(ctx instanceof VariableDeclarationContext){
+                var middleChild = ctx.getChild(1);
+                if (middleChild!= null && "=".equals(middleChild.getText())) {
+                    return firstAnchor != ctx.getChild(0);
                 }
+                return true;
             }
+            if(ctx instanceof ExpressionSequenceContext){
+                var middleChild = firstAnchor.getChild(1);
+                if (middleChild!= null && "=".equals(middleChild.getText())) {
+                    return secondAnchor != firstAnchor.getChild(0);
+                }
+                return true;
+            }
+            if(ctx instanceof ArgumentContext){
+                return true;
+            }if(ctx instanceof FormalParameterListContext){
+                return false;
+            }
+
         }
-        return true;
+        return false;
     }
 
     public static boolean isIdentifierDefinition(ParseTree ctx) {
@@ -45,7 +45,7 @@ public class GraphHelper {
             anchor = ctx;
             ctx = ctx.getParent();
             if (ctx instanceof SingleExpressionContext) {
-                if ("=".equals(ctx.getText())) {
+                if (ctx.getChild(1) != null && "=".equals(ctx.getChild(1).getText())) {
                     return ctx.getChild(0) == anchor;
                 }
             }
@@ -53,7 +53,7 @@ public class GraphHelper {
                 return false;
             }
         }
-        return true;
+        return false;
     }
 
     public static String getVariableNameOfDefinition(VariableDeclarationContext ctx) {
@@ -249,22 +249,6 @@ public class GraphHelper {
         return Optional.empty();
     }
 
-    public static Optional<PropertyNameContext> hasStatementItem(ParseTree ctx) {
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            ParseTree child = ctx.getChild(i);
-            if (child instanceof PropertyNameContext) {
-                if ("Item".equals(child.getText())) {
-                    return Optional.of((PropertyNameContext) child);
-                }
-            }
-            var optionalOfChildren = hasStatementItem(child);
-            if (optionalOfChildren.isPresent()) {
-                return optionalOfChildren;
-            }
-        }
-        return Optional.empty();
-    }
-
     public static String getJSONForPayload(PropertyNameContext payload) {
 
         var parent = payload.getParent();
@@ -281,17 +265,4 @@ public class GraphHelper {
         return "";
     }
 
-    public static Optional<FunctionBodyContext> getStartOfBody(ParseTree ctx) {
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            ParseTree child = ctx.getChild(i);
-            if (child instanceof FunctionBodyContext) {
-                return Optional.of((FunctionBodyContext) child);
-            }
-            var childResult = getStartOfBody(child);
-            if (childResult.isPresent()) {
-                return childResult;
-            }
-        }
-        return Optional.empty();
-    }
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="probRandomInputAsValue">0.0</entry>
+<entry key="probRandomOutputAsValue">1.0</entry>
+<entry key="resetFunctionName">resetFunction</entry>
+<entry key="probChangeGoodData">1.0</entry>
+<entry key="probSimilarInputAsValue">0.0</entry>
+<entry key="probSameValueEverywhere">0.0</entry>
+<entry key="regionAWS">eu-central-1</entry>
+<entry key="probSimilarOutputAsValue">0.0</entry>
+<entry key="numberOfTries">10</entry>
+<entry key="probEntryUndefined">0.0</entry>
+</properties>

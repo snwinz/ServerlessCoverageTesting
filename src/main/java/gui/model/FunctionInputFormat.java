@@ -4,96 +4,79 @@ import com.google.gson.annotations.Expose;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import shared.model.input.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class FunctionInputFormat {
+
     @Expose
-    private List<StringInput> stringInput;
-    @Expose
-    private List<IntegerInput> integerInput;
-    @Expose
-    private String JSONInput;
+    private List<GeneralInput> generalInputs;
 
     final StringProperty text = new SimpleStringProperty();
 
-    public FunctionInputFormat(List<StringInput> stringInput, List<IntegerInput> integerInput, String JSONInput) {
-        Objects.requireNonNull(stringInput, "string input list must not null");
-        Objects.requireNonNull(integerInput, "string input list must not null");
-        Objects.requireNonNull(JSONInput, "string input list must not null");
-
-        this.stringInput = stringInput;
-        this.integerInput = integerInput;
-        this.JSONInput = JSONInput;
+    public FunctionInputFormat(List<GeneralInput> generalInput) {
+        Objects.requireNonNull(generalInput, "string input list must not null");
+        this.generalInputs = generalInput;
         text.set(this.toString());
     }
 
     public FunctionInputFormat() {
-        stringInput = new ArrayList<>();
-        integerInput = new ArrayList<>();
-        JSONInput = "";
+        generalInputs = new ArrayList<>();
+
     }
 
-    public List<StringInput> getStringInput() {
-        return stringInput;
-    }
-
-    public List<IntegerInput> getIntegerInput() {
-        return integerInput;
-    }
-
-    public String getJSONInput() {
-        return JSONInput;
+    public List<GeneralInput> getGeneralInputs() {
+        return generalInputs;
     }
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (var stringInputEntry : stringInput) {
+        for (var stringInputEntry : generalInputs) {
             result.append(stringInputEntry);
             result.append("\n");
         }
+        return result.toString();
+    }
 
-        for (var integerInputEntry : integerInput) {
-            result.append(integerInputEntry);
-            result.append("\n");
-        }
+    public String getJSON() {
+        StringBuilder result = new StringBuilder();
+        result.append('{');
+        var rootEntry = generalInputs.stream().filter(item -> item.getParentId() == null)
+                .map(item -> item.getJsonFormat(generalInputs)).collect(Collectors.joining(","));
+        result.append(rootEntry);
+        result.append('}');
 
-        result.append(this.JSONInput);
+        return result.toString();
+    }
+
+    public String getJSONWithContent() {
+        generalInputs.forEach(GeneralInput::calculateNewValues);
+        StringBuilder result = new StringBuilder();
+        result.append('{');
+        var rootEntry = generalInputs.stream().filter(item -> item.getParentId() == null)
+                .map(item -> item.getJsonWithData(generalInputs)).collect(Collectors.joining(","));
+        result.append(rootEntry);
+        result.append('}');
 
         return result.toString();
     }
 
     public FunctionInputFormat getCopy() {
-
-
-        List<IntegerInput> integerInputCopy = new ArrayList<>();
-        for (var integerInputEntry : integerInput) {
-            var entry = new IntegerInput(integerInputEntry.getKey(), integerInputEntry.getMinValue(), integerInputEntry.getMaxValue());
-            integerInputCopy.add(entry);
+        List<GeneralInput> generalInputCopy = new ArrayList<>();
+        for (var stringInputEntry : generalInputs) {
+            var entry = stringInputEntry.getCopy();
+            generalInputCopy.add(entry);
         }
-        List<StringInput> stringInputCopy = new ArrayList<>();
-        for (var stringInputEntry : stringInput) {
-            var entry = new StringInput(stringInputEntry.getKey(), stringInputEntry.getJsonValue());
-            stringInputCopy.add(entry);
-        }
-        return new FunctionInputFormat(stringInputCopy, integerInputCopy, this.JSONInput);
+        return new FunctionInputFormat(generalInputCopy);
     }
 
-    public void setStringInput(List<StringInput> stringInput) {
-        this.stringInput = stringInput;
-        text.set(this.toString());
-    }
-
-    public void setIntegerInput(List<IntegerInput> integerInput) {
-        this.integerInput = integerInput;
-        text.set(this.toString());
-    }
-
-    public void setJSONInput(String JSONInput) {
-        this.JSONInput = JSONInput;
+    public void setStringInput(List<GeneralInput> generalInput) {
+        this.generalInputs = generalInput;
         text.set(this.toString());
     }
 
@@ -101,27 +84,45 @@ public class FunctionInputFormat {
         return text;
     }
 
-    public void addStringInputValue(StringInput stringInputValue) {
-        if (stringInput != null) {
-            stringInput.add(stringInputValue);
+    public void addGeneralInputValue(GeneralInput generalInputValue) {
+        if (generalInputs != null) {
+            generalInputs.add(generalInputValue);
         }
     }
 
-    public void delete(StringInput item) {
-        if (stringInput != null) {
-            stringInput.remove(item);
-        }
-    }
-    public void delete(IntegerInput item) {
-        if (integerInput != null) {
-            integerInput.remove(item);
+    public void delete(GeneralInput item) {
+        if (generalInputs != null) {
+            generalInputs.remove(item);
         }
     }
 
-    public void addIntegerInputValue(IntegerInput item) {
-        if (integerInput != null) {
-            integerInput.add(item);
+    public void updateTypes() {
+        List<GeneralInput> typedInputs = new ArrayList<>();
+
+        for (var generalInput : generalInputs) {
+            if (generalInput.getParentNode() != null && generalInput.getParentNode() && generalInput.getJsonSavedAsString() != null) {
+                typedInputs.add(new ParentKeyInput(generalInput));
+                continue;
+            }
+            if (generalInput.getArrayNode() != null && generalInput.getArrayNode()) {
+                typedInputs.add(new ArrayKeyInput(generalInput));
+                continue;
+            }
+            if (generalInput.getMaxValue() != null) {
+                typedInputs.add(new IntegerInput(generalInput));
+                continue;
+            }
+            if (generalInput.getDynamicValue() != null) {
+                typedInputs.add(new DynamicKeyValue(generalInput));
+            }
+            if (generalInput.getKey() == null) {
+                typedInputs.add(new ConstantValue(generalInput));
+                continue;
+            }
+            if (generalInput.getKey() != null && generalInput.getConstantValue() != null) {
+                typedInputs.add(new ConstantKeyValue(generalInput));
+            }
         }
+        this.generalInputs = typedInputs;
     }
 }
-

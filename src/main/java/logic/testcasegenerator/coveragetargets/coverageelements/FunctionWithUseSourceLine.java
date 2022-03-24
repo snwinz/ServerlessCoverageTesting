@@ -1,11 +1,9 @@
-package logic.testcasegenerator.coveragetargets.aspect;
+package logic.testcasegenerator.coveragetargets.coverageelements;
 
 import logic.model.NodeModel;
 import logic.model.SourceCodeLine;
 
 import java.util.Objects;
-
-import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.*;
 
 public class FunctionWithUseSourceLine extends FunctionWithSourceLine {
     public FunctionWithUseSourceLine(NodeModel function, SourceCodeLine sourceCodeLine) {
@@ -20,13 +18,8 @@ public class FunctionWithUseSourceLine extends FunctionWithSourceLine {
                 function.getType(), function.getNameOfNode(), function.getIdentifier(), sourceCodeLine.getUseTracker("", function.getIdentifier()));
     }
 
-
     @Override
-    public String getAspectMessage() {
-        return String.format("#%s%s%s%s", DEFLOG_MARKER,USELOG_MARKER, this.getSourceCodeLine().getUseTracker("",this.getFunction().getIdentifier()),LOGDELIMITER);
-    }
-    @Override
-    public String getAspectTarget(){
+    public String getCoverageTargetDescription(){
         return String.format("Coverage of Usage %s with any definition", this.getSourceCodeLine().getUseTracker("",this.getFunction().getIdentifier()));
     }
     @Override
@@ -43,10 +36,9 @@ public class FunctionWithUseSourceLine extends FunctionWithSourceLine {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof FunctionWithUseSourceLine)) {
+        if (!(o instanceof FunctionWithUseSourceLine functionWithUseSourceLine)) {
             return false;
         }
-        FunctionWithUseSourceLine functionWithUseSourceLine = (FunctionWithUseSourceLine) o;
         return functionWithUseSourceLine.function.equals(this.function) && functionWithUseSourceLine.sourceCodeLine.equals(this.sourceCodeLine);
     }
 }

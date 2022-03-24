@@ -1,6 +1,7 @@
 package logic.model;
 
 import com.google.gson.annotations.Expose;
+import shared.model.NodeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +97,12 @@ public class NodeModel {
 
     public void addOutgoingArrow(ArrowModel outgoingArrow) {
         outgoingArrows.add(outgoingArrow);
+    }
+
+    public void updateTypeForInputFormats() {
+        if (inputFormats != null) {
+            inputFormats.updateTypesOfGeneralInputs();
+        }
     }
 
     @Override

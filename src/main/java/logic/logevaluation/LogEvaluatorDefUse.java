@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class LogEvaluatorDefUse extends LogEvaluator {
 
-    List<String> logs = new ArrayList<>();
+    final List<String> logs = new ArrayList<>();
 
     public LogEvaluatorDefUse(List<String> logStatements) {
         for (String statement : logStatements) {

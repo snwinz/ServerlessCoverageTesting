@@ -52,7 +52,7 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
     }
 
 
-    public void updateAndshow() {
+    public void updateAndShow() {
         ScrollPane visualizedGraph = createGraphDisplay();
         var borderPane = createBorderPane(visualizedGraph);
 
@@ -64,16 +64,21 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
     }
 
     private EventHandler<ActionEvent> createEventHandlerCreateNode(double x, double y) {
-        return event -> controller.createNode(x, y);
+        return event -> controller.createNode(x, y, nodes, arrows);
     }
 
     private EventHandler<ActionEvent> createEventHandlerCreateArrow() {
-        return event -> controller.createArrow();
+        return event -> controller.createArrow(nodes, arrows);
     }
 
     private EventHandler<ActionEvent> createEventHandlerCreateStaticTestCases() {
         return event -> controller.createStaticTestCases();
     }
+
+    private EventHandler<ActionEvent> createEventHandlerCreateDynamicTestCases() {
+        return event -> controller.createDynamicTestCases();
+    }
+
 
     private BorderPane createBorderPane(ScrollPane visualizedGraph) {
         var borderPane = new BorderPane();
@@ -88,16 +93,18 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
         var menuBar = new MenuBar();
         var file = new Menu("File");
 
+        var saveGraphItemAs = new MenuItem("Save Graph As...");
         var saveGraphItem = new MenuItem("Save Graph");
         var closeItem = new MenuItem("Close");
         var analyzeLogFile = new MenuItem("Analyze Log File");
         var openNewGraphItem = new MenuItem("Open Graph");
         closeItem.setOnAction(event -> controller.closeWindow());
 
+        saveGraphItemAs.setOnAction(event -> controller.saveGraphAs(nodes, arrows));
         saveGraphItem.setOnAction(event -> controller.saveGraph(nodes, arrows));
         analyzeLogFile.setOnAction(getActionEventEventHandlerForLogEvaluation());
         openNewGraphItem.setOnAction(event -> controller.openGraph());
-        file.getItems().addAll(saveGraphItem, openNewGraphItem, analyzeLogFile, closeItem);
+        file.getItems().addAll(saveGraphItem, saveGraphItemAs, openNewGraphItem, analyzeLogFile, closeItem);
         menuBar.getMenus().addAll(file);
         return menuBar;
     }
@@ -105,9 +112,7 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
     private EventHandler<ActionEvent> getActionEventEventHandlerForLogEvaluation() {
         return event -> {
             var logFile = getLogFile();
-            if (logFile.isPresent()) {
-                controller.analyzeLogFile(logFile.get());
-            }
+            logFile.ifPresent(file -> controller.analyzeLogFile(file));
         };
     }
 
@@ -206,7 +211,11 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
             var createStaticTestCasesItem = new MenuItem("Create static template for test cases");
             createStaticTestCasesItem.setOnAction(createEventHandlerCreateStaticTestCases());
 
-            contextMenu.getItems().addAll(createNodeItem, createArrowItem, createStaticTestCasesItem);
+            var createDynamicTestCasesItem = new MenuItem("Create data for test cases");
+            createDynamicTestCasesItem.setOnAction(createEventHandlerCreateDynamicTestCases());
+
+
+            contextMenu.getItems().addAll(createNodeItem, createArrowItem, createStaticTestCasesItem, createDynamicTestCasesItem);
             contextMenu.show(this, event.getScreenX(), event.getScreenY());
         };
     }
@@ -221,21 +230,6 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
 
     public void closeWindow() {
         this.close();
-    }
-
-
-    public void updateAndShow() {
-        var visualizedGraph = createGraphDisplay();
-        var menuBar = createMenuBar();
-        var borderPane = new BorderPane();
-        borderPane.setTop(menuBar);
-        borderPane.setCenter(visualizedGraph);
-
-        var scene = new Scene(borderPane, WIDTH, HEIGHT);
-        scene.setFill(Color.GHOSTWHITE);
-
-        this.setScene(scene);
-        this.show();
     }
 
     public void setModel(Graph model) {

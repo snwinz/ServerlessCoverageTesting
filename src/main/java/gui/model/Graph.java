@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import gui.controller.dto.ArrowInputData;
 import gui.controller.dto.NodeInputData;
+import shared.model.NodeType;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -64,11 +65,11 @@ public class Graph {
         this.pcs.firePropertyChange("graphUpdated", null, this);
     }
 
-    public void addNode(NodeInputData nodeInfos) {
-        NodeModel node = copyNode(nodeInfos);
-        boolean isNodeAlreadyAdded = nodes.stream().anyMatch(n -> n.getIdentifier() == nodeInfos.getId());
+    public void addNode(NodeInputData nodeInfo) {
+        NodeModel nodeCreated = copyNode(nodeInfo);
+        boolean isNodeAlreadyAdded = nodes.stream().anyMatch(n -> n.getIdentifier() == nodeInfo.getId());
         if (!isNodeAlreadyAdded) {
-            nodes.add(node);
+            nodes.add(nodeCreated);
         }
         this.pcs.firePropertyChange("graphUpdated", null, this);
     }
@@ -89,17 +90,19 @@ public class Graph {
 
     }
 
-    private NodeModel copyNode(NodeInputData nodeInfos) {
+    private NodeModel copyNode(NodeInputData nodeInfo) {
         NodeModel node = new NodeModel();
-        if (nodeInfos.getId() != -1) {
-            node.setIdentifier(nodeInfos.getId());
+        if (nodeInfo.getId() != -1) {
+            node.setIdentifier(nodeInfo.getId());
         }
-        node.setNameOfNode(nodeInfos.getName());
-        node.setType(nodeInfos.getNodeType());
-        node.setSourceList(nodeInfos.getSourceList());
-        node.setX(nodeInfos.getX());
-        node.setY(nodeInfos.getY());
-        node.setInputFormats(nodeInfos.getInputFormats());
+        node.setNameOfNode(nodeInfo.getName());
+        node.setType(nodeInfo.getNodeType());
+        if (node.getType().equals(NodeType.FUNCTION)) {
+            node.setSourceList(nodeInfo.getSourceList());
+        }
+        node.setX(nodeInfo.getX());
+        node.setY(nodeInfo.getY());
+        node.setInputFormats(nodeInfo.getInputFormats());
         return node;
     }
 
@@ -136,7 +139,7 @@ public class Graph {
         if (arrow.isPresent()) {
             arrows.remove(arrow.get());
 
-            for(var node : nodes){
+            for (var node : nodes) {
                 node.removeRelations(id);
             }
 

@@ -1,6 +1,8 @@
 package gui.controller.dto;
 
-import gui.model.AccessMode;
+import shared.model.AccessMode;
+
+import java.util.Set;
 
 public class ArrowInputData {
     private long successor;
@@ -11,7 +13,7 @@ public class ArrowInputData {
     private double originalStartOffsetPositionY = 0;
     private double originalEndOffsetPositionX = 0;
     private double originalEndOffsetPositionY = 0;
-    private AccessMode accessMode;
+    private Set<AccessMode> accessMode;
 
 
     public long getId() {
@@ -33,6 +35,7 @@ public class ArrowInputData {
     public void setPredecessor(long predecessor) {
         this.predecessor = predecessor;
     }
+
     public ArrowInputData() {
     }
 
@@ -72,11 +75,11 @@ public class ArrowInputData {
         this.successor = successor;
     }
 
-    public AccessMode getAccessMode() {
+    public Set<AccessMode> getAccessMode() {
         return accessMode;
     }
 
-    public void setAccessMode(AccessMode accessMode) {
+    public void setAccessMode(Set<AccessMode> accessMode) {
         this.accessMode = accessMode;
     }
 }

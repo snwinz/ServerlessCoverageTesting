@@ -2,11 +2,10 @@ package gui.view;
 
 import gui.controller.ArrowEditorController;
 import gui.controller.dto.ArrowInputData;
-import gui.model.AccessMode;
 import gui.model.Graph;
 import gui.model.NodeModel;
-import gui.model.NodeType;
 import gui.view.graphcomponents.DraggableArrow;
+import gui.view.wrapper.AccessModesCombobox;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -16,6 +15,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import shared.model.AccessMode;
+import shared.model.NodeType;
 
 public class ArrowEditorView extends Stage {
 
@@ -24,14 +25,14 @@ public class ArrowEditorView extends Stage {
 
     private final ComboBox<NodeWrapper> comboBoxSuccessor = new ComboBox<>();
     private final ComboBox<NodeWrapper> comboBoxPredecessor = new ComboBox<>();
-    private final ComboBox<AccessMode> comboboxAccess = new ComboBox<>();
+    private final AccessModesCombobox accessModesCombobox = new AccessModesCombobox();
 
 
     public ArrowEditorView(ArrowEditorController arrowEditorController, DraggableArrow draggableArrow, Graph model) {
         this.controller = arrowEditorController;
         this.arrow = draggableArrow;
 
-        this.setTitle("Create Arrow");
+        this.setTitle("Edit Arrow");
         var grid = getGridPane(model);
         var scene = new Scene(grid);
         this.setScene(scene);
@@ -53,7 +54,7 @@ public class ArrowEditorView extends Stage {
         grid.add(successorText, 1, 2);
         grid.add(comboBoxSuccessor, 2, 2);
         grid.add(accessText, 1, 3);
-        grid.add(comboboxAccess, 2, 3);
+        grid.add(accessModesCombobox.getCombobox(), 2, 3);
 
         var updateButton = new Button("Update arrow");
         updateButton.setOnAction(getUpdateButtonHandler());
@@ -73,7 +74,8 @@ public class ArrowEditorView extends Stage {
             infos.setSuccessor(successorNode.getIdentifier());
             infos.setPredecessor(predecessorNode.getIdentifier());
             infos.setId(arrow.getIdentifier());
-            infos.setAccessMode(comboboxAccess.getValue());
+
+            infos.setAccessMode(accessModesCombobox.getModes());
             controller.updateArrowToGraph(infos);
         };
     }
@@ -99,9 +101,9 @@ public class ArrowEditorView extends Stage {
 
         ChangeListener<NodeWrapper> showAndHideAccessMode = (observable, oldValue, newValue) -> {
             if (comboBoxPredecessor.getValue() == null || comboBoxSuccessor.getValue() == null) {
-                comboboxAccess.getItems().clear();
                 accessText.setVisible(false);
-                comboboxAccess.setVisible(false);
+                accessModesCombobox.clear();
+                accessModesCombobox.setVisible(false);
                 return;
             }
             NodeWrapper pre = comboBoxPredecessor.getValue();
@@ -109,16 +111,17 @@ public class ArrowEditorView extends Stage {
 
             if (isDBCall(pre.node, suc.node)) {
                 accessText.setVisible(true);
-                comboboxAccess.getItems().setAll(AccessMode.READ, AccessMode.WRITE, AccessMode.DELETE);
-                comboboxAccess.setVisible(true);
+                accessModesCombobox.activateModes(AccessMode.READ, AccessMode.CREATE, AccessMode.UPDATE, AccessMode.DELETE);
+                accessModesCombobox.setVisible(true);
+
             } else if (isFunctionCall(pre.node, suc.node)) {
                 accessText.setVisible(true);
-                comboboxAccess.getItems().setAll(AccessMode.FUNCTIONCALL, AccessMode.RETURN);
-                comboboxAccess.setVisible(true);
+                accessModesCombobox.activateModes(AccessMode.FUNCTIONCALL, AccessMode.RETURN);
+                accessModesCombobox.setVisible(true);
             } else {
                 accessText.setVisible(false);
-                comboboxAccess.getItems().clear();
-                comboboxAccess.setVisible(false);
+                accessModesCombobox.clear();
+                accessModesCombobox.setVisible(false);
             }
         };
 
@@ -128,25 +131,24 @@ public class ArrowEditorView extends Stage {
 
         if (isDBCall(comboBoxPredecessor.getValue().node, comboBoxSuccessor.getValue().node)) {
             accessText.setVisible(true);
-            comboboxAccess.getItems().setAll(AccessMode.READ, AccessMode.WRITE, AccessMode.DELETE);
-            comboboxAccess.setValue(arrow.getAccessMode());
-            comboboxAccess.setVisible(true);
+            accessModesCombobox.activateModes(AccessMode.READ, AccessMode.CREATE, AccessMode.UPDATE, AccessMode.DELETE);
+            //comboboxAccess.setValue(arrow.getAccessMode().toArray();
+            accessModesCombobox.setVisible(true);
         } else if (isFunctionCall(comboBoxPredecessor.getValue().node, comboBoxSuccessor.getValue().node)) {
             accessText.setVisible(true);
-            comboboxAccess.getItems().setAll(AccessMode.FUNCTIONCALL, AccessMode.RETURN);
-            comboboxAccess.setValue(arrow.getAccessMode());
-            comboboxAccess.setVisible(true);
+            accessModesCombobox.activateModes(AccessMode.FUNCTIONCALL, AccessMode.RETURN);
+            // comboboxAccess.setValue(arrow.getAccessMode());
+            accessModesCombobox.setVisible(true);
         } else {
-            comboboxAccess.getItems().clear();
+            accessModesCombobox.clear();
             accessText.setVisible(false);
-            comboboxAccess.setVisible(false);
+            accessModesCombobox.setVisible(false);
         }
     }
 
     private boolean isDBCall(NodeModel pre, NodeModel suc) {
         return pre.getType().equals(NodeType.FUNCTION) && suc.getType().equals(NodeType.DATA_STORAGE);
     }
-
 
 
     private boolean isFunctionCall(NodeModel pre, NodeModel suc) {

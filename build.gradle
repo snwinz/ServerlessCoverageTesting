@@ -3,6 +3,8 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'antlr'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+
 }
 group = 'de.uni-bamberg.pi'
 version = '0.0.1-SNAPSHOT'
@@ -16,7 +18,7 @@ tasks.withType(JavaCompile) {
 
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 dependencies {
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
@@ -43,13 +45,19 @@ generateGrammarSource {
 }
 */
 javafx {
-    version = "14"
+    version = "17"
     modules = [ 'javafx.base', 'javafx.controls', 'javafx.fxml' ]
 }
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked"
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'gui.view.MainApp'
     }
 }
 

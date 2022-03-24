@@ -6,23 +6,20 @@ import logic.model.Testcase;
 import java.util.ArrayList;
 import java.util.List;
 
-import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.LOGDELIMITER;
-import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.RESOURCE_MARKER;
-
 public class CoverageTargetAllResources implements CoverageTarget {
 
-    private final NodeModel aspect;
+    private final NodeModel coverageElement;
 
     private final List<Testcase> testcases;
 
-    public CoverageTargetAllResources(NodeModel aspect) {
-        this.aspect = aspect;
+    public CoverageTargetAllResources(NodeModel coverageElement) {
+        this.coverageElement = coverageElement;
         testcases = new ArrayList<>();
     }
 
 
-    public NodeModel getAspect() {
-        return aspect;
+    public NodeModel getCoverageElement() {
+        return coverageElement;
     }
 
     public List<Testcase> getTestcases() {
@@ -35,21 +32,16 @@ public class CoverageTargetAllResources implements CoverageTarget {
 
 
     @Override
-    public String getAspectLogMessage() {
-        return String.format("%s%d%s",RESOURCE_MARKER, aspect.getIdentifier(),LOGDELIMITER);
-    }
-
-    @Override
-    public String getAspectTarget() {
+    public String getCoverageTargetDescription() {
         return String.format("Coverage of %s %s (id %d)",
-                aspect.getType(), aspect.getNameOfNode(), aspect.getIdentifier());
+                coverageElement.getType(), coverageElement.getNameOfNode(), coverageElement.getIdentifier());
     }
 
 
     @Override
     public String toString() {
-        return "CoverageAspectAllResources{" +
-                "aspect=" + aspect +
+        return "CoverageTargetAllResources{" +
+                "coverageElement=" + coverageElement +
                 '}';
     }
 }

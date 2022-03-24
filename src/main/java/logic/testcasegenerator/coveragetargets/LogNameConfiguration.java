@@ -7,4 +7,6 @@ public class LogNameConfiguration {
     public static final String RESOURCE_MARKER ="#Resource_Covered_";
     public static final String RELATION_MARKER ="#Relation_Covered_";
     public static final String LOGDELIMITER = "#";
+    public static final String FUNCTION_MARKER = "FUNCTION";
+
 }

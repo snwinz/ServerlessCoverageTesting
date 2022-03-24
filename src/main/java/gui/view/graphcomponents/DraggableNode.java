@@ -2,7 +2,7 @@ package gui.view.graphcomponents;
 
 import gui.controller.GraphVisualisationController;
 import gui.model.FunctionInputFormat;
-import gui.model.NodeType;
+import shared.model.NodeType;
 import gui.model.SourceCodeLine;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -52,7 +52,7 @@ public class DraggableNode extends Group {
         this.controller = controller;
         setOnMousePressed(clickMouse());
         setOnMouseDragged(dragMouse());
-        setOnMouseReleased(releaseMouse());
+        setOnMouseDragReleased(releaseMouse());
         layoutXProperty().set(xPosition);
         layoutYProperty().set(yPosition);
         updatePosition();
@@ -69,6 +69,15 @@ public class DraggableNode extends Group {
                 break;
             case FUNCTION:
                 symbol = getSymbol("images/lambda.png");
+                break;
+            case STREAM:
+                symbol = getSymbol("images/stream.png");
+                break;
+            case QUEUE:
+                symbol = getSymbol("images/queue.png");
+                break;
+            case MAIL:
+                symbol = getSymbol("images/mail.png");
                 break;
             case STANDARD_NODE:
             default:
@@ -214,13 +223,14 @@ public class DraggableNode extends Group {
 
     @Override
     public String toString() {
+        String sourceListEntry =     sourceList != null ? ", source=\" +" +    sourceList.stream().map(SourceCodeLine::toString).reduce("", (a, b) ->
+                a + "\n" + b) : "";
         return "DraggableNode{" +
                 "x=" + layoutXProperty().get() +
                 ", y=" + layoutYProperty().get() +
                 ", nameOfNode='" + nameOfNode + "\n" +
                 ", type=" + type +
-                ", source=" + sourceList.stream().map(SourceCodeLine::toString).reduce("", (a, b) ->
-                a + "\n" + b) +
+                sourceListEntry +
                 ", input formats=" + inputFormats + "\n" +
                 ", identifier=" + identifier +
                 '}';

@@ -1,6 +1,6 @@
 package logic.testcasegenerator.coveragetargets;
 
-import logic.testcasegenerator.coveragetargets.aspect.DefUsePair;
+import logic.testcasegenerator.coveragetargets.coverageelements.DefUsePair;
 import logic.model.Testcase;
 
 import java.util.ArrayList;
@@ -8,18 +8,18 @@ import java.util.List;
 
 public class CoverageTargetAllUses implements CoverageTarget {
 
-    private final DefUsePair aspect;
+    private final DefUsePair coverageElement;
 
     private final List<Testcase> testcases;
 
-    public CoverageTargetAllUses(DefUsePair aspect) {
-        this.aspect = aspect;
+    public CoverageTargetAllUses(DefUsePair coverageElement) {
+        this.coverageElement = coverageElement;
         testcases = new ArrayList<>();
     }
 
 
-    public DefUsePair getAspect() {
-        return aspect;
+    public DefUsePair getCoverageElement() {
+        return coverageElement;
     }
 
     public List<Testcase> getTestcases() {
@@ -32,20 +32,15 @@ public class CoverageTargetAllUses implements CoverageTarget {
 
 
     @Override
-    public String getAspectLogMessage() {
-        return aspect.getLogMessage();
-    }
-
-    @Override
-    public String getAspectTarget() {
-        return aspect.getAspectTarget();
+    public String getCoverageTargetDescription() {
+        return coverageElement.getCoverageTargetDescription();
     }
 
 
     @Override
     public String toString() {
-        return "CoverageAspectAllDefs{" +
-                "aspect=" + aspect +
+        return "CoverageTargetAllUses{" +
+                "coverageElement=" + coverageElement +
                 '}';
     }
 }

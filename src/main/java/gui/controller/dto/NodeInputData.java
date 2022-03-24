@@ -1,7 +1,7 @@
 package gui.controller.dto;
 
 import gui.model.FunctionInputFormat;
-import gui.model.NodeType;
+import shared.model.NodeType;
 import gui.model.SourceCodeLine;
 
 import java.util.List;
@@ -69,6 +69,7 @@ public class NodeInputData {
     }
 
     public void setInputFormats(FunctionInputFormat inputFormats) {
+        inputFormats.updateTypes();
         this.inputFormats = inputFormats;
     }
 

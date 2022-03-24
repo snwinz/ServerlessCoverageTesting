@@ -1,13 +1,7 @@
-package logic.testcasegenerator.coveragetargets.aspect;
+package logic.testcasegenerator.coveragetargets.coverageelements;
 
-public class DefUsePair {
-    private final FunctionWithDefSourceLine def;
-    private final FunctionWithUseSourceLine use;
-
-    public DefUsePair(FunctionWithDefSourceLine def, FunctionWithUseSourceLine use) {
-        this.def = def;
-        this.use = use;
-    }
+public record DefUsePair(FunctionWithDefSourceLine def,
+                         FunctionWithUseSourceLine use) {
 
     public FunctionWithDefSourceLine getDef() {
         return def;
@@ -29,14 +23,8 @@ public class DefUsePair {
                 '}';
     }
 
-    public String getLogMessage() {
-        return String.format("#%s%s",
-                def.getSourceCodeLine().getDefTracker("", def.getFunction().getIdentifier()),
-                use.getSourceCodeLine().getUseTracker("", use.getFunction().getIdentifier()
-                ));
-    }
 
-    public String getAspectTarget() {
+    public String getCoverageTargetDescription() {
         return String.format("Coverage of definition %s by use %s",
                 def.getSourceCodeLine().getDefTracker("", def.getFunction().getIdentifier()),
                 use.getSourceCodeLine().getUseTracker("", use.getFunction().getIdentifier()));

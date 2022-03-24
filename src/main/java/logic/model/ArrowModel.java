@@ -1,6 +1,10 @@
 package logic.model;
 
 import com.google.gson.annotations.Expose;
+import shared.model.AccessMode;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class ArrowModel {
     @Expose
@@ -11,7 +15,7 @@ public class ArrowModel {
     @Expose
     private long predecessor;
     @Expose
-    private AccessMode accessMode;
+    private Set<AccessMode> accessMode;
 
     private NodeModel successorNode;
     private NodeModel predecessorNode;
@@ -40,12 +44,17 @@ public class ArrowModel {
         this.predecessor = predecessor;
     }
 
-    public AccessMode getAccessMode() {
-        return accessMode;
+    public void setAccessMode(Set<AccessMode> accessMode) {
+        this.accessMode = accessMode;
     }
 
-    public void setAccessMode(AccessMode accessMode) {
-        this.accessMode = accessMode;
+    public void addAccessMode(AccessMode mode) {
+        if (accessMode != null) {
+            this.accessMode.add(mode);
+        } else {
+            this.accessMode = new HashSet<>();
+            this.accessMode.add(mode);
+        }
     }
 
     public NodeModel getSuccessorNode() {
@@ -62,6 +71,18 @@ public class ArrowModel {
 
     public void setPredecessorNode(NodeModel predecessorNode) {
         this.predecessorNode = predecessorNode;
+    }
+
+    public boolean hasAccessMode(AccessMode mode) {
+        if (accessMode != null) {
+            return accessMode.contains(mode);
+        } else {
+            return false;
+        }
+    }
+
+    public Set<AccessMode> getAccessMode() {
+        return accessMode;
     }
 
     @Override

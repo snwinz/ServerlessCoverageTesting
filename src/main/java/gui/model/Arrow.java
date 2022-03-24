@@ -1,6 +1,9 @@
 package gui.model;
 
 import com.google.gson.annotations.Expose;
+import shared.model.AccessMode;
+
+import java.util.Set;
 
 public class Arrow {
 
@@ -23,7 +26,7 @@ public class Arrow {
     private static long idCounter = 0;
 
     @Expose
-    private AccessMode accessMode;
+    private Set<AccessMode> accessMode;
 
     public Arrow() {
         identifier = idCounter;
@@ -96,13 +99,21 @@ public class Arrow {
         idCounter = 0;
     }
 
-    public void setAccessMode(AccessMode accessMode) {
+
+    public void setAccessMode(Set<AccessMode> accessMode) {
         this.accessMode = accessMode;
     }
 
-    public AccessMode getAccessMode() {
+    public Set<AccessMode> getAccessMode() {
         return accessMode;
     }
 
+    public boolean hasAccessMode(AccessMode mode) {
+        if (accessMode != null) {
+            return accessMode.contains(mode);
+        } else {
+            return false;
+        }
+    }
 
 }

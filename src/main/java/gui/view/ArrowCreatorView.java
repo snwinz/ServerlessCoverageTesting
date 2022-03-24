@@ -2,10 +2,11 @@ package gui.view;
 
 import gui.controller.ArrowCreatorController;
 import gui.controller.dto.ArrowInputData;
-import gui.model.AccessMode;
 import gui.model.Graph;
 import gui.model.NodeModel;
-import gui.model.NodeType;
+import gui.view.wrapper.AccessModesCombobox;
+import shared.model.AccessMode;
+import shared.model.NodeType;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -16,16 +17,18 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-public class ArrowCreatorView extends Stage{
+import java.util.HashSet;
+
+public class ArrowCreatorView extends Stage {
 
     private final ArrowCreatorController controller;
     private final ComboBox<NodeWrapper> comboBoxSuccessor = new ComboBox<>();
     private final ComboBox<NodeWrapper> comboBoxPredecessor = new ComboBox<>();
-    private final ComboBox<AccessMode> comboboxAccess = new ComboBox<>();
+    private final AccessModesCombobox accessModesCombobox = new AccessModesCombobox();
 
     public ArrowCreatorView(ArrowCreatorController controller, Graph model) {
         this.controller = controller;
-        this.setTitle("Edit Arrow");
+        this.setTitle("Create Arrow");
         var grid = getGridPane(model);
 
         var scene = new Scene(grid);
@@ -48,7 +51,7 @@ public class ArrowCreatorView extends Stage{
         grid.add(successorText, 1, 2);
         grid.add(comboBoxSuccessor, 2, 2);
         grid.add(accessText, 1, 3);
-        grid.add(comboboxAccess, 2, 3);
+        grid.add(accessModesCombobox.getCombobox(), 2, 3);
         grid.add(createButton, 1, 5);
         grid.add(cancelButton, 2, 5);
         return grid;
@@ -70,16 +73,16 @@ public class ArrowCreatorView extends Stage{
 
             if (isDBCall(pre.node, suc.node)) {
                 accessText.setVisible(true);
-                comboboxAccess.getItems().setAll(AccessMode.READ, AccessMode.WRITE, AccessMode.DELETE);
-                comboboxAccess.setVisible(true);
+                accessModesCombobox.activateModes(AccessMode.READ, AccessMode.CREATE, AccessMode.UPDATE, AccessMode.DELETE);
+                accessModesCombobox.setVisible(true);
             } else if (isFunctionCall(pre.node, suc.node)) {
                 accessText.setVisible(true);
-                comboboxAccess.getItems().setAll(AccessMode.FUNCTIONCALL, AccessMode.RETURN);
-                comboboxAccess.setVisible(true);
+                accessModesCombobox.activateModes(AccessMode.FUNCTIONCALL, AccessMode.RETURN);
+                accessModesCombobox.setVisible(true);
             } else {
                 accessText.setVisible(false);
-                comboboxAccess.getItems().clear();
-                comboboxAccess.setVisible(false);
+                accessModesCombobox.clear();
+                accessModesCombobox.setVisible(false);
             }
         };
 
@@ -87,7 +90,7 @@ public class ArrowCreatorView extends Stage{
         comboBoxSuccessor.valueProperty().addListener(showAndHideAccessMode);
         comboBoxPredecessor.valueProperty().addListener(showAndHideAccessMode);
 
-        comboboxAccess.setVisible(false);
+        accessModesCombobox.setVisible(false);
     }
 
     private boolean isDBCall(NodeModel pre, NodeModel suc) {
@@ -113,12 +116,12 @@ public class ArrowCreatorView extends Stage{
                 infos.setSuccessor(successorNode.getIdentifier());
                 infos.setPredecessor(predecessorNode.getIdentifier());
                 if (isDBCall(predecessorNode, successorNode) || isFunctionCall(predecessorNode, successorNode)) {
-                    infos.setAccessMode(comboboxAccess.getValue());
+                    var accessSet = new HashSet<AccessMode>();
+                    infos.setAccessMode(accessModesCombobox.getModes());
                 }
                 controller.addArrowToGraph(infos);
                 this.close();
             }
-
         };
     }
 

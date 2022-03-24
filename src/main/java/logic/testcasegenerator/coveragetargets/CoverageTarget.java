@@ -8,7 +8,5 @@ public interface CoverageTarget {
     List<Testcase> getTestcases();
 
 
-    String getAspectLogMessage();
-
-    String getAspectTarget();
+    String getCoverageTargetDescription();
 }

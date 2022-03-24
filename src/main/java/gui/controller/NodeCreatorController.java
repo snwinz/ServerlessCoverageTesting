@@ -22,8 +22,8 @@ public class NodeCreatorController {
         view.setup();
     }
 
-    public void addNodeToGraph(NodeInputData nodeInfos) {
-        model.addNode(nodeInfos);
+    public void addNodeToGraph(NodeInputData nodeInfo) {
+        model.addNode(nodeInfo);
         if (view != null) {
             view.close();
         }

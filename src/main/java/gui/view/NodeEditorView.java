@@ -1,12 +1,14 @@
 package gui.view;
 
+import gui.controller.FunctionInputFormatViewController;
 import gui.controller.NodeEditorController;
 import gui.controller.dto.NodeInputData;
 import gui.model.FunctionInputFormat;
 import gui.model.Graph;
-import gui.model.NodeType;
+import shared.model.NodeType;
 import gui.model.SourceCodeLine;
 import gui.view.graphcomponents.DraggableNode;
+import gui.view.wrapper.ComboBoxItemWrap;
 import gui.view.wrapper.SourceEntryWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -154,7 +156,7 @@ public class NodeEditorView extends Stage {
         var instrumentSourceButton = new Button("Instrument source code");
         var analyzeSourceButton = new Button("Analyze source code");
 
-        var analyzeBox = new HBox(analyzeSourceButton,considerDeletesCheckbox);
+        var analyzeBox = new HBox(analyzeSourceButton, considerDeletesCheckbox);
         var containerForSourceButtons = new VBox(loadSourceButton, instrumentSourceButton, analyzeBox);
         instrumentSourceButton.setOnAction(getSourceInstrumentationHandler());
         analyzeSourceButton.setOnAction(getAnalyzeHandler()
@@ -187,8 +189,8 @@ public class NodeEditorView extends Stage {
     }
 
     private void editFunctionInputFormat() {
-        FunctionInputFormatView view = new FunctionInputFormatView(functionInputFormat);
-        view.show();
+        FunctionInputFormatViewController controller = new FunctionInputFormatViewController();
+        controller.setup(functionInputFormat);
     }
 
 
@@ -249,11 +251,8 @@ public class NodeEditorView extends Stage {
             List<Long> neighbours = model.getNeighboursArrowsOfNode(node.getIdentifier());
             List<Long> nodes = model.getNeighbourNodesOfNode(node.getIdentifier());
             nodes.add(0, node.getIdentifier());
-            for (var idEntry : model.getNodeIDs()) {
-                if (!nodes.contains(idEntry)) {
-                    nodes.add(idEntry);
-                }
-            }
+            nodes.addAll(model.getNodeIDs());
+            nodes = nodes.stream().distinct().collect(Collectors.toList());
             List<Long> arrows = model.getArrowIDs();
             tableItemsWrapped.add(new SourceEntryWrapper(item, neighbours, nodes, arrows));
         }
@@ -267,16 +266,16 @@ public class NodeEditorView extends Stage {
         PropertyValueFactory<SourceEntryWrapper, String> defContainerFactory = new PropertyValueFactory<>("defContainer");
         defContainerColumn.setCellValueFactory(defContainerFactory);
 
-        TableColumn<SourceEntryWrapper, ComboBox> defInfluenceColumn = new TableColumn<>("relation influenced by def");
-        PropertyValueFactory<SourceEntryWrapper, ComboBox> defInfluenceFactory = new PropertyValueFactory<>("relationsDefs");
+        TableColumn<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>>> defInfluenceColumn = new TableColumn<>("relation influenced by def");
+        PropertyValueFactory<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>>> defInfluenceFactory = new PropertyValueFactory<>("relationsDefs");
         defInfluenceColumn.setCellValueFactory(defInfluenceFactory);
 
         TableColumn<SourceEntryWrapper, String> useColumn = new TableColumn<>("use statement");
         PropertyValueFactory<SourceEntryWrapper, String> useFactory = new PropertyValueFactory<>("use");
         useColumn.setCellValueFactory(useFactory);
 
-        TableColumn<SourceEntryWrapper, ComboBox> useInfluenceColumn = new TableColumn<>("relation influencing use");
-        PropertyValueFactory<SourceEntryWrapper, ComboBox> useInfluenceFactory = new PropertyValueFactory<>("relationsUses");
+        TableColumn<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>>> useInfluenceColumn = new TableColumn<>("relation influencing use");
+        PropertyValueFactory<SourceEntryWrapper, ComboBox<ComboBoxItemWrap<String>>> useInfluenceFactory = new PropertyValueFactory<>("relationsUses");
         useInfluenceColumn.setCellValueFactory(useInfluenceFactory);
 
         TableColumn<SourceEntryWrapper, String> nodeCalledByExecutionColumn = new TableColumn<>("node called by statement");
@@ -293,7 +292,7 @@ public class NodeEditorView extends Stage {
 
         tableView.getColumns().clear();
         tableView.getColumns().addAll(Arrays.asList(sourceCodeColumn, defContainerColumn, defInfluenceColumn, useColumn,
-                useInfluenceColumn, nodeCalledByExecutionColumn, relationCalledByExecutionColumn,replaceLineColumn));
+                useInfluenceColumn, nodeCalledByExecutionColumn, relationCalledByExecutionColumn, replaceLineColumn));
         tableView.getColumns().forEach(column -> column.setSortable(false));
 
         tableView.setItems(tableData);
@@ -312,9 +311,7 @@ public class NodeEditorView extends Stage {
             event.getRowValue().getUseWrapper().refreshText();
         });
         replaceLineColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        replaceLineColumn.setOnEditCommit(event -> {
-            event.getRowValue().setReplaceLine(event.getNewValue());
-        });
+        replaceLineColumn.setOnEditCommit(event -> event.getRowValue().setReplaceLine(event.getNewValue()));
 
 
     }

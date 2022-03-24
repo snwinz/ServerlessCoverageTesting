@@ -30,7 +30,7 @@ public class DefUsePairCoverageInstrumentator implements LineInstrumentator {
                 sourceCodeLine.addBeforeLine(logLine);
             }
             if (sourceCodeLine.getReplaceLine() != null) {
-                String commentForTarget = String.format("Old line '%s' is replaced by '%s'",
+                String commentForTarget = String.format("Old line '%s' is replaced by %n '%s'",
                         sourceCodeLine.getSourceLine(), sourceCodeLine.getReplaceLine());
                 var logLine = new LogLine(commentForTarget);
                 sourceCodeLine.addBeforeLine(logLine);

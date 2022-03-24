@@ -1,8 +1,7 @@
 package gui.view;
 
+import gui.controller.FunctionInputFormatViewController;
 import gui.model.FunctionInputFormat;
-import gui.model.IntegerInput;
-import gui.model.StringInput;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -10,159 +9,107 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import shared.model.input.*;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class FunctionInputFormatView extends Stage {
 
     private final FunctionInputFormat functionInputFormat;
-    private TableView<IntegerInput> tableViewInteger = new TableView<>();
-    private TableView<StringInput> tableViewString = new TableView<>();
-    private final TextArea textAreaJson = new TextArea();
+    private final FunctionInputFormatViewController controller;
+    private TableView<GeneralInput> tableViewString = new TableView<>();
+    private final ComboBox<TypOfJsonContent> comboBoxTypOfKey;
+    private final ComboBox<GeneralInput> comboBoxOfParents = new ComboBox<>();
 
-    public FunctionInputFormatView(FunctionInputFormat inputFormats) {
+    public FunctionInputFormatView(FunctionInputFormat inputFormats, FunctionInputFormatViewController controller) {
+        this.controller = controller;
         this.functionInputFormat = inputFormats;
         this.initModality(Modality.APPLICATION_MODAL);
         this.setTitle("Edit input format of node");
-        refreshView();
+        ObservableList<TypOfJsonContent> options =
+                FXCollections.observableArrayList(
+                        TypOfJsonContent.KEY_DYNAMIC_VALUE, TypOfJsonContent.KEY_INTEGER_VALUE, TypOfJsonContent.ARRAY_KEY,
+                        TypOfJsonContent.PARENT_KEY, TypOfJsonContent.KEY_CONSTANT_VALUE, TypOfJsonContent.CONSTANT_VALUE
+                );
+        comboBoxTypOfKey = new ComboBox<>(options);
+        comboBoxTypOfKey.getSelectionModel().selectFirst();
+        setupGUI();
+        refreshData();
     }
 
-    private GridPane getGrid() {
-
-        var grid = new GridPane();
-        final VBox stringInputTable = getStringInputTable();
-        grid.add(stringInputTable, 1, 1);
-        final VBox integerInputTable = getIntegerInputTable();
-        grid.add(integerInputTable, 2, 1);
-        final VBox jsonInputTable = getTextArea();
-
-        grid.add(jsonInputTable, 3, 1);
-
-        final Node controlButton = getControlButton();
-        grid.add(controlButton, 2, 2);
-
-        return grid;
+    private Pane getGrid() {
+        var pane = new Pane();
+        pane.setPrefWidth(900);
+        final VBox stringInputTable = getGeneralInputTable();
+        pane.getChildren().addAll(stringInputTable);
+        return pane;
     }
 
-    private HBox getControlButton() {
+    private HBox getControlButtons() {
         Button updateButton = new Button("Update input format");
         updateButton.setOnAction(e -> {
             updateFunctionInputFormat();
-            this.close();
+            controller.closeView();
         });
-
+        Button showPotentialJson = new Button("Show potential input");
+        showPotentialJson.setOnAction(e -> controller.showPotentialInput(functionInputFormat));
+        Button showPotentialJsonWithContent = new Button("Show potential input");
+        showPotentialJsonWithContent.setOnAction(e -> controller.showPotentialInputWithContent(functionInputFormat));
         final HBox hbox = new HBox();
-        hbox.getChildren().addAll(updateButton);
+        hbox.getChildren().addAll(showPotentialJson, showPotentialJsonWithContent, updateButton);
         return hbox;
     }
 
     private void updateFunctionInputFormat() {
-        this.functionInputFormat.setJSONInput(textAreaJson.getText());
         this.functionInputFormat.setStringInput(tableViewString.getItems());
-        this.functionInputFormat.setIntegerInput(tableViewInteger.getItems());
     }
 
-    private VBox getTextArea() {
-        textAreaJson.setText(functionInputFormat.getJSONInput());
-        Label heading = new Label("Constant Json used");
-        final VBox vbox = new VBox();
-        vbox.setSpacing(5);
-        vbox.setPadding(new
-                Insets(10, 0, 0, 10));
-        vbox.getChildren().
-                addAll(heading, textAreaJson);
-        return vbox;
+    private void refreshData() {
+        final ObservableList<GeneralInput> dataGeneralInput = FXCollections.observableArrayList(
+                functionInputFormat.getGeneralInputs()
+        );
+        tableViewString.setItems(dataGeneralInput);
+
+        final ObservableList<GeneralInput> dataPotentialParents = FXCollections.observableArrayList(
+                functionInputFormat.getGeneralInputs().stream().filter(entry -> entry instanceof ParentKeyInput || entry instanceof ArrayKeyInput).collect(Collectors.toList())
+        );
+        comboBoxOfParents.setItems(dataPotentialParents);
+
     }
 
-    private VBox getStringInputTable() {
+    private VBox getGeneralInputTable() {
         tableViewString = new TableView<>();
+        tableViewString.prefWidthProperty().bind(this.widthProperty());
         tableViewString.setEditable(true);
         tableViewString.getSelectionModel().
                 setSelectionMode(SelectionMode.MULTIPLE);
 
-        TableColumn<StringInput,String> keyCol = new TableColumn<>("Key");
-        TableColumn<StringInput,String> regexCol = new TableColumn<>("Regex of value");
-        tableViewString.getColumns().addAll(Arrays.asList(keyCol, regexCol));
-        final ObservableList<StringInput> dataStringInput = FXCollections.observableArrayList(
-                functionInputFormat.getStringInput()
-        );
+        TableColumn<GeneralInput, String> keyCol = new TableColumn<>("Key");
+        TableColumn<GeneralInput, String> regexCol = new TableColumn<>("Regex of value");
+        TableColumn<GeneralInput, String> minValueCol = new TableColumn<>("Min Value of Integer");
+        TableColumn<GeneralInput, String> maxValueCol = new TableColumn<>("Max Value of Integer");
+        TableColumn<GeneralInput, String> constantValueCol = new TableColumn<>("Constant value");
 
-        keyCol.setCellValueFactory(
-                new PropertyValueFactory<>("key")
-        );
-        regexCol.setCellValueFactory(
-                new PropertyValueFactory<>("jsonValue")
-        );
-        tableViewString.setItems(dataStringInput);
+        TableColumn<GeneralInput, String> parentCol = new TableColumn<>("parent");
+        TableColumn<GeneralInput, String> entryIdCol = new TableColumn<>("ID");
+        tableViewString.getColumns().addAll(Arrays.asList(keyCol, regexCol, minValueCol, maxValueCol, constantValueCol, parentCol, entryIdCol));
+
+        setMappingForColumns(keyCol, regexCol, minValueCol, maxValueCol, constantValueCol, parentCol, entryIdCol);
 
 
         final TextField addStringInputKey = new TextField();
         addStringInputKey.setPromptText("Key");
-        addStringInputKey.setMaxWidth(keyCol.getPrefWidth());
+        addStringInputKey.setPrefWidth(300);
+
         final TextField addStringInputJSON = new TextField();
-        addStringInputJSON.setMaxWidth(regexCol.getPrefWidth());
-        addStringInputJSON.setPromptText("regex, e.g. \".*\" for any String");
-        final Button addButton = new Button("Add");
-
-        addButton.setOnAction(e -> {
-            var newStringInputValue = new StringInput(
-                    addStringInputKey.getText(),
-                    addStringInputJSON.getText());
-            functionInputFormat.addStringInputValue(newStringInputValue);
-            refreshView();
-        });
-        final Button deleteButton = new Button("Delete");
-        deleteButton.setOnAction(e ->
-                deleteStringInputEntries());
-        final HBox hb = new HBox();
-        hb.getChildren().
-                addAll(addStringInputKey, addStringInputJSON, addButton, deleteButton);
-        hb.setSpacing(3);
-        Label heading = new Label("String input values as regex");
-        final VBox vbox = new VBox();
-        vbox.setSpacing(5);
-        vbox.setPadding(new
-                Insets(10, 0, 0, 10));
-        vbox.getChildren().
-                addAll(heading, tableViewString, hb);
-        return vbox;
-    }
-
-    private VBox getIntegerInputTable() {
-        tableViewInteger = new TableView<>();
-        tableViewInteger.setEditable(true);
-        tableViewInteger.getSelectionModel().
-                setSelectionMode(SelectionMode.MULTIPLE);
-
-        TableColumn<IntegerInput,String> keyCol = new TableColumn<>("Key");
-        TableColumn<IntegerInput,String> minValueCol = new TableColumn<>("Min Value of Integer");
-        TableColumn<IntegerInput,String> maxValueCol = new TableColumn<>("Max Value of Integer");
-        tableViewInteger.getColumns().addAll(Arrays.asList(keyCol, minValueCol, maxValueCol));
-
-        final ObservableList<IntegerInput> dataIntegerInput = FXCollections.observableArrayList(
-                functionInputFormat.getIntegerInput()
-        );
-
-        keyCol.setCellValueFactory(
-                new PropertyValueFactory<>("key")
-        );
-        minValueCol.setCellValueFactory(
-                new PropertyValueFactory<>("minValue")
-        );
-        maxValueCol.setCellValueFactory(
-                new PropertyValueFactory<>("maxValue")
-        );
-        tableViewInteger.setItems(dataIntegerInput);
-
-
-        final TextField inputKeyField = new TextField();
-        inputKeyField.setPromptText("Key");
-        inputKeyField.setMaxWidth(keyCol.getPrefWidth());
+        addStringInputJSON.setPrefWidth(300);
+        addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
 
         final TextField addMinValueField = new TextField();
         addMinValueField.setMaxWidth(minValueCol.getPrefWidth());
@@ -173,28 +120,170 @@ public class FunctionInputFormatView extends Stage {
         addMaxValueField.setPromptText("max value");
 
         final Button addButton = new Button("Add");
-        addButton.setOnAction(e -> {
-            IntegerInput integerInputValue = new IntegerInput(inputKeyField.getText(), addMinValueField.getText(), addMaxValueField.getText());
-            functionInputFormat.addIntegerInputValue(integerInputValue);
-            refreshView();
-        });
 
+        final CheckBox valueInJson = new CheckBox("save json value as string");
+        valueInJson.setSelected(false);
+
+        final CheckBox asBase64 = new CheckBox("save json value as base64");
+        asBase64.setSelected(false);
+
+        addButton.setOnAction(e -> addNewJSONEntry(addStringInputKey, addStringInputJSON, addMinValueField, addMaxValueField, valueInJson,asBase64));
 
         final Button deleteButton = new Button("Delete");
         deleteButton.setOnAction(e ->
-                deleteInputInputEntries());
-        final HBox hb = new HBox();
-        hb.getChildren().
-                addAll(inputKeyField, addMinValueField, addMaxValueField, addButton, deleteButton);
-        hb.setSpacing(3);
-        Label heading = new Label("Integer input");
-        final VBox vbox = new VBox();
-        vbox.setSpacing(5);
-        vbox.setPadding(new
+                deleteStringInputEntries());
+
+
+
+        final HBox nodeOfKeyControl = new HBox();
+        nodeOfKeyControl.getChildren().
+                addAll(addStringInputKey, addButton, deleteButton, asBase64);
+        nodeOfKeyControl.setSpacing(3);
+
+
+        final HBox boxForInput = new HBox();
+        boxForInput.getChildren().
+                addAll(addStringInputJSON);
+        boxForInput.setSpacing(3);
+
+
+        final VBox inputOptions = new VBox();
+        Label heading = new Label("String input values as regex");
+        comboBoxTypOfKey.valueProperty().addListener((observable, oldValue, newValue) -> {
+            switch (oldValue) {
+                case KEY_CONSTANT_VALUE:
+                    addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
+                    boxForInput.getChildren().remove(addStringInputJSON);
+                    break;
+                case CONSTANT_VALUE:
+                    nodeOfKeyControl.getChildren().add(0, addStringInputKey);
+                    addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
+                    boxForInput.getChildren().remove(addStringInputJSON);
+                    break;
+                case KEY_INTEGER_VALUE:
+                    boxForInput.getChildren().removeAll(addMinValueField, addMaxValueField);
+                    break;
+                case KEY_DYNAMIC_VALUE:
+                    addStringInputJSON.setText("");
+                    boxForInput.getChildren().removeAll(addStringInputJSON);
+                    nodeOfKeyControl.getChildren().removeAll(asBase64);
+                    break;
+                case PARENT_KEY:
+                    nodeOfKeyControl.getChildren().removeAll(valueInJson,asBase64);
+                case ARRAY_KEY:
+                default:
+                    break;
+            }
+            switch (newValue) {
+                case KEY_CONSTANT_VALUE:
+                    addStringInputJSON.setPromptText("JSON text");
+                    boxForInput.getChildren().addAll(addStringInputJSON);
+                    nodeOfKeyControl.getChildren().removeAll(valueInJson, asBase64);
+                    break;
+                case CONSTANT_VALUE:
+                    nodeOfKeyControl.getChildren().remove(addStringInputKey);
+                    addStringInputJSON.setPromptText("constant value");
+                    boxForInput.getChildren().addAll(addStringInputJSON);
+                    nodeOfKeyControl.getChildren().removeAll(valueInJson, asBase64);
+                    break;
+                case KEY_INTEGER_VALUE:
+                    boxForInput.getChildren().addAll(addMinValueField, addMaxValueField);
+                    nodeOfKeyControl.getChildren().removeAll(valueInJson, asBase64);
+                    break;
+                case KEY_DYNAMIC_VALUE:
+                    addStringInputJSON.setText("");
+                    addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
+                    boxForInput.getChildren().addAll(addStringInputJSON);
+                    nodeOfKeyControl.getChildren().remove(valueInJson);
+                    nodeOfKeyControl.getChildren().addAll(asBase64);
+                    break;
+                case ARRAY_KEY:
+                    nodeOfKeyControl.getChildren().removeAll(valueInJson, asBase64);
+                    comboBoxOfParents.getSelectionModel().select(null);
+                    break;
+                case PARENT_KEY:
+                    nodeOfKeyControl.getChildren().addAll(valueInJson,asBase64);
+                    comboBoxOfParents.getSelectionModel().select(null);
+                default:
+                    break;
+            }
+        });
+
+
+        inputOptions.setSpacing(5);
+        inputOptions.setPadding(new
                 Insets(10, 0, 0, 10));
-        vbox.getChildren().
-                addAll(heading, tableViewInteger, hb);
-        return vbox;
+        final Node controlButton = getControlButtons();
+        inputOptions.getChildren().
+                addAll(heading, tableViewString, nodeOfKeyControl, comboBoxTypOfKey, boxForInput, comboBoxOfParents, controlButton);
+        return inputOptions;
+    }
+
+    private void addNewJSONEntry(TextField addStringInputKey, TextField addStringInputJSON, TextField addMinValueField, TextField addMaxValueField, CheckBox valueInJson, CheckBox asBase64) {
+        GeneralInput generatedInputValue;
+        var key = addStringInputKey.getText();
+
+        var selection = comboBoxTypOfKey.getValue();
+        switch (selection) {
+            case KEY_CONSTANT_VALUE:
+                generatedInputValue = new ConstantKeyValue(key, addStringInputJSON.getText());
+                break;
+            case CONSTANT_VALUE:
+                generatedInputValue = new ConstantValue(addStringInputJSON.getText());
+                break;
+            case KEY_INTEGER_VALUE:
+                generatedInputValue = new IntegerInput(key, Integer.valueOf(addMinValueField.getText()), Integer.valueOf(addMaxValueField.getText()));
+                break;
+            case KEY_DYNAMIC_VALUE:
+                generatedInputValue = new DynamicKeyValue(key, addStringInputJSON.getText(),asBase64.isSelected());
+                break;
+            case ARRAY_KEY:
+                generatedInputValue = new ArrayKeyInput(key);
+                break;
+            case PARENT_KEY:
+                generatedInputValue = new ParentKeyInput(key, valueInJson.isSelected(), asBase64.isSelected());
+                break;
+            default:
+                generatedInputValue = new GeneralInput(key);
+                break;
+        }
+
+        Integer freeEntryID = functionInputFormat.getGeneralInputs().stream().mapToInt(GeneralInput::getEntryID).max().orElse(0) + 1;
+        generatedInputValue.setEntryID(freeEntryID);
+        var parent = comboBoxOfParents.getValue();
+        if (parent != null) {
+            generatedInputValue.setParentId(parent.getEntryID());
+        }
+        functionInputFormat.addGeneralInputValue(generatedInputValue);
+        refreshData();
+    }
+
+
+    private void setMappingForColumns(TableColumn<GeneralInput, String> keyCol, TableColumn<GeneralInput,
+            String> regexCol, TableColumn<GeneralInput, String> minValueCol, TableColumn<GeneralInput,
+            String> maxValueCol, TableColumn<GeneralInput, String> constantValueCol, TableColumn<GeneralInput,
+            String> parentCol, TableColumn<GeneralInput, String> entryIdCol) {
+        keyCol.setCellValueFactory(
+                new PropertyValueFactory<>("key")
+        );
+        regexCol.setCellValueFactory(
+                new PropertyValueFactory<>("dynamicValue")
+        );
+        minValueCol.setCellValueFactory(
+                new PropertyValueFactory<>("minValue")
+        );
+        maxValueCol.setCellValueFactory(
+                new PropertyValueFactory<>("maxValue")
+        );
+        constantValueCol.setCellValueFactory(
+                new PropertyValueFactory<>("constantValue")
+        );
+        parentCol.setCellValueFactory(
+                new PropertyValueFactory<>("parentId")
+        );
+        entryIdCol.setCellValueFactory(
+                new PropertyValueFactory<>("entryID")
+        );
     }
 
 
@@ -203,30 +292,29 @@ public class FunctionInputFormatView extends Stage {
         for (var item : items) {
             functionInputFormat.delete(item);
         }
-        refreshView();
+        refreshData();
     }
 
-    private void deleteInputInputEntries() {
-        var items = tableViewInteger.getSelectionModel().getSelectedItems();
-        for (var item : items) {
-            functionInputFormat.delete(item);
-        }
-        refreshView();
-    }
-
-
-    private void refreshView() {
+    private void setupGUI() {
         var grid = getGrid();
         var scene = new Scene(grid);
         this.setScene(scene);
     }
 
+    enum TypOfJsonContent {
+        PARENT_KEY("Parent key of entries"), ARRAY_KEY("Array key of entries"), KEY_DYNAMIC_VALUE("Key with dynamic value"),
+        KEY_INTEGER_VALUE("Key with integer content"), KEY_CONSTANT_VALUE("Constant key and value"),
+        CONSTANT_VALUE("Constant value");
+        private final String description;
 
+        TypOfJsonContent(String s) {
+            this.description = s;
+        }
+
+        @Override
+        public String toString() {
+            return this.description;
+        }
+    }
 
 }
-
-
-
-
-
-

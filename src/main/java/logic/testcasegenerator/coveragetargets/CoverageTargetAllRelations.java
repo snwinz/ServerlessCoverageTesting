@@ -6,23 +6,20 @@ import logic.model.Testcase;
 import java.util.ArrayList;
 import java.util.List;
 
-import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.LOGDELIMITER;
-import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.RELATION_MARKER;
-
 public class CoverageTargetAllRelations implements CoverageTarget {
 
-    private final ArrowModel aspect;
+    private final ArrowModel coverageElement;
 
     private final List<Testcase> testcases;
 
-    public CoverageTargetAllRelations(ArrowModel aspect) {
-        this.aspect = aspect;
+    public CoverageTargetAllRelations(ArrowModel coverageElement) {
+        this.coverageElement = coverageElement;
         testcases = new ArrayList<>();
     }
 
 
-    public ArrowModel getAspect() {
-        return aspect;
+    public ArrowModel getCoverageElement() {
+        return coverageElement;
     }
 
     public List<Testcase> getTestcases() {
@@ -34,20 +31,15 @@ public class CoverageTargetAllRelations implements CoverageTarget {
     }
 
     @Override
-    public String getAspectLogMessage() {
-        return String.format("#%s%s%s", RELATION_MARKER,aspect.getIdentifier(),LOGDELIMITER);
-    }
-
-    @Override
-    public String getAspectTarget() {
+    public String getCoverageTargetDescription() {
         return String.format("Coverage of relation from %s to %s by calling relation %s",
-                aspect.getPredecessorNode(), aspect.getSuccessorNode(), aspect.getIdentifier());
+                coverageElement.getPredecessorNode(), coverageElement.getSuccessorNode(), coverageElement.getIdentifier());
     }
 
     @Override
     public String toString() {
-        return "CoverageAspectAllRelations{" +
-                "aspect=" + aspect +
+        return "CoverageTargetAllRelations{" +
+                "coverageElement=" + coverageElement +
                 '}';
     }
 }

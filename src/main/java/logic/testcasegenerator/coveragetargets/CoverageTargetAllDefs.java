@@ -1,25 +1,25 @@
 package logic.testcasegenerator.coveragetargets;
 
 import logic.model.Testcase;
-import logic.testcasegenerator.coveragetargets.aspect.FunctionWithDefSourceLine;
+import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithDefSourceLine;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CoverageTargetAllDefs implements CoverageTarget {
 
-    private final FunctionWithDefSourceLine aspect;
+    private final FunctionWithDefSourceLine coverageElement;
 
     private final List<Testcase> testcases;
 
-    public CoverageTargetAllDefs(FunctionWithDefSourceLine aspect) {
-        this.aspect = aspect;
+    public CoverageTargetAllDefs(FunctionWithDefSourceLine coverageElement) {
+        this.coverageElement = coverageElement;
         testcases = new ArrayList<>();
     }
 
 
-    public FunctionWithDefSourceLine getAspect() {
-        return aspect;
+    public FunctionWithDefSourceLine getCoverageElement() {
+        return coverageElement;
     }
 
     public List<Testcase> getTestcases() {
@@ -27,13 +27,8 @@ public class CoverageTargetAllDefs implements CoverageTarget {
     }
 
     @Override
-    public String getAspectLogMessage() {
-        return aspect.getLogMessage();
-    }
-
-    @Override
-    public String getAspectTarget() {
-        return aspect.getAspectTarget();
+    public String getCoverageTargetDescription() {
+        return coverageElement.getCoverageTargetDescription();
     }
 
     public void addTestcases(List<Testcase> testcases) {
@@ -42,8 +37,8 @@ public class CoverageTargetAllDefs implements CoverageTarget {
 
     @Override
     public String toString() {
-        return "CoverageAspectAllDefs{" +
-                "aspect=" + aspect +
+        return "CoverageTargetAllDefs{" +
+                "coverageElement=" + coverageElement +
                 '}';
     }
 }

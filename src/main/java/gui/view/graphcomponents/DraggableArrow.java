@@ -1,7 +1,6 @@
 package gui.view.graphcomponents;
 
 import gui.controller.GraphVisualisationController;
-import gui.model.AccessMode;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
@@ -16,15 +15,19 @@ import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import shared.model.AccessMode;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 public class DraggableArrow extends Group {
     private static final double ARROW_LENGTH = 20;
     private final Line line;
-
+    private final Text text;
 
     private GraphVisualisationController controller;
 
@@ -44,7 +47,7 @@ public class DraggableArrow extends Group {
     private boolean wasClickNearerToStartNode = true;
 
     private final DraggableNode successor;
-    private AccessMode accessMode;
+    private Set<AccessMode> accessMode;
 
     private long identifier;
 
@@ -114,8 +117,9 @@ public class DraggableArrow extends Group {
         endXProperty().bind(endXBinding);
         endYProperty().bind(endYBinding);
 
-        var text = new Text(".");
-
+        this.text = new Text();
+        var defaultFont = Font.getDefault();
+        this.text.setFont(Font.font(defaultFont.getName(), FontWeight.BOLD, defaultFont.getSize()));
         getChildren().add(text);
 
         DoubleBinding xPositionText = getMiddle(startXBinding, endXBinding);
@@ -127,16 +131,12 @@ public class DraggableArrow extends Group {
 
         this.setOnMousePressed(mouseClicked());
         this.setOnMouseDragged(dragMouse());
-        this.setOnMouseReleased(releaseMouse());
-
-
+        this.setOnMouseDragReleased(releaseMouse());
     }
 
     private EventHandler<MouseEvent> releaseMouse() {
         return event -> {
-
             updateOffset();
-
             controller.updateArrowPosition(this);
         };
     }
@@ -242,7 +242,6 @@ public class DraggableArrow extends Group {
                 double deltaY = event.getY() - originalClickPositionY;
 
                 if (wasClickNearerToStartNode) {
-
                     startXOffset.set(deltaX + originalStartOffsetPositionX);
                     startYOffset.set(deltaY + originalStartOffsetPositionY);
                 } else {
@@ -389,11 +388,22 @@ public class DraggableArrow extends Group {
                 '}';
     }
 
-    public void setAccessMode(AccessMode accessMode) {
+    public void setAccessMode(Set<AccessMode> accessMode) {
         this.accessMode = accessMode;
+        updateText();
     }
 
-    public AccessMode getAccessMode() {
+    private void updateText() {
+        if (accessMode != null) {
+            StringBuilder text = new StringBuilder();
+            for (var mode : accessMode) {
+                text.append(" ").append(mode.toShortString());
+            }
+            this.text.setText(text.toString());
+        }
+    }
+
+    public Set<AccessMode> getAccessMode() {
         return accessMode;
     }
 

@@ -26,7 +26,6 @@ public class MyLogger {
         formatterTxt = new SimpleFormatter();
         fileTxt.setFormatter(formatterTxt);
         logger.addHandler(fileTxt);
-
         // create an HTML formatter
         formatterHTML = new MyHtmlFormatter();
         fileHTML.setFormatter(formatterHTML);

@@ -1,5 +1,6 @@
 package gui.controller;
 
+import gui.controller.criteriaSelection.CriteriaSelectionDynamicTestCaseController;
 import gui.controller.criteriaSelection.CriteriaSelectionTestCaseTemplateController;
 import gui.model.Graph;
 import gui.view.GraphVisualisationView;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class GraphVisualisationController {
     private final GraphVisualisationView view;
-
+    private File fileAliasOfView;
     private final Graph model;
 
     public GraphVisualisationController(Graph model) {
@@ -23,18 +24,25 @@ public class GraphVisualisationController {
     }
 
 
-    public void saveGraph(List<DraggableNode> nodes, List<DraggableArrow> arrows) {
-
-        updatePositionsInModel(nodes, arrows);
+    public void saveGraphAs(List<DraggableNode> nodes, List<DraggableArrow> arrows) {
         var fileChooser = new FileChooser();
         var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        var file = fileChooser.showSaveDialog(view);
-        if (file != null) {
-            PersistenceUtilities.saveGraph(model, file.getAbsolutePath());
-        }
+        fileAliasOfView = fileChooser.showSaveDialog(view);
+        saveGraph(nodes,arrows);
     }
+
+
+    public void saveGraph(List<DraggableNode> nodes, List<DraggableArrow> arrows) {
+        if(fileAliasOfView==null){
+            saveGraphAs(nodes, arrows);
+            return;
+        }
+        updatePositionsInModel(nodes, arrows);
+        PersistenceUtilities.saveGraph(model, fileAliasOfView.getAbsolutePath());
+    }
+
 
     private void updatePositionsInModel(List<DraggableNode> nodes, List<DraggableArrow> arrows) {
         for (DraggableNode node : nodes) {
@@ -58,6 +66,7 @@ public class GraphVisualisationController {
             model.clearGraph();
             var result = PersistenceUtilities.loadGraph(file.getAbsolutePath(), model);
             result.ifPresent(view::setModel);
+            fileAliasOfView = file;
         }
     }
 
@@ -81,12 +90,14 @@ public class GraphVisualisationController {
     }
 
 
-    public void createArrow() {
+    public void createArrow(List<DraggableNode> nodes, List<DraggableArrow> arrows) {
+        updatePositionsInModel(nodes, arrows);
         var controller = new ArrowCreatorController(model);
         controller.setup();
     }
 
-    public void createNode(double x, double y) {
+    public void createNode(double x, double y, List<DraggableNode> nodes, List<DraggableArrow> arrows) {
+        updatePositionsInModel(nodes, arrows);
         var controller = new NodeCreatorController(model);
         controller.setup(x, y);
     }
@@ -121,12 +132,17 @@ public class GraphVisualisationController {
     }
 
     public void show() {
-        view.updateAndshow();
+        view.updateAndShow();
     }
 
     public void createStaticTestCases() {
 
         CriteriaSelectionTestCaseTemplateController controller = new CriteriaSelectionTestCaseTemplateController(model);
+        controller.setup();
+    }
+
+    public void createDynamicTestCases() {
+        CriteriaSelectionDynamicTestCaseController controller = new CriteriaSelectionDynamicTestCaseController(model);
         controller.setup();
     }
 
@@ -137,4 +153,5 @@ public class GraphVisualisationController {
         view.setText(result);
         view.show();
     }
+
 }

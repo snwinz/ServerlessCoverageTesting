@@ -22,10 +22,10 @@ public class CoverageCalculation {
             LinkedList<LogEvaluator> evaluators = new LinkedList<>();
 
             evaluators.add(new LogEvaluatorAllResources(logStatements));
-              evaluators.add(new LogEvaluatorAllRelations(logStatements));
-              evaluators.add(new LogEvaluatorDefs(logStatements));
-              evaluators.add(new LogEvaluatorDefUse(logStatements));
-              evaluators.add(new LogEvaluatorUses(logStatements));
+            evaluators.add(new LogEvaluatorAllRelations(logStatements));
+            evaluators.add(new LogEvaluatorDefs(logStatements));
+            evaluators.add(new LogEvaluatorDefUse(logStatements));
+            evaluators.add(new LogEvaluatorUses(logStatements));
 
 
             for (LogEvaluator evaluator : evaluators) {

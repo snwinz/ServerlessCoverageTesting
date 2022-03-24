@@ -1,6 +1,6 @@
-package logic.testcasegenerator.coveragetargets.aspect;
+package logic.testcasegenerator.coveragetargets.coverageelements;
 
-import logic.model.NodeType;
+import shared.model.NodeType;
 import logic.model.NodeModel;
 import logic.model.SourceCodeLine;
 
@@ -37,15 +37,12 @@ public class FunctionWithSourceLine {
                 function.getType(), function.getNameOfNode(), function.getIdentifier(), sourceCodeLine.getSourceLine());
     }
 
-    public String getAspectMessage() {
-        return "";
-    }
 
     public String getLogMessage() {
         return "";
     }
 
-    public String getAspectTarget() {
+    public String getCoverageTargetDescription() {
         return "";
     }
 }

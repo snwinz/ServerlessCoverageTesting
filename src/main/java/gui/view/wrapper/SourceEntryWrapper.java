@@ -42,7 +42,7 @@ public class SourceEntryWrapper {
     }
 
     public SourceEntryWrapper(SourceCodeLine sourceEntry) {
-        this(sourceEntry, new ArrayList<>(), new ArrayList<Long>(), new ArrayList<Long>());
+        this(sourceEntry, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
     public String getSourceLine() {

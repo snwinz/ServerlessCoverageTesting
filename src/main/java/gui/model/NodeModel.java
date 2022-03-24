@@ -1,6 +1,7 @@
 package gui.model;
 
 import com.google.gson.annotations.Expose;
+import shared.model.NodeType;
 
 import java.util.List;
 

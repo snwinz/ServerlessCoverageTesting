@@ -20,6 +20,13 @@ public class Graph {
         Graph modelLoaded = gson.fromJson(graphJSON, Graph.class);
         this.arrows = modelLoaded.getArrows();
         this.nodes = modelLoaded.getNodes();
+        updateTypesOfInput();
+    }
+
+    private void updateTypesOfInput() {
+        for (var node : nodes) {
+            node.updateTypeForInputFormats();
+        }
     }
 
 

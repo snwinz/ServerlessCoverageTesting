@@ -21,20 +21,8 @@ public class ComboBoxItemWrap<T> {
         return check.getValue();
     }
 
-    public void setCheck(Boolean value) {
-        check.set(value);
-    }
-
-    public ObjectProperty<T> itemProperty() {
-        return item;
-    }
-
     public T getItem() {
         return item.getValue();
-    }
-
-    public void setItem(T value) {
-        item.setValue(value);
     }
 
     @Override

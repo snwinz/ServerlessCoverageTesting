@@ -1,4 +1,4 @@
-package logic.testcasegenerator.coveragetargets.aspect;
+package logic.testcasegenerator.coveragetargets.coverageelements;
 
 import logic.model.NodeModel;
 import logic.model.SourceCodeLine;
@@ -17,11 +17,6 @@ public class FunctionWithDefSourceLine extends FunctionWithSourceLine {
                 function.getType(), function.getNameOfNode(), function.getIdentifier(), sourceCodeLine.getDefTracker("", function.getIdentifier()));
     }
 
-    @Override
-    public String getAspectMessage() {
-        return String.format("%s",
-                this.getSourceCodeLine().getDefTracker("", this.getFunction().getIdentifier()));
-    }
 
     @Override
     public String getLogMessage() {
@@ -31,7 +26,7 @@ public class FunctionWithDefSourceLine extends FunctionWithSourceLine {
 
 
     @Override
-    public String getAspectTarget() {
+    public String getCoverageTargetDescription() {
         return String.format("Coverage of Definition %s with any use", this.getSourceCodeLine().getDefTracker("", this.getFunction().getIdentifier()));
     }
 
