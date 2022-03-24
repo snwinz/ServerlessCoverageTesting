@@ -145,6 +145,16 @@ public class TestData {
         return result.toString();
     }
 
+    public String getExecutableDataAsText(){
+        StringBuilder result = new StringBuilder();
+        for (var testFunction : testFunctions) {
+            result.append(testFunction.getName()).append(" ");
+            result.append(testFunction.getJSON()).append("\n");
+        }
+        return result.toString();
+
+    }
+
     public void checkToUseSameValues() {
         Random rn = new Random();
         double randomValue = rn.nextDouble();

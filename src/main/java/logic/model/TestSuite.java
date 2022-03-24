@@ -91,4 +91,33 @@ public class TestSuite {
         return result.toString();
     }
 
+    public String getTCsWithInput() {
+        StringBuilder result = new StringBuilder();
+        for (var target : this.testTargets) {
+
+            var testcases = target.getTestcases();
+
+            boolean isTargetCovered = false;
+            for (var testcase : testcases) {
+                if (testcase.isCovered()) {
+                    isTargetCovered = true;
+                    var testData = testcase.getTestData();
+                    String specificTestDataText = "";
+                    if (testData != null) {
+                        specificTestDataText = testData.getExecutableDataAsText();
+                    }
+                    result.append(String.format("##Target %s%n", target.getCoverageTargetDescription())) ;
+                    result.append(specificTestDataText);
+                }
+            }
+            if (!isTargetCovered) {
+                result.append(String.format("##Target %s not covered%n", target.getCoverageTargetDescription()));
+            }
+        }
+
+
+        return result.toString();
+
+
+    }
 }

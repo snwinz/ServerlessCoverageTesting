@@ -78,8 +78,8 @@ public class DynamicTCSelectionView extends Stage {
         grid.add(resetFunctionBox, 3, 1);
 
         var regionLabel = new Label("AWS region:");
-        HBox regionBox  = new HBox();
-        regionBox.getChildren().addAll(regionLabel,regionAWS);
+        HBox regionBox = new HBox();
+        regionBox.getChildren().addAll(regionLabel, regionAWS);
         grid.add(regionBox, 4, 1);
 
 
@@ -192,6 +192,8 @@ public class DynamicTCSelectionView extends Stage {
         Button getAllDataButton = new Button("All tc data");
         getAllDataButton.setOnAction(e -> controller.showTestSuitData(testSuite));
 
+        Button getAllTCsWithInput = new Button("All test cases with input");
+        getAllTCsWithInput.setOnAction(e -> controller.showTestSuiteForExecution(testSuite));
 
         Button selectAllTestCases = new Button("Select all test cases");
         selectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(true)));
@@ -199,9 +201,10 @@ public class DynamicTCSelectionView extends Stage {
         Button unselectAllTestCases = new Button("Unselect all test cases");
         unselectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(false)));
 
-        lastRow.getChildren().addAll(getAllDataButton, selectAllTestCases, unselectAllTestCases);
+        lastRow.getChildren().addAll(getAllDataButton, getAllTCsWithInput, selectAllTestCases, unselectAllTestCases);
         grid.add(lastRow, 1, grid.getRowCount());
         HBox.setMargin(getAllDataButton, new Insets(10, 10, 10, 10));
+        HBox.setMargin(getAllTCsWithInput, new Insets(10, 10, 10, 10));
         HBox.setMargin(selectAllTestCases, new Insets(10, 10, 10, 10));
         HBox.setMargin(unselectAllTestCases, new Insets(10, 10, 10, 10));
         return scrollpane;
@@ -298,7 +301,7 @@ public class DynamicTCSelectionView extends Stage {
             properties.setProperty("probRandomOutputAsValue", String.valueOf(probRandomOutputAsValue.getValue()));
             properties.setProperty("probSameValueEverywhere", String.valueOf(probSameValueEverywhere.getValue()));
             properties.setProperty("resetFunctionName", resetFunctionName.getText());
-            properties.setProperty("regionAWS",regionAWS.getText());
+            properties.setProperty("regionAWS", regionAWS.getText());
 
             Path path = Path.of(pathOfProperties);
             properties.storeToXML(Files.newOutputStream(path), null);

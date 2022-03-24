@@ -4,6 +4,8 @@ import gui.model.Graph;
 import gui.view.DynamicTCSelectionView;
 import gui.view.StandardPresentationView;
 import gui.view.wrapper.Commands;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import logic.dynamicdatageneration.DynamicTestCaseGenerator;
 import logic.dynamicdatageneration.TestcaseSimulator;
 import logic.model.TestSuite;
@@ -68,4 +70,9 @@ public class DynamicTCSelectionController {
     }
 
 
+    public void showTestSuiteForExecution(TestSuite testSuite) {
+        String data = testSuite.getTCsWithInput();
+        StandardPresentationView tcView = new StandardPresentationView("Test suite info", data);
+        tcView.show();
+    }
 }
