@@ -8,6 +8,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import logic.dynamicdatageneration.DynamicTestCaseGenerator;
 import logic.dynamicdatageneration.TestcaseSimulator;
+import logic.dynamicdatageneration.executionplatforms.AWSInvoker;
+import logic.dynamicdatageneration.executionplatforms.Executor;
 import logic.model.TestSuite;
 import logic.model.Testcase;
 
@@ -50,10 +52,8 @@ public class DynamicTCSelectionController {
     }
 
     public void executeReset(String resetFunction, String region) {
-
-        TestcaseSimulator simulator = new TestcaseSimulator(1, region);
-        simulator.setResetFunction(resetFunction);
-        Thread thread = new Thread(simulator::resetApplication);
+        Executor executor = new AWSInvoker(region);
+        var thread = new Thread(() -> executor.resetApplication(resetFunction));
         thread.start();
     }
 

@@ -30,12 +30,12 @@ public class GraphVisualisationController {
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileAliasOfView = fileChooser.showSaveDialog(view);
-        saveGraph(nodes,arrows);
+        saveGraph(nodes, arrows);
     }
 
 
     public void saveGraph(List<DraggableNode> nodes, List<DraggableArrow> arrows) {
-        if(fileAliasOfView==null){
+        if (fileAliasOfView == null) {
             saveGraphAs(nodes, arrows);
             return;
         }
@@ -154,4 +154,16 @@ public class GraphVisualisationController {
         view.show();
     }
 
+    public void executeTestcases() {
+        var fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        var tcFile = fileChooser.showOpenDialog(view);
+        if (tcFile != null) {
+            var testcases = PersistenceUtilities.loadTCs(tcFile.getAbsolutePath());
+            if (testcases != null) {
+                TestCaseExecutionController controller = new TestCaseExecutionController(model);
+                controller.setup(testcases,tcFile);
+            }
+        }
+    }
 }

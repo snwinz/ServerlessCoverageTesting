@@ -99,14 +99,16 @@ public class TestSuite {
 
             boolean isTargetCovered = false;
             for (var testcase : testcases) {
-                if (testcase.isCovered()) {
+                if (testcase.isSpecificTargetCovered()) {
                     isTargetCovered = true;
                     var testData = testcase.getTestData();
                     String specificTestDataText = "";
                     if (testData != null) {
                         specificTestDataText = testData.getExecutableDataAsText();
                     }
-                    result.append(String.format("##Target %s%n", target.getCoverageTargetDescription())) ;
+                    var logsToCover = testcase.getLogsToCover();
+                    var logs = String.join(";", logsToCover);
+                    result.append(String.format("##Target %s with logs %s:%n", target.getCoverageTargetDescription(), logs));
                     result.append(specificTestDataText);
                 }
             }

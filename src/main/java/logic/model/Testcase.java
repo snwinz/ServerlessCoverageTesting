@@ -52,6 +52,9 @@ public class Testcase {
         return testCovered.get();
     }
 
+    public boolean isSpecificTargetCovered(){
+        return specificTargetCovered.get();
+    }
 
     public void setSpecificTargetCovered(boolean covered) {
         specificTargetCovered.set(covered);

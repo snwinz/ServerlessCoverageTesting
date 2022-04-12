@@ -56,7 +56,7 @@ public class TestcaseSimulator {
                     testcase.setNumberOfRuns(actualRun);
                     return Optional.of(testDataCreated);
                 } else if (allGeneralTestTargetsCovered) {
-                    testcase.addTextToWriteOutput("Successfully covered in run " + actualRun + ":\n" + testDataCreated + "\n");
+                    testcase.addTextToWriteOutput("Only target successfully covered in run " + actualRun + ":\n" + testDataCreated + "\n");
                     if (!testcase.isCovered()) {
                         testcase.setCovered(true);
                         testcase.setTestTargetData(testDataCreated);

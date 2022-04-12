@@ -9,4 +9,6 @@ public interface Executor {
     List<String> getAllNewLogs(long startTime);
 
     void deleteOldLogs();
+
+    void resetApplication(String resetFunctionName);
 }
