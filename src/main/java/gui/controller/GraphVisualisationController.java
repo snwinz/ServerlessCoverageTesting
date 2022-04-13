@@ -160,10 +160,9 @@ public class GraphVisualisationController {
         var tcFile = fileChooser.showOpenDialog(view);
         if (tcFile != null) {
             var testcases = PersistenceUtilities.loadTCs(tcFile.getAbsolutePath());
-            if (testcases != null) {
-                TestCaseExecutionController controller = new TestCaseExecutionController(model);
-                controller.setup(testcases,tcFile);
-            }
+            TestCaseExecutionController controller = new TestCaseExecutionController(model);
+            controller.setup(testcases, tcFile);
+
         }
     }
 }

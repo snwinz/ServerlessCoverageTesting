@@ -33,7 +33,7 @@ public class DynamicTCSelectionView extends Stage {
 
     private final TestSuite testSuite;
     private final Graph model;
-    private final List<CheckboxWrapper> availableTestcases = new ArrayList<>();
+    private final List<CheckboxWrapper<Testcase>> availableTestcases = new ArrayList<>();
     private final DynamicTCSelectionController controller;
     private final Spinner<Integer> numberOfTries = new Spinner<>(1, 100, 2);
     private final Spinner<Double> probChangeGoodData = new Spinner<>(0, 1, 0.1, 0.01);
@@ -96,7 +96,7 @@ public class DynamicTCSelectionView extends Stage {
             int lastRow = grid.getRowCount();
             Label testTargetLabel = new Label(testTarget.getCoverageTargetDescription());
             grid.add(testTargetLabel, 1, lastRow);
-            for (var testcase : testTarget.getTestcases()) {
+            for (Testcase testcase : testTarget.getTestcases()) {
                 lastRow = grid.getRowCount();
                 StringBuilder summaryOfTestCase = new StringBuilder();
                 summaryOfTestCase.append("Log statements to be called:").append("\n");
@@ -129,7 +129,7 @@ public class DynamicTCSelectionView extends Stage {
                 summaryOfTestcaseTextArea.setPrefHeight(100);
                 grid.add(summaryOfTestcaseTextArea, 2, lastRow);
 
-                CheckboxWrapper checkbox = new CheckboxWrapper(testcase);
+                CheckboxWrapper<Testcase> checkbox = new CheckboxWrapper<Testcase>(testcase);
 
                 TextArea outputOfRunningTestCase = new TextArea();
 
@@ -261,7 +261,7 @@ public class DynamicTCSelectionView extends Stage {
             List<Testcase> testcasesToBeCreated = new ArrayList<>();
             for (var checkboxWrapper : availableTestcases) {
                 if (checkboxWrapper.isSelected()) {
-                    testcasesToBeCreated.add(checkboxWrapper.getTestcase());
+                    testcasesToBeCreated.add(checkboxWrapper.getEntry());
                 }
             }
             Commands commands = new Commands();

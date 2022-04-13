@@ -1,18 +1,16 @@
 package gui.view.wrapper;
 
 import javafx.scene.control.CheckBox;
-import logic.model.Testcase;
 
-public class CheckboxWrapper extends CheckBox {
-    private final Testcase testcase;
+public class CheckboxWrapper<T> extends CheckBox {
+    private final T entry;
 
-    public CheckboxWrapper(Testcase testcase) {
-        this.testcase = testcase;
+    public CheckboxWrapper(T testcase) {
+        this.entry = testcase;
     }
 
-    public Testcase getTestcase() {
-        return testcase;
+    public T getEntry() {
+        return entry;
     }
-
 
 }
