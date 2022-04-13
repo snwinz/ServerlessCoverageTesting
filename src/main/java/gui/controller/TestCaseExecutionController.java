@@ -32,7 +32,6 @@ public class TestCaseExecutionController {
 
     public void executeTC(Testcase testcase, String region) {
         TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
-        tcExecutor.executeTC(testcase);
         var thread = new Thread(() -> tcExecutor.executeTC(testcase));
         thread.start();
 
