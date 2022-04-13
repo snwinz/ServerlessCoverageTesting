@@ -84,6 +84,7 @@ public class TestCaseExecutionView extends Stage {
 
             var resetLabel = new Label("Reset function:");
             var startResetButton = new Button("Start reset");
+            startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
             HBox.setMargin(startResetButton, new Insets(10, 10, 10, 10));
             HBox.setMargin(resetLabel, new Insets(10, 0, 10, 10));
             HBox.setMargin(resetFunctionName, new Insets(10, 10, 10, 0));
@@ -117,6 +118,9 @@ public class TestCaseExecutionView extends Stage {
                 HBox.setMargin(executeTC, new Insets(10, 10, 10, 10));
                 HBox.setMargin(calibrateTC, new Insets(10, 10, 10, 10));
 
+                executeTC.setOnAction(e -> controller.executeTC(testcase, regionAWS.getText()));
+
+
                 HBox buttons = new HBox();
                 buttons.getChildren().addAll(executeTC, calibrateTC);
                 grid.add(buttons, 3, lastRow);
@@ -140,12 +144,11 @@ public class TestCaseExecutionView extends Stage {
                     expectedOutputTextArea.setPrefHeight(25);
                     grid.add(expectedOutputTextArea, 4, lastRow);
 
-
                     TextArea infoBox = new TextArea();
+                    infoBox.textProperty().bind(function.outputProperty());
                     infoBox.setEditable(true);
                     infoBox.setPrefHeight(25);
                     grid.add(infoBox, 5, lastRow);
-
 
                 }
             }

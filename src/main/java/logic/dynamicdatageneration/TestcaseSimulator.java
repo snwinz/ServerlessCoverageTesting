@@ -1,14 +1,12 @@
 package logic.dynamicdatageneration;
 
 import gui.view.wrapper.Commands;
-import logic.dynamicdatageneration.executionplatforms.AWSInvoker;
-import logic.dynamicdatageneration.executionplatforms.Executor;
+import logic.executionplatforms.AWSInvoker;
+import logic.executionplatforms.Executor;
 import logic.dynamicdatageneration.testrun.FunctionWithInputData;
 import logic.dynamicdatageneration.testrun.TestData;
 import logic.model.Testcase;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -75,10 +73,7 @@ public class TestcaseSimulator {
     }
 
     public void resetApplication() {
-        if (resetFunctionName != null) {
-            executor.invokeFunction(resetFunctionName, "{}", new HashMap<>());
-        }
-        executor.deleteOldLogs();
+        executor.resetApplication(resetFunctionName);
     }
 
     private List<String> getAllTestTargets(Testcase testcase) {

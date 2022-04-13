@@ -1,4 +1,4 @@
-package logic.dynamicdatageneration.executionplatforms;
+package logic.executionplatforms;
 
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
@@ -57,7 +57,6 @@ public class AWSInvoker implements Executor {
             else {
                 break;
             }
-
         }
         return json;
     }
@@ -104,9 +103,14 @@ public class AWSInvoker implements Executor {
 
     @Override
     public void resetApplication(String resetFunctionName) {
+        callResetFunction(resetFunctionName);
+        deleteOldLogs();
+    }
+
+    @Override
+    public void callResetFunction(String resetFunctionName) {
         if (resetFunctionName != null) {
             invokeFunction(resetFunctionName, "{}", new HashMap<>());
         }
-        deleteOldLogs();
     }
 }

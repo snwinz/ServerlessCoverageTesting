@@ -129,7 +129,7 @@ public class DynamicTCSelectionView extends Stage {
                 summaryOfTestcaseTextArea.setPrefHeight(100);
                 grid.add(summaryOfTestcaseTextArea, 2, lastRow);
 
-                CheckboxWrapper<Testcase> checkbox = new CheckboxWrapper<Testcase>(testcase);
+                CheckboxWrapper<Testcase> checkbox = new CheckboxWrapper<>(testcase);
 
                 TextArea outputOfRunningTestCase = new TextArea();
 
@@ -160,7 +160,6 @@ public class DynamicTCSelectionView extends Stage {
                     }
                 });
                 testcase.setTestState(testTargetState);
-
                 testcase.setTestCaseOutput(stringProperty);
 
                 Button replayButton = new Button("Reexecute");

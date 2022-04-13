@@ -1,4 +1,4 @@
-package logic.dynamicdatageneration.executionplatforms;
+package logic.executionplatforms;
 
 import java.util.List;
 import java.util.Map;
@@ -11,4 +11,6 @@ public interface Executor {
     void deleteOldLogs();
 
     void resetApplication(String resetFunctionName);
+
+    void callResetFunction(String resetFunctionName);
 }

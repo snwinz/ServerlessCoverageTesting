@@ -1,4 +1,4 @@
-package logic.dynamicdatageneration.testrun;
+package logic.executionplatforms;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -9,7 +9,7 @@ import java.util.*;
 public class KeyValueJsonGenerator {
     private final String input;
     private final Map<String, List<String>> keyValues = new HashMap<>();
-    private static JsonParser jsonParser = new JsonParser();
+    private static final JsonParser jsonParser = new JsonParser();
 
     public KeyValueJsonGenerator(String value) {
         this.input = value;

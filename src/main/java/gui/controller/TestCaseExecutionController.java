@@ -2,8 +2,9 @@ package gui.controller;
 
 import gui.model.Graph;
 import gui.view.TestCaseExecutionView;
-import logic.dynamicdatageneration.executionplatforms.AWSInvoker;
-import logic.dynamicdatageneration.executionplatforms.Executor;
+import logic.executionplatforms.AWSInvoker;
+import logic.executionplatforms.Executor;
+import logic.testcaseexecution.TestcaseExecutor;
 import shared.model.Testcase;
 
 import java.io.File;
@@ -25,7 +26,15 @@ public class TestCaseExecutionController {
 
     public void executeReset(String resetFunction, String region) {
         Executor executor = new AWSInvoker(region);
-        var thread = new Thread(() -> executor.resetApplication(resetFunction));
+        var thread = new Thread(() -> executor.callResetFunction(resetFunction));
         thread.start();
+    }
+
+    public void executeTC(Testcase testcase, String region) {
+        TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
+        tcExecutor.executeTC(testcase);
+        var thread = new Thread(() -> tcExecutor.executeTC(testcase));
+        thread.start();
+
     }
 }

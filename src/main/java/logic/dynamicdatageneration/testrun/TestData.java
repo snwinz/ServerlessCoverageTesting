@@ -1,6 +1,7 @@
 package logic.dynamicdatageneration.testrun;
 
 import gui.view.wrapper.Commands;
+import logic.executionplatforms.KeyValueJsonGenerator;
 import logic.model.ServerlessFunction;
 import shared.model.input.DynamicKeyValue;
 import shared.model.input.IntegerInput;
@@ -166,8 +167,7 @@ public class TestData {
         }
         var inputDataString = testFunctions.stream()
                 .flatMap(function -> function.getActualGeneralInputData().stream())
-                .filter(input -> input instanceof DynamicKeyValue)
-                .collect(Collectors.toList());
+                .filter(input -> input instanceof DynamicKeyValue).toList();
         if (inputDataString.size() > 0) {
             var randomInputString = inputDataString.get(rn.nextInt(inputDataString.size()));
             randomInputString.calculateNewValues();
@@ -175,8 +175,7 @@ public class TestData {
         }
         var inputDataInteger = testFunctions.stream()
                 .flatMap(function -> function.getActualGeneralInputData().stream())
-                .filter(input -> input instanceof IntegerInput)
-                .collect(Collectors.toList());
+                .filter(input -> input instanceof IntegerInput).toList();
         if (inputDataInteger.size() > 0) {
             var randomInputInteger = inputDataInteger.get(rn.nextInt(inputDataInteger.size()));
             randomInputInteger.calculateNewValues();

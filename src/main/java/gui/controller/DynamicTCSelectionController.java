@@ -4,12 +4,10 @@ import gui.model.Graph;
 import gui.view.DynamicTCSelectionView;
 import gui.view.StandardPresentationView;
 import gui.view.wrapper.Commands;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import logic.dynamicdatageneration.DynamicTestCaseGenerator;
 import logic.dynamicdatageneration.TestcaseSimulator;
-import logic.dynamicdatageneration.executionplatforms.AWSInvoker;
-import logic.dynamicdatageneration.executionplatforms.Executor;
+import logic.executionplatforms.AWSInvoker;
+import logic.executionplatforms.Executor;
 import logic.model.TestSuite;
 import logic.model.Testcase;
 
