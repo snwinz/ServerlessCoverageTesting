@@ -1,14 +1,15 @@
 package logic.testcaseexecution;
 
+import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
 import logic.executionplatforms.KeyValueJsonGenerator;
 import logic.executionplatforms.AWSInvoker;
-import shared.model.Testcase;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class TestcaseExecutor {
     private final AWSInvoker executor;
@@ -32,12 +33,34 @@ public class TestcaseExecutor {
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
             addResultToOutput(result, outputValues);
 
+            checkCorrectnessOfOutput(result, function);
+
             String resultFormatted = String.format("result: %s", result);
 
             LOGGER.info(resultFormatted);
             function.addTextToOutput(resultFormatted);
         }
 
+    }
+
+    private void checkCorrectnessOfOutput(String result, FunctionWrapper function) {
+        boolean passed = true;
+        for (var part : function.getFunction().getResults()) {
+            if (result.contains(part)) {
+                var splitResult = result.split(Pattern.quote(part));
+                if (splitResult.length > 1) {
+                    result = splitResult[1];
+                }
+            } else {
+                passed = false;
+                break;
+            }
+        }
+        if (passed) {
+            function.passedProperty().set(true);
+        } else {
+            function.passedProperty().set(false);
+        }
     }
 
     private void addResultToOutput(String result, Map<String, List<String>> outputValues) {

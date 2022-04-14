@@ -3,6 +3,7 @@ package gui.controller;
 import gui.model.Graph;
 import gui.view.TestCaseExecutionView;
 import gui.view.wrapper.TestcaseWrapper;
+import javafx.stage.FileChooser;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
 import logic.testcaseexecution.TestcaseExecutor;
@@ -21,7 +22,7 @@ public class TestCaseExecutionController {
     }
 
     public void setup(List<Testcase> testcases, File tcFile) {
-        this.view = new TestCaseExecutionView( this, testcases,tcFile, model);
+        this.view = new TestCaseExecutionView(this, testcases, tcFile, model);
         view.showAndWait();
     }
 
@@ -36,5 +37,14 @@ public class TestCaseExecutionController {
         var thread = new Thread(() -> tcExecutor.executeTC(testcase));
         thread.start();
 
+    }
+
+    public void saveTestcases(List<Testcase> testcasesOriginal) {
+        var fileChooser = new FileChooser();
+        var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        var fileToSave = fileChooser.showSaveDialog(view);
+        PersistenceUtilities.saveTestSuite(testcasesOriginal, fileToSave.getAbsolutePath());
     }
 }

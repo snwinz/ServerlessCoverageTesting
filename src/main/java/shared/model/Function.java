@@ -2,7 +2,9 @@ package shared.model;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class Function {
     private final String name;
@@ -23,12 +25,21 @@ public final class Function {
         return parameter;
     }
 
-    public void addResults(List<String> results) {
-        results.addAll(results);
-    }
-
     public List<String> getResults() {
         return List.copyOf(results);
+    }
+
+    public void setResults(String newValue) {
+        var parts = newValue.split("\\*");
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i];
+            if (part.endsWith("\\")) {
+                parts[i + 1] = part.substring(0,part.length()-1) + "*" + parts[i + 1];
+                parts[i] = null;
+            }
+        }
+        results.clear();
+        results.addAll(Arrays.stream(parts).filter(o -> o != null).collect(Collectors.toList()));
     }
 
 }

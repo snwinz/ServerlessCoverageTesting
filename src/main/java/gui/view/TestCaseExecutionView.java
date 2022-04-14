@@ -11,6 +11,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import shared.model.Testcase;
 
@@ -106,10 +108,12 @@ public class TestCaseExecutionView extends Stage {
                 int lastRow = grid.getRowCount();
                 Label testTargetLabel = new Label(testcase.getTestcase().target());
                 grid.add(testTargetLabel, 1, lastRow);
+                Circle statusLightTestcase = new Circle(100 / 3.0 / 2, 100 / 4.0, 10);
+                grid.add(statusLightTestcase, 2, lastRow);
 
                 var checkboxForTestcase = new CheckboxWrapper<TestcaseWrapper>(testcase);
                 selectedTestcases.add(checkboxForTestcase);
-                grid.add(checkboxForTestcase, 2, lastRow);
+                grid.add(checkboxForTestcase, 3, lastRow);
 
                 Button executeTC = new Button("execute TC");
                 Button calibrateTC = new Button("calibrate TC");
@@ -121,17 +125,31 @@ public class TestCaseExecutionView extends Stage {
 
                 HBox buttons = new HBox();
                 buttons.getChildren().addAll(executeTC, calibrateTC);
-                grid.add(buttons, 3, lastRow);
+                grid.add(buttons, 4, lastRow);
 
                 var functions = testcase.getFunctionsWrapped();
                 for (var function : functions) {
-                    var originalFunction = function.getFunction();
                     lastRow = grid.getRowCount();
+                    Circle statusLightFunction = new Circle(100 / 3.0 / 2, 100 / 4.0, 10);
+                    function.passedProperty().addListener((observable, oldValue, newValue) -> {
+                        if (newValue) {
+                            statusLightFunction.setFill(Color.GREEN);
+                            if (testcase.getFunctionsWrapped().stream().allMatch(f -> f.passedProperty().get())) {
+                                statusLightTestcase.setFill(Color.GREEN);
+                            }
+                            ;
+                        } else {
+                            statusLightFunction.setFill(Color.RED);
+                            statusLightTestcase.setFill(Color.RED);
+                        }
+                    });
+                    grid.add(statusLightFunction, 3, lastRow);
+                    var originalFunction = function.getFunction();
                     String functionInvocation = String.format("%s %s", originalFunction.getName(), originalFunction.getParameter());
                     TextArea functionDescription = new TextArea(functionInvocation);
                     functionDescription.setEditable(false);
                     functionDescription.setPrefHeight(25);
-                    grid.add(functionDescription, 3, lastRow);
+                    grid.add(functionDescription, 4, lastRow);
 
                     var partsToBeCovered = originalFunction.getResults();
                     partsToBeCovered = partsToBeCovered.stream().map(part -> part.replace("*", "\\*")).collect(Collectors.toList());
@@ -140,13 +158,17 @@ public class TestCaseExecutionView extends Stage {
                     TextArea expectedOutputTextArea = new TextArea(expectedOutput);
                     expectedOutputTextArea.setEditable(true);
                     expectedOutputTextArea.setPrefHeight(25);
-                    grid.add(expectedOutputTextArea, 4, lastRow);
+                    expectedOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> {
+                        originalFunction.setResults(newValue);
+                    });
+
+                    grid.add(expectedOutputTextArea, 5, lastRow);
 
                     TextArea infoBox = new TextArea();
                     infoBox.textProperty().bind(function.outputProperty());
                     infoBox.setEditable(true);
                     infoBox.setPrefHeight(25);
-                    grid.add(infoBox, 5, lastRow);
+                    grid.add(infoBox, 6, lastRow);
 
                 }
             }
@@ -215,10 +237,13 @@ public class TestCaseExecutionView extends Stage {
         var file = new Menu("File");
 
         var saveTCs = new MenuItem("Save TCs");
-        var save = new MenuItem("Save");
-        var loadTC = new MenuItem("Load test cases");
 
-        file.getItems().addAll(save, saveTCs, loadTC);
+        saveTCs.setOnAction(event -> {
+            var testcasesOriginal = testcases.stream().map(tc -> tc.getTestcase()).toList();
+            controller.saveTestcases(testcasesOriginal);
+        });
+
+        file.getItems().addAll(saveTCs);
         menuBar.getMenus().addAll(file);
         return menuBar;
     }
