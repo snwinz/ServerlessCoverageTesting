@@ -1,8 +1,11 @@
 package logic.model;
 
 import logic.testcasegenerator.coveragetargets.CoverageTarget;
+import shared.model.Function;
+import shared.model.Testcase;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,6 +123,36 @@ public class TestSuite {
 
         return result.toString();
 
+
+    }
+
+    public List<Testcase> getTestSuiteForExecution() {
+        List<Testcase> result = new ArrayList<>();
+        for (var target : this.testTargets) {
+            var testcases = target.getTestcases();
+            for (var testcase : testcases) {
+                if (testcase.isSpecificTargetCovered()) {
+                    var testData = testcase.getTestData();
+                    String specificTestDataText = "";
+                    if (testData != null) {
+                        specificTestDataText = testData.getExecutableDataAsText();
+                    }
+                    var functionsForExecution = new LinkedList<Function>();
+                    var testdata = testcase.getTestData();
+                    for (var function : testdata.getTestFunctions()) {
+                        var functionName =
+                                function.getFunction().getName();
+                        var argument = function.getJSON();
+                        functionsForExecution.add(new Function(functionName, argument));
+                    }
+                    var logsToCoverForExecution = testcase.getLogsToCover();
+                    String targetForExecution = target.getCoverageTargetDescription();
+                    var testcaseForExecution = new Testcase(functionsForExecution, logsToCoverForExecution, targetForExecution);
+                    result.add(testcaseForExecution);
+                }
+            }
+        }
+        return result;
 
     }
 }

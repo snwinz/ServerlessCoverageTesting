@@ -4,6 +4,7 @@ import gui.model.Graph;
 import gui.view.DynamicTCSelectionView;
 import gui.view.StandardPresentationView;
 import gui.view.wrapper.Commands;
+import javafx.stage.FileChooser;
 import logic.dynamicdatageneration.DynamicTestCaseGenerator;
 import logic.dynamicdatageneration.TestcaseSimulator;
 import logic.executionplatforms.AWSInvoker;
@@ -11,6 +12,7 @@ import logic.executionplatforms.Executor;
 import logic.model.TestSuite;
 import logic.model.Testcase;
 
+import java.io.File;
 import java.util.List;
 
 public class DynamicTCSelectionController {
@@ -72,5 +74,15 @@ public class DynamicTCSelectionController {
         String data = testSuite.getTCsWithInput();
         StandardPresentationView tcView = new StandardPresentationView("Test suite info", data);
         tcView.show();
+    }
+
+    public void exportTestSuitForExecution(TestSuite testSuite) {
+        var testSuiteExecution = testSuite.getTestSuiteForExecution();
+        var fileChooser = new FileChooser();
+        var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        var fileToSave = fileChooser.showSaveDialog(view);
+        PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
     }
 }

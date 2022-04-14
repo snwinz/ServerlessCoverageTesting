@@ -1,5 +1,6 @@
 package logic.testcaseexecution;
 
+import gui.view.wrapper.TestcaseWrapper;
 import logic.executionplatforms.KeyValueJsonGenerator;
 import logic.executionplatforms.AWSInvoker;
 import shared.model.Testcase;
@@ -17,13 +18,14 @@ public class TestcaseExecutor {
         this.executor = new AWSInvoker(region);
     }
 
-    public void executeTC(Testcase testcase) {
-        var functions = testcase.functions();
+    public void executeTC(TestcaseWrapper testcase) {
+        var functions = testcase.getFunctionsWrapped();
         final Map<String, List<String>> outputValues = new HashMap<>();
         for (var function : functions) {
-            String functionName = function.getName();
+            var originalFunction = function.getFunction();
+            String functionName = originalFunction.getName();
 
-            String jsonData = function.getParameter();
+            String jsonData = originalFunction.getParameter();
             String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
             LOGGER.info(invocation);
 

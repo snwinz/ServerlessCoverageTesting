@@ -3,6 +3,7 @@ package gui.view;
 import gui.controller.TestCaseExecutionController;
 import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
+import gui.view.wrapper.TestcaseWrapper;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -10,10 +11,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-import shared.model.Function;
 import shared.model.Testcase;
 
 import java.io.File;
@@ -31,15 +29,15 @@ public class TestCaseExecutionView extends Stage {
     private final Spinner<Integer> numberOfRuns = new Spinner<>(2, 100, 2);
     private final TextField resetFunctionName = new TextField();
     private final TextField regionAWS = new TextField();
-    private final List<Testcase> testcases;
+    private final List<TestcaseWrapper> testcases;
     private final File tcFile;
-    private final List<CheckboxWrapper<Testcase>> selectedTestcases = new ArrayList<>();
+    private final List<CheckboxWrapper<TestcaseWrapper>> selectedTestcases = new ArrayList<>();
 
 
     public TestCaseExecutionView(TestCaseExecutionController controller, List<Testcase> testcases, File tcFile, Graph model) {
         this.controller = controller;
         this.model = model;
-        this.testcases = testcases;
+        this.testcases = testcases.stream().map(tc -> new TestcaseWrapper(tc)).toList();
         this.tcFile = tcFile;
         getConfigProperties();
         createView();
@@ -106,10 +104,10 @@ public class TestCaseExecutionView extends Stage {
 
             for (var testcase : testcases) {
                 int lastRow = grid.getRowCount();
-                Label testTargetLabel = new Label(testcase.target());
+                Label testTargetLabel = new Label(testcase.getTestcase().target());
                 grid.add(testTargetLabel, 1, lastRow);
 
-                var checkboxForTestcase = new CheckboxWrapper<Testcase>(testcase);
+                var checkboxForTestcase = new CheckboxWrapper<TestcaseWrapper>(testcase);
                 selectedTestcases.add(checkboxForTestcase);
                 grid.add(checkboxForTestcase, 2, lastRow);
 
@@ -125,17 +123,17 @@ public class TestCaseExecutionView extends Stage {
                 buttons.getChildren().addAll(executeTC, calibrateTC);
                 grid.add(buttons, 3, lastRow);
 
-                var functions = testcase.functions();
+                var functions = testcase.getFunctionsWrapped();
                 for (var function : functions) {
+                    var originalFunction = function.getFunction();
                     lastRow = grid.getRowCount();
-
-                    String functionInvocation = String.format("%s %s", function.getName(), function.getParameter());
+                    String functionInvocation = String.format("%s %s", originalFunction.getName(), originalFunction.getParameter());
                     TextArea functionDescription = new TextArea(functionInvocation);
                     functionDescription.setEditable(false);
                     functionDescription.setPrefHeight(25);
                     grid.add(functionDescription, 3, lastRow);
 
-                    var partsToBeCovered = function.getResults();
+                    var partsToBeCovered = originalFunction.getResults();
                     partsToBeCovered = partsToBeCovered.stream().map(part -> part.replace("*", "\\*")).collect(Collectors.toList());
 
                     String expectedOutput = String.join("*", partsToBeCovered);
@@ -162,12 +160,12 @@ public class TestCaseExecutionView extends Stage {
             selectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(true));
                 executionButtons.getChildren().remove(selectAllTestCases);
-                executionButtons.getChildren().add(0,unselectAllTestCases);
+                executionButtons.getChildren().add(0, unselectAllTestCases);
             });
             unselectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(false));
                 executionButtons.getChildren().remove(unselectAllTestCases);
-                executionButtons.getChildren().add(0,selectAllTestCases);
+                executionButtons.getChildren().add(0, selectAllTestCases);
             });
 
 

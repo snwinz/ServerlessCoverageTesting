@@ -194,16 +194,21 @@ public class DynamicTCSelectionView extends Stage {
         Button getAllTCsWithInput = new Button("All test cases with input");
         getAllTCsWithInput.setOnAction(e -> controller.showTestSuiteForExecution(testSuite));
 
+        Button exportAllTCsWithInput = new Button("Export all test cases with input");
+        exportAllTCsWithInput.setOnAction(e -> controller.exportTestSuitForExecution(testSuite));
+
+
         Button selectAllTestCases = new Button("Select all test cases");
         selectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(true)));
 
         Button unselectAllTestCases = new Button("Unselect all test cases");
         unselectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(false)));
 
-        lastRow.getChildren().addAll(getAllDataButton, getAllTCsWithInput, selectAllTestCases, unselectAllTestCases);
+        lastRow.getChildren().addAll(getAllDataButton, getAllTCsWithInput,exportAllTCsWithInput, selectAllTestCases, unselectAllTestCases);
         grid.add(lastRow, 1, grid.getRowCount());
         HBox.setMargin(getAllDataButton, new Insets(10, 10, 10, 10));
         HBox.setMargin(getAllTCsWithInput, new Insets(10, 10, 10, 10));
+        HBox.setMargin(exportAllTCsWithInput, new Insets(10, 10, 10, 10));
         HBox.setMargin(selectAllTestCases, new Insets(10, 10, 10, 10));
         HBox.setMargin(unselectAllTestCases, new Insets(10, 10, 10, 10));
         return scrollpane;

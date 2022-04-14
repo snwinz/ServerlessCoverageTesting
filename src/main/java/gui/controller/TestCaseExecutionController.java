@@ -2,6 +2,7 @@ package gui.controller;
 
 import gui.model.Graph;
 import gui.view.TestCaseExecutionView;
+import gui.view.wrapper.TestcaseWrapper;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
 import logic.testcaseexecution.TestcaseExecutor;
@@ -30,7 +31,7 @@ public class TestCaseExecutionController {
         thread.start();
     }
 
-    public void executeTC(Testcase testcase, String region) {
+    public void executeTC(TestcaseWrapper testcase, String region) {
         TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
         var thread = new Thread(() -> tcExecutor.executeTC(testcase));
         thread.start();

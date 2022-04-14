@@ -1,6 +1,7 @@
 package gui.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import gui.controller.dto.ArrowInputData;
 import gui.controller.dto.NodeInputData;
 import gui.model.Graph;
@@ -9,6 +10,7 @@ import shared.model.NodeType;
 import shared.model.Testcase;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -84,23 +86,33 @@ public class PersistenceUtilities {
     public static List<Testcase> loadTCs(String absolutePath) {
         List<Testcase> testcasesRead = new ArrayList<>();
         var source = Path.of(absolutePath);
+
         try {
             var testcaseOneLine = Files.readString(source);
-            var testcases = testcaseOneLine.split("##Target ");
-            for(var testcaseLine : testcases){
-                var lines = testcaseLine.split("\n");
-                if(lines.length >1){
-                    var target = getTarget(lines[0]);
-                    var logs = getLogs(lines[0]);
-                    List<Function> functions = new LinkedList<>();
-                    for(int i = 1; i< lines.length; i++){
-                        var function = getFunction(lines[i]);
-                        functions.add(function);
+            if (absolutePath.endsWith("json")) {
+                Type tcListType = new TypeToken<LinkedList<Testcase>>() {
+                }.getType();
+                var gson = new GsonBuilder().setPrettyPrinting().create();
+                 testcasesRead = gson.fromJson(testcaseOneLine, tcListType);
+            } else {
+
+                var testcases = testcaseOneLine.split("##Target ");
+                for (var testcaseLine : testcases) {
+                    var lines = testcaseLine.split("\n");
+                    if (lines.length > 1) {
+                        var target = getTarget(lines[0]);
+                        var logs = getLogs(lines[0]);
+                        List<Function> functions = new LinkedList<>();
+                        for (int i = 1; i < lines.length; i++) {
+                            var function = getFunction(lines[i]);
+                            functions.add(function);
+                        }
+                        Testcase testcase = new Testcase(functions, logs, target);
+                        testcasesRead.add(testcase);
                     }
-                    Testcase testcase = new Testcase(functions, logs, target);
-                    testcasesRead.add(testcase);
                 }
             }
+
         } catch (IOException e) {
             System.err.printf("Could not read file '%s'", absolutePath);
         }
@@ -108,8 +120,8 @@ public class PersistenceUtilities {
     }
 
     private static Function getFunction(String line) {
-        var functionInformation = line.split(" ",2);
-        return new Function(functionInformation[0],functionInformation[1]);
+        var functionInformation = line.split(" ", 2);
+        return new Function(functionInformation[0], functionInformation[1]);
     }
 
     private static List<String> getLogs(String line) {
@@ -119,5 +131,16 @@ public class PersistenceUtilities {
 
     private static String getTarget(String line) {
         return line.split(" with logs ")[0];
+    }
+
+    public static void saveTestSuite(List<Testcase> testSuite, String absolutePath) {
+        var gson = new GsonBuilder().setPrettyPrinting().create();
+        String json = gson.toJson(testSuite);
+        var destination = Path.of(absolutePath);
+        try {
+            Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            System.err.printf("Could not write the following to %s:%n%s ", absolutePath, json);
+        }
     }
 }
