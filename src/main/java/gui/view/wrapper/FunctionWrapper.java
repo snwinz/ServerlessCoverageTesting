@@ -6,12 +6,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import shared.model.Function;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class FunctionWrapper {
     private  Function function;
     private final StringProperty output = new SimpleStringProperty("");
+    private final StringProperty expectedResult = new SimpleStringProperty("");
     private final BooleanProperty passed = new SimpleBooleanProperty();
 
     public FunctionWrapper(Function function) {
@@ -39,5 +37,7 @@ public class FunctionWrapper {
         return output;
     }
 
-
+    public StringProperty expectedResultProperty() {
+        return expectedResult;
+    }
 }

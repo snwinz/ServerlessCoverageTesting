@@ -30,9 +30,9 @@ dependencies {
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.12.30'
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-logs', version: '1.12.30'
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch', version: '1.12.30'
+    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 
 
-    testImplementation group: 'junit', name: 'junit', version:'3.8.1'
     antlr "org.antlr:antlr4:4.5"
 }
 /*

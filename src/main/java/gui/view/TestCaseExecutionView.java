@@ -67,20 +67,11 @@ public class TestCaseExecutionView extends Stage {
             scrollpane.setContent(grid);
 
 
-            var runsLabel = new Label("Runs for output generation:");
-            HBox runsFunctionBox = new HBox();
-            HBox.setMargin(runsLabel, new Insets(10, 0, 10, 10));
-            HBox.setMargin(numberOfRuns, new Insets(10, 10, 10, 0));
-            runsFunctionBox.getChildren().addAll(runsLabel, numberOfRuns);
-            grid.add(runsFunctionBox, 1, 1);
-
-
             var regionLabel = new Label("AWS region:");
             HBox.setMargin(regionLabel, new Insets(10, 0, 10, 10));
             HBox.setMargin(regionAWS, new Insets(10, 10, 10, 0));
             HBox regionBox = new HBox();
             regionBox.getChildren().addAll(regionLabel, regionAWS);
-            grid.add(regionBox, 3, 1);
 
             var resetLabel = new Label("Reset function:");
             var startResetButton = new Button("Start reset");
@@ -91,7 +82,10 @@ public class TestCaseExecutionView extends Stage {
             startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
             HBox resetFunctionBox = new HBox();
             resetFunctionBox.getChildren().addAll(resetLabel, resetFunctionName, startResetButton);
-            grid.add(resetFunctionBox, 4, 1);
+            HBox essentialFunctionality = new HBox();
+            essentialFunctionality.getChildren().addAll(regionBox, resetFunctionBox);
+
+            grid.add(essentialFunctionality, 3, 1, 4, 1);
 
 
             Label operationsLabel = new Label("Operations:");
@@ -104,16 +98,24 @@ public class TestCaseExecutionView extends Stage {
             Label outputInfoLabel = new Label("Output info");
             grid.add(outputInfoLabel, 5, 2);
 
+
             for (var testcase : testcases) {
                 int lastRow = grid.getRowCount();
+                HBox testcaseDashboard = new HBox();
                 Label testTargetLabel = new Label(testcase.getTestcase().target());
-                grid.add(testTargetLabel, 1, lastRow);
+                testTargetLabel.setMaxWidth(300);
+                testTargetLabel.setTooltip(new Tooltip(testcase.getTestcase().target()));
+
                 Circle statusLightTestcase = new Circle(100 / 3.0 / 2, 100 / 4.0, 10);
-                grid.add(statusLightTestcase, 2, lastRow);
+                HBox.setMargin(statusLightTestcase, new Insets(0, 5, 0, 5));
+
 
                 var checkboxForTestcase = new CheckboxWrapper<TestcaseWrapper>(testcase);
                 selectedTestcases.add(checkboxForTestcase);
-                grid.add(checkboxForTestcase, 3, lastRow);
+                HBox.setMargin(checkboxForTestcase, new Insets(0, 5, 0, 5));
+
+                testcaseDashboard.getChildren().addAll(testTargetLabel, statusLightTestcase, checkboxForTestcase);
+                grid.add(testcaseDashboard, 1, lastRow);
 
                 Button executeTC = new Button("execute TC");
                 Button calibrateTC = new Button("calibrate TC");
@@ -121,11 +123,11 @@ public class TestCaseExecutionView extends Stage {
                 HBox.setMargin(calibrateTC, new Insets(10, 10, 10, 10));
 
                 executeTC.setOnAction(e -> controller.executeTC(testcase, regionAWS.getText()));
-
+                calibrateTC.setOnAction(e -> controller.calibrateOutput(testcase, regionAWS.getText(), resetFunctionName.getText()));
 
                 HBox buttons = new HBox();
                 buttons.getChildren().addAll(executeTC, calibrateTC);
-                grid.add(buttons, 4, lastRow);
+                grid.add(buttons, 3, lastRow);
 
                 var functions = testcase.getFunctionsWrapped();
                 for (var function : functions) {
@@ -143,13 +145,13 @@ public class TestCaseExecutionView extends Stage {
                             statusLightTestcase.setFill(Color.RED);
                         }
                     });
-                    grid.add(statusLightFunction, 3, lastRow);
+                    grid.add(statusLightFunction, 2, lastRow);
                     var originalFunction = function.getFunction();
                     String functionInvocation = String.format("%s %s", originalFunction.getName(), originalFunction.getParameter());
                     TextArea functionDescription = new TextArea(functionInvocation);
                     functionDescription.setEditable(false);
                     functionDescription.setPrefHeight(25);
-                    grid.add(functionDescription, 4, lastRow);
+                    grid.add(functionDescription, 3, lastRow);
 
                     var partsToBeCovered = originalFunction.getResults();
                     partsToBeCovered = partsToBeCovered.stream().map(part -> part.replace("*", "\\*")).collect(Collectors.toList());
@@ -161,14 +163,14 @@ public class TestCaseExecutionView extends Stage {
                     expectedOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> {
                         originalFunction.setResults(newValue);
                     });
-
-                    grid.add(expectedOutputTextArea, 5, lastRow);
+                    function.expectedResultProperty().bindBidirectional(expectedOutputTextArea.textProperty());
+                    grid.add(expectedOutputTextArea, 4, lastRow);
 
                     TextArea infoBox = new TextArea();
                     infoBox.textProperty().bind(function.outputProperty());
                     infoBox.setEditable(true);
                     infoBox.setPrefHeight(25);
-                    grid.add(infoBox, 6, lastRow);
+                    grid.add(infoBox, 5, lastRow);
 
                 }
             }
@@ -199,8 +201,8 @@ public class TestCaseExecutionView extends Stage {
             Button executeAllTCs = new Button("Execute all TCs");
             executeAllTCs.setOnAction(e -> saveConfigProperties());
 
-            executionButtons.getChildren().addAll(selectAllTestCases, showPassedTCs, executeTCs, executeAllTCs);
-            grid.add(executionButtons, 1, grid.getRowCount());
+            executionButtons.getChildren().addAll(executeTCs, executeAllTCs, selectAllTestCases, showPassedTCs);
+            grid.add(executionButtons, 1, grid.getRowCount(), 5, 1);
             HBox.setMargin(selectAllTestCases, new Insets(10, 10, 10, 10));
             HBox.setMargin(unselectAllTestCases, new Insets(10, 10, 10, 10));
             HBox.setMargin(showPassedTCs, new Insets(10, 10, 10, 10));

@@ -3,6 +3,7 @@ package gui.controller;
 import gui.model.Graph;
 import gui.view.TestCaseExecutionView;
 import gui.view.wrapper.TestcaseWrapper;
+import javafx.scene.control.Spinner;
 import javafx.stage.FileChooser;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
@@ -46,5 +47,11 @@ public class TestCaseExecutionController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         var fileToSave = fileChooser.showSaveDialog(view);
         PersistenceUtilities.saveTestSuite(testcasesOriginal, fileToSave.getAbsolutePath());
+    }
+
+    public void calibrateOutput(TestcaseWrapper testcase, String region, String resetFunction) {
+        TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
+        var thread = new Thread(() -> tcExecutor.calibrate(testcase,resetFunction));
+        thread.start();
     }
 }

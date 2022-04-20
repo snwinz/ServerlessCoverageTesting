@@ -72,7 +72,7 @@ public class DynamicTCSelectionView extends Stage {
 
         var resetLabel = new Label("Reset function:");
         HBox resetFunctionBox = new HBox();
-        var startResetButton = new Button("Start reset");
+        var startResetButton = new Button("Start reset application");
         startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
         resetFunctionBox.getChildren().addAll(resetLabel, resetFunctionName, startResetButton);
         grid.add(resetFunctionBox, 3, 1);
