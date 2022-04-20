@@ -7,6 +7,14 @@ import gui.view.wrapper.TestcaseWrapper;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -194,14 +202,25 @@ public class TestCaseExecutionView extends Stage {
 
 
             Button showPassedTCs = new Button("Show passed TCs");
+            showPassedTCs.setOnAction(e-> controller.showPassedTCs(testcases));
 
-            Button executeTCs = new Button("Execute TCs");
-            executeTCs.setOnAction(e -> saveConfigProperties());
+
+            Button executeTCs = new Button("Execute selected TCs");
+            executeTCs.setOnAction(e -> {
+                saveConfigProperties();
+                var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
+                controller.executeTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
+            });
+
 
             Button executeAllTCs = new Button("Execute all TCs");
-            executeAllTCs.setOnAction(e -> saveConfigProperties());
+            executeAllTCs.setOnAction(e -> {
+                saveConfigProperties();
+                controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
+            });
 
-            executionButtons.getChildren().addAll(executeTCs, executeAllTCs, selectAllTestCases, showPassedTCs);
+
+            executionButtons.getChildren().addAll(selectAllTestCases,executeTCs, executeAllTCs, showPassedTCs);
             grid.add(executionButtons, 1, grid.getRowCount(), 5, 1);
             HBox.setMargin(selectAllTestCases, new Insets(10, 10, 10, 10));
             HBox.setMargin(unselectAllTestCases, new Insets(10, 10, 10, 10));
@@ -214,17 +233,16 @@ public class TestCaseExecutionView extends Stage {
             grid.add(logLabel, 1, grid.getRowCount());
 
             HBox logRow = new HBox();
-            Button getAllDataButton = new Button("reset Logs");
+            Button deleteLogs = new Button("delete Logs");
+            deleteLogs.setOnAction(e-> controller.deleteLogs(regionAWS.getText()));
 
-            Button getAllTCsWithInput = new Button("get Logs");
+            Button getLogs = new Button("get Logs");
+            getLogs.setOnAction(e-> controller.getLogs(regionAWS.getText()));
 
-            Button evaluateLogs = new Button("evaluate Logs");
-
-            logRow.getChildren().addAll(getAllDataButton, getAllTCsWithInput, evaluateLogs);
+            logRow.getChildren().addAll(deleteLogs, getLogs);
             grid.add(logRow, 1, grid.getRowCount());
-            HBox.setMargin(getAllDataButton, new Insets(10, 10, 10, 10));
-            HBox.setMargin(getAllTCsWithInput, new Insets(10, 10, 10, 10));
-            HBox.setMargin(evaluateLogs, new Insets(10, 10, 10, 10));
+            HBox.setMargin(deleteLogs, new Insets(10, 10, 10, 10));
+            HBox.setMargin(getLogs, new Insets(10, 10, 10, 10));
 
 
             return scrollpane;

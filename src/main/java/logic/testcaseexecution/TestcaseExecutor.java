@@ -43,6 +43,14 @@ public class TestcaseExecutor {
 
     }
 
+    public void executeTCs(List<TestcaseWrapper> testcases, String resetFunction) {
+        for (var testcase : testcases) {
+            executor.callResetFunction(resetFunction);
+            this.executeTC(testcase);
+        }
+    }
+
+
     private void checkCorrectnessOfOutput(String result, FunctionWrapper function, Map<String, List<String>> outputValues) {
         boolean passed = true;
         for (var part : function.getFunction().getResults()) {
@@ -52,7 +60,7 @@ public class TestcaseExecutor {
                 var valueArray = splitPart.split(Pattern.quote("__"));
                 var partsOfKey = Arrays.copyOfRange(valueArray, 0, valueArray.length - 1);
                 String key = String.join("__", partsOfKey);
-                int number = 0;
+                int number;
                 if (partsOfKey.length == 0 || !outputValues.containsKey(key)) {
                     passed = false;
                     break;
@@ -79,10 +87,8 @@ public class TestcaseExecutor {
                 break;
             }
         }
-        if (passed) {
-            function.passedProperty().set(true);
-        } else {
-            function.passedProperty().set(true);
+        function.passedProperty().set(true);
+        if (!passed) {
             function.passedProperty().set(false);
         }
     }
@@ -194,4 +200,6 @@ public class TestcaseExecutor {
         }
         return result;
     }
+
+
 }
