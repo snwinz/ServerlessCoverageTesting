@@ -18,7 +18,7 @@ public class TestcaseEvaluator {
 
         var tcPassed = testcases.stream().filter(isPassed()).toList();
         var tcFailed = testcases.stream().filter(isPassed().negate()).toList();
-        result.append(String.format("TC passed: %d %nTc failed: %d"),tcPassed.size(),tcFailed.size());
+        result.append(String.format("TC passed: %d %nTc failed: %d", tcPassed.size(), tcFailed.size()));
         return result.toString();
     }
 
