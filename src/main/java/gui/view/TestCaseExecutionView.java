@@ -177,6 +177,7 @@ public class TestCaseExecutionView extends Stage {
                             int separatorFunctionParameter = newValue.indexOf(" ");
                             String functionName = newValue.substring(0, separatorFunctionParameter);
                             originalFunction.setFunctionName(functionName);
+                            separatorFunctionParameter++;
                             if (separatorFunctionParameter <= newValue.length()) {
                                 String arguments = newValue.substring(separatorFunctionParameter);
                                 originalFunction.setFunctionParameter(arguments);
