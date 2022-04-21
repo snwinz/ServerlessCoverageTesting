@@ -154,7 +154,6 @@ public class TestCaseExecutionView extends Stage {
                             if (testcase.getFunctionsWrapped().stream().allMatch(f -> f.passedProperty().get())) {
                                 statusLightTestcase.setFill(Color.GREEN);
                             }
-                            ;
                         } else {
                             statusLightFunction.setFill(Color.RED);
                             statusLightTestcase.setFill(Color.RED);

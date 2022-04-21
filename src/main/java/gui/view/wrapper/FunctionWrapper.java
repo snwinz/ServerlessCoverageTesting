@@ -7,7 +7,7 @@ import javafx.beans.property.StringProperty;
 import shared.model.Function;
 
 public class FunctionWrapper {
-    private Function function;
+    private final Function function;
     private final StringProperty output = new SimpleStringProperty("");
     private final StringProperty expectedResult = new SimpleStringProperty("");
     private final BooleanProperty passed = new SimpleBooleanProperty();

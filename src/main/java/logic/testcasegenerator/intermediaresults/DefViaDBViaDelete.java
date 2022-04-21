@@ -17,8 +17,8 @@ import static logic.testcasegenerator.intermediaresults.DefViaDB.getDefsInAFunct
 
 public class DefViaDBViaDelete implements DefViaDB {
 
-    private FunctionWithDefSourceLine def;
-    private NodeModel db;
+    private final FunctionWithDefSourceLine def;
+    private final NodeModel db;
 
     public DefViaDBViaDelete(FunctionWithDefSourceLine def, NodeModel db) {
         this.def = def;

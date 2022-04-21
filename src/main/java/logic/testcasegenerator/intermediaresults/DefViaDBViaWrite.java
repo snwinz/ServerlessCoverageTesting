@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DefViaDBViaWrite implements DefViaDB {
-    private FunctionWithDefSourceLine def;
+    private final FunctionWithDefSourceLine def;
 
     public DefViaDBViaWrite(FunctionWithDefSourceLine def) {
         this.def = def;
