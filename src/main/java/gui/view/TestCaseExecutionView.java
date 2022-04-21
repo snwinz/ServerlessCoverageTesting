@@ -3,6 +3,7 @@ package gui.view;
 import gui.controller.TestCaseExecutionController;
 import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
+import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -130,8 +131,14 @@ public class TestCaseExecutionView extends Stage {
                 HBox.setMargin(executeTC, new Insets(10, 10, 10, 10));
                 HBox.setMargin(calibrateTC, new Insets(10, 10, 10, 10));
 
-                executeTC.setOnAction(e -> controller.executeTC(testcase, regionAWS.getText()));
-                calibrateTC.setOnAction(e -> controller.calibrateOutput(testcase, regionAWS.getText(), resetFunctionName.getText()));
+                executeTC.setOnAction(e -> {
+                    testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
+                    controller.executeTC(testcase, regionAWS.getText());
+                });
+                calibrateTC.setOnAction(e -> {
+                    testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
+                    controller.calibrateOutput(testcase, regionAWS.getText(), resetFunctionName.getText());
+                });
 
                 HBox buttons = new HBox();
                 buttons.getChildren().addAll(executeTC, calibrateTC);
@@ -153,12 +160,29 @@ public class TestCaseExecutionView extends Stage {
                             statusLightTestcase.setFill(Color.RED);
                         }
                     });
+                    function.executedProperty().addListener((observable, oldValue, newValue) -> {
+                        if (!newValue) {
+                            statusLightFunction.setFill(Color.BLACK);
+                            statusLightTestcase.setFill(Color.BLACK);
+                        }
+                    });
                     grid.add(statusLightFunction, 2, lastRow);
                     var originalFunction = function.getFunction();
                     String functionInvocation = String.format("%s %s", originalFunction.getName(), originalFunction.getParameter());
                     TextArea functionDescription = new TextArea(functionInvocation);
-                    functionDescription.setEditable(false);
+                    functionDescription.setEditable(true);
                     functionDescription.setPrefHeight(25);
+                    functionDescription.textProperty().addListener((observable, oldValue, newValue) -> {
+                        if (newValue.contains(" ")) {
+                            int separatorFunctionParameter = newValue.indexOf(" ");
+                            String functionName = newValue.substring(0, separatorFunctionParameter);
+                            originalFunction.setFunctionName(functionName);
+                            if (separatorFunctionParameter <= newValue.length()) {
+                                String arguments = newValue.substring(separatorFunctionParameter);
+                                originalFunction.setFunctionParameter(arguments);
+                            }
+                        }
+                    });
                     grid.add(functionDescription, 3, lastRow);
 
                     var partsToBeCovered = originalFunction.getResults();
@@ -175,7 +199,7 @@ public class TestCaseExecutionView extends Stage {
                     grid.add(expectedOutputTextArea, 4, lastRow);
 
                     TextArea infoBox = new TextArea();
-                    infoBox.textProperty().bind(function.outputProperty());
+                    infoBox.textProperty().bindBidirectional(function.outputProperty());
                     infoBox.setEditable(true);
                     infoBox.setPrefHeight(25);
                     grid.add(infoBox, 5, lastRow);
@@ -202,13 +226,14 @@ public class TestCaseExecutionView extends Stage {
 
 
             Button showPassedTCs = new Button("Show passed TCs");
-            showPassedTCs.setOnAction(e-> controller.showPassedTCs(testcases));
+            showPassedTCs.setOnAction(e -> controller.showPassedTCs(testcases));
 
 
             Button executeTCs = new Button("Execute selected TCs");
             executeTCs.setOnAction(e -> {
                 saveConfigProperties();
                 var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
+                testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(functions -> functions.stream()).forEach(FunctionWrapper::reset);
                 controller.executeTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
             });
 
@@ -216,11 +241,12 @@ public class TestCaseExecutionView extends Stage {
             Button executeAllTCs = new Button("Execute all TCs");
             executeAllTCs.setOnAction(e -> {
                 saveConfigProperties();
+                testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(functions -> functions.stream()).forEach(FunctionWrapper::reset);
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
 
-            executionButtons.getChildren().addAll(selectAllTestCases,executeTCs, executeAllTCs, showPassedTCs);
+            executionButtons.getChildren().addAll(selectAllTestCases, executeTCs, executeAllTCs, showPassedTCs);
             grid.add(executionButtons, 1, grid.getRowCount(), 5, 1);
             HBox.setMargin(selectAllTestCases, new Insets(10, 10, 10, 10));
             HBox.setMargin(unselectAllTestCases, new Insets(10, 10, 10, 10));
@@ -234,10 +260,10 @@ public class TestCaseExecutionView extends Stage {
 
             HBox logRow = new HBox();
             Button deleteLogs = new Button("delete Logs");
-            deleteLogs.setOnAction(e-> controller.deleteLogs(regionAWS.getText()));
+            deleteLogs.setOnAction(e -> controller.deleteLogs(regionAWS.getText()));
 
             Button getLogs = new Button("get Logs");
-            getLogs.setOnAction(e-> controller.getLogs(regionAWS.getText()));
+            getLogs.setOnAction(e -> controller.getLogs(regionAWS.getText()));
 
             logRow.getChildren().addAll(deleteLogs, getLogs);
             grid.add(logRow, 1, grid.getRowCount());

@@ -33,7 +33,7 @@ public class TestcaseExecutor {
 
             checkCorrectnessOfOutput(result, function, outputValues);
 
-            addResultToOutput(result, outputValues);
+            addResultToOutputvalues(result, outputValues);
 
             String resultFormatted = String.format("result: %s", result);
 
@@ -88,12 +88,13 @@ public class TestcaseExecutor {
             }
         }
         function.passedProperty().set(true);
+        function.executedProperty().set(true);
         if (!passed) {
             function.passedProperty().set(false);
         }
     }
 
-    private void addResultToOutput(String result, Map<String, List<String>> outputValues) {
+    private void addResultToOutputvalues(String result, Map<String, List<String>> outputValues) {
         KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(result);
         var outputKeyValues = keyValueJsonGenerator.getKeyValues();
         outputValues.putAll(outputKeyValues);
@@ -101,7 +102,6 @@ public class TestcaseExecutor {
 
     public void calibrate(TestcaseWrapper testcase, String resetFunction) {
         var functions = testcase.getFunctionsWrapped();
-
         executor.callResetFunction(resetFunction);
         List<String> resultsFirstExecution = getResultOfExecution(functions);
         executor.callResetFunction(resetFunction);
@@ -181,9 +181,13 @@ public class TestcaseExecutor {
             String jsonData = originalFunction.getParameter();
             String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
             LOGGER.info(invocation);
+            function.addTextToOutput(invocation);
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
             result = replaceResultsOfPreviousOutput(result, outputValues);
-            addResultToOutput(result, outputValues);
+            addResultToOutputvalues(result, outputValues);
+            String resultInfoMessage = String.format("result: %s", result);
+            function.addTextToOutput(resultInfoMessage);
+            LOGGER.info(String.format(resultInfoMessage));
             results.add(result);
         }
         return results;
@@ -194,7 +198,7 @@ public class TestcaseExecutor {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 var outputValue = entry.getValue().get(i);
                 if (outputValue.length() > 3 && result.contains(outputValue)) {
-                    result = result.replaceAll(Pattern.quote(outputValue), String.format("##PREVIOUSOUTPUT__%s__%dPREVIOUSOUTPUT##", entry.getKey(), i));
+                    result = result.replaceAll(Pattern.quote(outputValue), String.format("##PREVIOUSOUTPUT__%s__%d__PREVIOUSOUTPUT##", entry.getKey(), i));
                 }
             }
         }

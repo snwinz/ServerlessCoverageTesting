@@ -7,14 +7,20 @@ import javafx.beans.property.StringProperty;
 import shared.model.Function;
 
 public class FunctionWrapper {
-    private  Function function;
+    private Function function;
     private final StringProperty output = new SimpleStringProperty("");
     private final StringProperty expectedResult = new SimpleStringProperty("");
     private final BooleanProperty passed = new SimpleBooleanProperty();
+    private final BooleanProperty executed = new SimpleBooleanProperty();
+
+    public BooleanProperty executedProperty() {
+        return executed;
+    }
 
     public FunctionWrapper(Function function) {
         this.function = function;
     }
+
     public BooleanProperty passedProperty() {
         return passed;
     }
@@ -22,7 +28,6 @@ public class FunctionWrapper {
     public Function getFunction() {
         return function;
     }
-
 
 
     public void addTextToOutput(String text) {
@@ -33,11 +38,18 @@ public class FunctionWrapper {
             output.set(text);
         }
     }
+
     public StringProperty outputProperty() {
         return output;
     }
 
     public StringProperty expectedResultProperty() {
         return expectedResult;
+    }
+
+     public void reset() {
+        this.output.set("");
+        this.passed.set(false);
+        this.executed.set(false);
     }
 }
