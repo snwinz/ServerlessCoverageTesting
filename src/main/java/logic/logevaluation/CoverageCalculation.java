@@ -57,8 +57,8 @@ public class CoverageCalculation {
         for (String line : lines) {
             if (line.contains("INFO")) {
                 line = line.substring(line.indexOf("INFO"));
-                String[] infos = line.split("INFO");
-                for (String info : infos) {
+                String[] infoArray = line.split("INFO");
+                for (String info : infoArray) {
                     String statement = info.split(" ")[0].trim();
                     if (statement.startsWith("#")) {
                         statements.add(statement);

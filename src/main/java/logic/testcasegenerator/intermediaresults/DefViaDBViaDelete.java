@@ -15,15 +15,7 @@ import java.util.stream.Collectors;
 
 import static logic.testcasegenerator.intermediaresults.DefViaDB.getDefsInAFunction;
 
-public class DefViaDBViaDelete implements DefViaDB {
-
-    private final FunctionWithDefSourceLine def;
-    private final NodeModel db;
-
-    public DefViaDBViaDelete(FunctionWithDefSourceLine def, NodeModel db) {
-        this.def = def;
-        this.db = db;
-    }
+public record DefViaDBViaDelete(FunctionWithDefSourceLine def, NodeModel db) implements DefViaDB {
 
     public static List<DefViaDB> parse(NodeModel dbNode) {
 
@@ -35,11 +27,7 @@ public class DefViaDBViaDelete implements DefViaDB {
                 result.addAll(getDefsInAFunction(predecessor, arrow.getIdentifier()));
             }
         }
-        return result.stream().map(function-> new DefViaDBViaDelete(function,dbNode)).collect(Collectors.toList());
-    }
-    @Override
-    public FunctionWithDefSourceLine getDef() {
-        return this.def;
+        return result.stream().map(function -> new DefViaDBViaDelete(function, dbNode)).collect(Collectors.toList());
     }
 
     @Override

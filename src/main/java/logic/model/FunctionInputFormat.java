@@ -1,8 +1,6 @@
 package logic.model;
 
 import com.google.gson.annotations.Expose;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import shared.model.input.*;
 
 import java.util.ArrayList;
@@ -13,7 +11,6 @@ public class FunctionInputFormat {
     @Expose
     private List<GeneralInput> generalInputs;
 
-    final StringProperty text = new SimpleStringProperty();
     public FunctionInputFormat(List<GeneralInput> generalInputs) {
         Objects.requireNonNull(generalInputs, "string input list must not null");
         this.generalInputs = generalInputs;

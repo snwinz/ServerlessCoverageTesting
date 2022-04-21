@@ -40,7 +40,7 @@ public class ArrowEditorView extends Stage {
 
     private GridPane getGridPane(Graph model) {
         var accessText = new Label("Access mode: ");
-        setupComboboxes(model, accessText);
+        setupComboBoxes(model, accessText);
 
 
         var grid = new GridPane();
@@ -54,7 +54,7 @@ public class ArrowEditorView extends Stage {
         grid.add(successorText, 1, 2);
         grid.add(comboBoxSuccessor, 2, 2);
         grid.add(accessText, 1, 3);
-        grid.add(accessModesCombobox.getCombobox(), 2, 3);
+        grid.add(accessModesCombobox.getComboBox(), 2, 3);
 
         var updateButton = new Button("Update arrow");
         updateButton.setOnAction(getUpdateButtonHandler());
@@ -69,14 +69,14 @@ public class ArrowEditorView extends Stage {
         return event -> {
             var successorNode = comboBoxSuccessor.getValue().node;
             var predecessorNode = comboBoxPredecessor.getValue().node;
-            var infos =
+            var info =
                     new ArrowInputData();
-            infos.setSuccessor(successorNode.getIdentifier());
-            infos.setPredecessor(predecessorNode.getIdentifier());
-            infos.setId(arrow.getIdentifier());
+            info.setSuccessor(successorNode.getIdentifier());
+            info.setPredecessor(predecessorNode.getIdentifier());
+            info.setId(arrow.getIdentifier());
 
-            infos.setAccessMode(accessModesCombobox.getModes());
-            controller.updateArrowToGraph(infos);
+            info.setAccessMode(accessModesCombobox.getModes());
+            controller.updateArrowToGraph(info);
         };
     }
 
@@ -85,7 +85,7 @@ public class ArrowEditorView extends Stage {
     }
 
 
-    private void setupComboboxes(Graph model, Label accessText) {
+    private void setupComboBoxes(Graph model, Label accessText) {
         for (var node : model.getNodes()) {
             var pre = new NodeWrapper(node, node.getNameOfNode());
             comboBoxSuccessor.getItems().add(pre);
@@ -132,12 +132,10 @@ public class ArrowEditorView extends Stage {
         if (isDBCall(comboBoxPredecessor.getValue().node, comboBoxSuccessor.getValue().node)) {
             accessText.setVisible(true);
             accessModesCombobox.activateModes(AccessMode.READ, AccessMode.CREATE, AccessMode.UPDATE, AccessMode.DELETE);
-            //comboboxAccess.setValue(arrow.getAccessMode().toArray();
             accessModesCombobox.setVisible(true);
         } else if (isFunctionCall(comboBoxPredecessor.getValue().node, comboBoxSuccessor.getValue().node)) {
             accessText.setVisible(true);
             accessModesCombobox.activateModes(AccessMode.FUNCTIONCALL, AccessMode.RETURN);
-            // comboboxAccess.setValue(arrow.getAccessMode());
             accessModesCombobox.setVisible(true);
         } else {
             accessModesCombobox.clear();
@@ -155,18 +153,12 @@ public class ArrowEditorView extends Stage {
         return pre.getType().equals(NodeType.FUNCTION) && suc.getType().equals(NodeType.FUNCTION);
     }
 
-    static class NodeWrapper {
-        public NodeWrapper(NodeModel node, String name) {
-            this.node = node;
-            this.name = name;
-        }
+    record NodeWrapper(NodeModel node, String name) {
 
         @Override
-        public String toString() {
-            return name;
-        }
+            public String toString() {
+                return name;
+            }
 
-        final NodeModel node;
-        final String name;
     }
 }

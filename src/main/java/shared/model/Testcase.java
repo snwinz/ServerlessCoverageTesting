@@ -19,10 +19,6 @@ public final class Testcase {
         return functions;
     }
 
-    public List<String> coverageLogs() {
-        return coverageLogs;
-    }
-
     public String target() {
         return target;
     }

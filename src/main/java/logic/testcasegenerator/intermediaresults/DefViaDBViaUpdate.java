@@ -31,7 +31,7 @@ public record DefViaDBViaUpdate(FunctionWithDefSourceLine def,
     }
 
     @Override
-    public FunctionWithDefSourceLine getDef() {
+    public FunctionWithDefSourceLine def() {
         return this.def;
     }
 

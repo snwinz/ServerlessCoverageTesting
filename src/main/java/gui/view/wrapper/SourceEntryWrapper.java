@@ -22,15 +22,15 @@ public class SourceEntryWrapper {
         this.relationsCallableForAllRelations = new RelationsWrapper(arrows);
         this.nodesCallableForAllNodes = new NodeWrapper(nodes);
         this.sourceEntry = sourceEntry;
-        setupComboboxes();
+        setupComboBoxes();
         activateCheckboxesForData(sourceEntry);
 
     }
 
-    private void setupComboboxes() {
-        relationsDefs.setupCombobox();
-        relationsUses.setupCombobox();
-        relationsCallableForAllRelations.setupCombobox();
+    private void setupComboBoxes() {
+        relationsDefs.setupComboBox();
+        relationsUses.setupComboBox();
+        relationsCallableForAllRelations.setupComboBox();
         nodesCallableForAllNodes.setupCombobox();
     }
 
@@ -88,19 +88,19 @@ public class SourceEntryWrapper {
     }
 
     public ComboBox<ComboBoxItemWrap<String>> getRelationsDefs() {
-        return relationsDefs.getCombobox();
+        return relationsDefs.getComboBox();
     }
 
     public ComboBox<ComboBoxItemWrap<String>> getRelationsUses() {
-        return relationsUses.getCombobox();
+        return relationsUses.getComboBox();
     }
 
     public ComboBox<ComboBoxItemWrap<String>> getNodesCallableForAllNodes() {
-        return nodesCallableForAllNodes.getCombobox();
+        return nodesCallableForAllNodes.getComboBox();
     }
 
     public ComboBox<ComboBoxItemWrap<String>> getRelationsCallableForAllRelations() {
-        return relationsCallableForAllRelations.getCombobox();
+        return relationsCallableForAllRelations.getComboBox();
     }
 
     public RelationsWrapper getDefWrapper() {

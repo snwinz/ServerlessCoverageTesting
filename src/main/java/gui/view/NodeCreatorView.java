@@ -63,27 +63,26 @@ public class NodeCreatorView extends Stage {
     private void linkViewsForComboBox(double x, double y) {
         nodeTypeCombobox.valueProperty().addListener((ov, t, typeOfEnum) -> {
             switch (typeOfEnum) {
-                case FUNCTION: {
+                case FUNCTION -> {
                     var grid = getFunctionGrid(x, y);
                     var scene = new Scene(grid);
                     this.setScene(scene);
                     break;
                 }
-                case DATA_STORAGE: {
+                case DATA_STORAGE -> {
                     var grid = getDataStorageGrid(x, y);
                     var scene = new Scene(grid);
                     this.setScene(scene);
                     break;
                 }
-                case STANDARD_NODE: {
+                case STANDARD_NODE -> {
                     var grid = getStandardNode(x, y);
                     var scene = new Scene(grid);
                     this.setScene(scene);
                     break;
                 }
-                default:
-
-
+                default -> {
+                }
             }
         });
     }
@@ -133,10 +132,12 @@ public class NodeCreatorView extends Stage {
         var sourceLabel = new Label("Source code:");
         var inputLabel = new Label("Input values:");
         var inputTooltip = new Tooltip();
-        inputTooltip.setText("format of the values being processed by the function:\n" +
-                "event.body.myValue: string\n" +
-                "event.myValue: [1-9]\n" +
-                "event.myValue: [A-Z][0-9]*\n"
+        inputTooltip.setText("""
+                format of the values being processed by the function:
+                event.body.myValue: string
+                event.myValue: [1-9]
+                event.myValue: [A-Z][0-9]*
+                """
         );
         inputLabel.setTooltip(inputTooltip);
         xArea.setText(String.valueOf(x));

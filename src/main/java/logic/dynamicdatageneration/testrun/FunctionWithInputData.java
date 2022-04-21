@@ -142,8 +142,8 @@ public class FunctionWithInputData {
 
     private void setRandomEntryOfOutputAsValue(GeneralInput inputData, List<Pair> inputValues) {
         if (inputValues != null && inputValues.size() > 0) {
-            var item = getRandomItem2(inputValues);
-            var inputText = String.format(PREVIOUSOUTPUT_PREFIX + "%s" + SEPARATOR + "%s" + PREVIOUSOUTPUT_SUFFIX, item.getKey(), item.getOccurence());
+            var item = getRandomItem(inputValues);
+            var inputText = String.format(PREVIOUSOUTPUT_PREFIX + "%s" + SEPARATOR + "%s" + PREVIOUSOUTPUT_SUFFIX, item.key(), item.occurrence());
             inputData.setGeneratedValue(inputText);
         }
 
@@ -162,33 +162,6 @@ public class FunctionWithInputData {
         return list.get(entryNumber);
     }
 
-    private <T> T getRandomItem2(List<T> list) {
-        int entryNumber = rn.nextInt(list.size());
-        return list.get(entryNumber);
-    }
-
-
-    private final class Pair {
-        private final String key;
-        private final String value;
-        private final int occurence;
-
-        Pair(String key, String value, int occurence) {
-            this.key = key;
-            this.value = value;
-            this.occurence = occurence;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public int getOccurence() {
-            return occurence;
-        }
+    private record Pair(String key, String value, int occurrence) {
     }
 }

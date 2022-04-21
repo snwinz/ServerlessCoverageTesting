@@ -5,13 +5,7 @@ import gui.view.wrapper.TestcaseWrapper;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class TestcaseEvaluator {
-    private final List<TestcaseWrapper> testcases;
-
-    public TestcaseEvaluator(List<TestcaseWrapper> testcases) {
-        this.testcases = testcases;
-
-    }
+public record TestcaseEvaluator(List<TestcaseWrapper> testcases) {
 
     public String getPassedData() {
         StringBuilder result = new StringBuilder();

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class NodeWrapper {
-    private final ComboBox<ComboBoxItemWrap<String>> combobox = new ComboBox<>();
+    private final ComboBox<ComboBoxItemWrap<String>> comboBox = new ComboBox<>();
     private final List<Long> nodes;
 
     public NodeWrapper(List<Long> nodes) {
@@ -20,14 +20,14 @@ public class NodeWrapper {
     }
 
 
-    public ComboBox<ComboBoxItemWrap<String>> getCombobox() {
-        return combobox;
+    public ComboBox<ComboBoxItemWrap<String>> getComboBox() {
+        return comboBox;
     }
 
     public void setupCombobox() {
         {
             fillCombobox();
-            combobox.setCellFactory(c -> {
+            comboBox.setCellFactory(c -> {
                 ListCell<ComboBoxItemWrap<String>> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(ComboBoxItemWrap<String> item, boolean empty) {
@@ -51,14 +51,14 @@ public class NodeWrapper {
     private void fillCombobox() {
         var entries = nodes.stream().map(n ->
                 new ComboBoxItemWrap<>(n.toString())).collect(Collectors.toCollection(LinkedList::new));
-        combobox.getItems().addAll(entries);
+        comboBox.getItems().addAll(entries);
     }
 
     public void refreshText() {
-        String combination = combobox.getItems().stream().filter(f -> f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).
+        String combination = comboBox.getItems().stream().filter(f -> f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).
                 collect(Collectors.joining(";"));
 
-        combobox.setPromptText(combination);
+        comboBox.setPromptText(combination);
     }
 
     public void activateNodes(List<Long> nodesInfluenced) {
@@ -69,7 +69,7 @@ public class NodeWrapper {
     }
 
     private void activateNeighboursOfCombobox(List<Long> relationsInfluenced) {
-        var items = combobox.getItems();
+        var items = comboBox.getItems();
         for (var item : items) {
             String entry = item.getItem();
             try {
@@ -85,7 +85,7 @@ public class NodeWrapper {
 
 
     public List<Long> getSelectedNodes() {
-        ObservableList<ComboBoxItemWrap<String>> items = combobox.getItems();
+        ObservableList<ComboBoxItemWrap<String>> items = comboBox.getItems();
         List<Long> nodesInfluenced = new LinkedList<>();
         for (var item : items) {
             if (item.getCheck()) {

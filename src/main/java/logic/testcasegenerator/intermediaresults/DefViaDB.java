@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public interface DefViaDB {
-    FunctionWithDefSourceLine getDef();
+    FunctionWithDefSourceLine def();
 
     static List<FunctionWithDefSourceLine> getDefsInAFunction(NodeModel node, long idOfArrow) {
         List<FunctionWithDefSourceLine> result = new ArrayList<>();

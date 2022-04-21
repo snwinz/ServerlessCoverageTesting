@@ -12,12 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DefViaDBViaWrite implements DefViaDB {
-    private final FunctionWithDefSourceLine def;
-
-    public DefViaDBViaWrite(FunctionWithDefSourceLine def) {
-        this.def = def;
-    }
+public record DefViaDBViaWrite(FunctionWithDefSourceLine def) implements DefViaDB {
 
     public static List<DefViaDB> parse(NodeModel dbNode) {
         List<FunctionWithDefSourceLine> result = new ArrayList<>();
@@ -32,12 +27,7 @@ public class DefViaDBViaWrite implements DefViaDB {
     }
 
     @Override
-    public FunctionWithDefSourceLine getDef() {
-        return this.def;
-    }
-
-    @Override
-    public List<Testcase>  getTestcases(FunctionWithUseSourceLine use) {
+    public List<Testcase> getTestcases(FunctionWithUseSourceLine use) {
         var logStatements = List.of(def.getLogMessage() + use.getLogMessage());
         String defDescription = String.format("def %s", def);
         String target = String.format("use %s should be covered by %s", use, defDescription);

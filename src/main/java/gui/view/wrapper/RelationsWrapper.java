@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class RelationsWrapper {
-    private final ComboBox<ComboBoxItemWrap<String>> combobox = new ComboBox<>();
+    private final ComboBox<ComboBoxItemWrap<String>> comboBox = new ComboBox<>();
     private final List<Long> neighbours;
 
     public RelationsWrapper(List<Long> neighbours) {
@@ -21,14 +21,14 @@ public class RelationsWrapper {
     }
 
 
-    public ComboBox<ComboBoxItemWrap<String>> getCombobox() {
-        return combobox;
+    public ComboBox<ComboBoxItemWrap<String>> getComboBox() {
+        return comboBox;
     }
 
-    public void setupCombobox() {
+    public void setupComboBox() {
         {
-            fillCombobox();
-            combobox.setCellFactory(c -> {
+            fillComboBox();
+            comboBox.setCellFactory(c -> {
                 ListCell<ComboBoxItemWrap<String>> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(ComboBoxItemWrap<String> item, boolean empty) {
@@ -49,34 +49,34 @@ public class RelationsWrapper {
         }
     }
 
-    private void fillCombobox() {
+    private void fillComboBox() {
         if (neighbours.contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)) {
             var allEntry = new ComboBoxItemWrap<>("all neighbours");
             allEntry.checkProperty().set(false);
-            var items = combobox.getItems();
+            var items = comboBox.getItems();
             items.add(allEntry);
         }
         var entries = neighbours.stream().
                 filter(r -> r != SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT).
                 map(n ->
                 new ComboBoxItemWrap<>(n.toString())).collect(Collectors.toCollection(LinkedList::new));
-        combobox.getItems().addAll(entries);
+        comboBox.getItems().addAll(entries);
     }
 
     public void refreshText() {
-        String combination = combobox.getItems().stream().filter(f -> f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).collect(Collectors.joining(";"));
-        combobox.setPromptText(combination);
+        String combination = comboBox.getItems().stream().filter(f -> f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).collect(Collectors.joining(";"));
+        comboBox.setPromptText(combination);
     }
 
     public void activateNeighbours(List<Long> relationsInfluenced) {
         if (relationsInfluenced != null && relationsInfluenced.size() > 0) {
-            activateNeighboursOfCombobox(relationsInfluenced);
+            activateNeighboursOfComboBox(relationsInfluenced);
             refreshText();
         }
     }
 
-    private void activateNeighboursOfCombobox(List<Long> relationsInfluenced) {
-        var items = combobox.getItems();
+    private void activateNeighboursOfComboBox(List<Long> relationsInfluenced) {
+        var items = comboBox.getItems();
         for (var item : items) {
             String entry = item.getItem();
             if ("all neighbours".equals(entry)) {
@@ -99,7 +99,7 @@ public class RelationsWrapper {
 
 
     public List<Long> getSelectedRelations() {
-        ObservableList<ComboBoxItemWrap<String>> items = combobox.getItems();
+        ObservableList<ComboBoxItemWrap<String>> items = comboBox.getItems();
         List<Long> influencedRelations = new LinkedList<>();
         for (var item : items) {
             if (item.getCheck()) {
@@ -121,9 +121,9 @@ public class RelationsWrapper {
     }
 
     public void activateAllOnly() {
-        combobox.getItems().clear();
-        fillCombobox();
-        combobox.getItems().stream().filter(n -> "all neighbours".equals(n.getItem())).forEach(n -> n.checkProperty().set(true));
+        comboBox.getItems().clear();
+        fillComboBox();
+        comboBox.getItems().stream().filter(n -> "all neighbours".equals(n.getItem())).forEach(n -> n.checkProperty().set(true));
     }
 
 }

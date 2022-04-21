@@ -10,21 +10,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class AccessModesCombobox {
-    private final ComboBox<ComboBoxItemWrap<AccessMode>> combobox = new ComboBox<>();
+    private final ComboBox<ComboBoxItemWrap<AccessMode>> comboBox = new ComboBox<>();
     private final Set<AccessMode> modes = new HashSet<>();
 
     public AccessModesCombobox() {
         setupCombobox();
     }
 
-    public ComboBox<ComboBoxItemWrap<AccessMode>> getCombobox() {
-        return this.combobox;
+    public ComboBox<ComboBoxItemWrap<AccessMode>> getComboBox() {
+        return this.comboBox;
     }
 
     public void setupCombobox() {
         {
             fillCombobox();
-            combobox.setCellFactory(c -> {
+            comboBox.setCellFactory(c -> {
                 ListCell<ComboBoxItemWrap<AccessMode>> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(ComboBoxItemWrap<AccessMode> item, boolean empty) {
@@ -48,18 +48,18 @@ public class AccessModesCombobox {
     private void fillCombobox() {
         var entries = modes.stream().
                 map(ComboBoxItemWrap::new).collect(Collectors.toCollection(LinkedList::new));
-        combobox.getItems().clear();
-        combobox.getItems().addAll(entries);
+        comboBox.getItems().clear();
+        comboBox.getItems().addAll(entries);
     }
 
     public void refreshText() {
-        String combination = combobox.getItems().stream().filter(f -> f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).map(AccessMode::toString).collect(Collectors.joining(";"));
-        combobox.setPromptText(combination);
+        String combination = comboBox.getItems().stream().filter(f -> f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).map(AccessMode::toString).collect(Collectors.joining(";"));
+        comboBox.setPromptText(combination);
     }
 
 
     public Set<AccessMode> getModes() {
-        return combobox.getItems().stream().filter(f->f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).collect(Collectors.toSet());
+        return comboBox.getItems().stream().filter(f->f != null && f.getCheck()).map(ComboBoxItemWrap::getItem).collect(Collectors.toSet());
     }
 
     public void clear() {
@@ -67,7 +67,7 @@ public class AccessModesCombobox {
     }
 
     public void setVisible(boolean visible) {
-        this.combobox.setVisible(visible);
+        this.comboBox.setVisible(visible);
     }
 
     public void activateModes(AccessMode... modes) {

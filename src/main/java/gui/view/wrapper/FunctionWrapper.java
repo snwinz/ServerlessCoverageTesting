@@ -31,12 +31,10 @@ public class FunctionWrapper {
 
 
     public void addTextToOutput(String text) {
-        if (output != null) {
-            if (!output.get().isEmpty()) {
-                text = output.get() + "\n" + text;
-            }
-            output.set(text);
+        if (!output.get().isEmpty()) {
+            text = output.get() + "\n" + text;
         }
+        output.set(text);
     }
 
     public StringProperty outputProperty() {

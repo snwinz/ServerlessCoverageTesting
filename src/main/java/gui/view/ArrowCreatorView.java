@@ -17,8 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-import java.util.HashSet;
-
 public class ArrowCreatorView extends Stage {
 
     private final ArrowCreatorController controller;
@@ -51,7 +49,7 @@ public class ArrowCreatorView extends Stage {
         grid.add(successorText, 1, 2);
         grid.add(comboBoxSuccessor, 2, 2);
         grid.add(accessText, 1, 3);
-        grid.add(accessModesCombobox.getCombobox(), 2, 3);
+        grid.add(accessModesCombobox.getComboBox(), 2, 3);
         grid.add(createButton, 1, 5);
         grid.add(cancelButton, 2, 5);
         return grid;
@@ -108,7 +106,7 @@ public class ArrowCreatorView extends Stage {
     private EventHandler<ActionEvent> getCreateButtonHandler() {
         return event -> {
             if (comboBoxPredecessor.getSelectionModel().isEmpty() || comboBoxSuccessor.getSelectionModel().isEmpty()) {
-                System.err.println("No value in combobox selected");
+                System.err.println("No value in ComboBox selected");
             } else {
                 var successorNode = comboBoxSuccessor.getValue().node;
                 var predecessorNode = comboBoxPredecessor.getValue().node;
@@ -116,7 +114,6 @@ public class ArrowCreatorView extends Stage {
                 infos.setSuccessor(successorNode.getIdentifier());
                 infos.setPredecessor(predecessorNode.getIdentifier());
                 if (isDBCall(predecessorNode, successorNode) || isFunctionCall(predecessorNode, successorNode)) {
-                    var accessSet = new HashSet<AccessMode>();
                     infos.setAccessMode(accessModesCombobox.getModes());
                 }
                 controller.addArrowToGraph(infos);
@@ -125,19 +122,13 @@ public class ArrowCreatorView extends Stage {
         };
     }
 
-    static class NodeWrapper {
-        public NodeWrapper(NodeModel node, String name) {
-            this.node = node;
-            this.name = name;
-        }
+    record NodeWrapper(NodeModel node, String name) {
 
         @Override
-        public String toString() {
-            return String.format("%s (id: %d)", name, node.getIdentifier());
-        }
+            public String toString() {
+                return String.format("%s (id: %d)", name, node.getIdentifier());
+            }
 
-        final NodeModel node;
-        final String name;
     }
 
 

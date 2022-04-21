@@ -80,6 +80,7 @@ public class DraggableNode extends Group {
                 symbol = getSymbol("images/mail.png");
                 break;
             case STANDARD_NODE:
+                symbol = new Sphere(50);
             default:
                 symbol = new Sphere(50);
         }

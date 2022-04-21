@@ -17,7 +17,6 @@ public class TestSuite {
     public String toString() {
         StringBuilder result = new StringBuilder();
 
-
         int numberOfCoverageTargets = 0;
         for (var testTarget : testTargets) {
             var testcases = testTarget.getTestcases();
@@ -132,14 +131,9 @@ public class TestSuite {
             var testcases = target.getTestcases();
             for (var testcase : testcases) {
                 if (testcase.isSpecificTargetCovered()) {
-                    var testData = testcase.getTestData();
-                    String specificTestDataText = "";
-                    if (testData != null) {
-                        specificTestDataText = testData.getExecutableDataAsText();
-                    }
                     var functionsForExecution = new LinkedList<Function>();
-                    var testdata = testcase.getTestData();
-                    for (var function : testdata.getTestFunctions()) {
+                    var testData = testcase.getTestData();
+                    for (var function : testData.getTestFunctions()) {
                         var functionName =
                                 function.getFunction().getName();
                         var argument = function.getJSON();

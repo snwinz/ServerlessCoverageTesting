@@ -224,29 +224,16 @@ public class FunctionInputFormatView extends Stage {
         var key = addStringInputKey.getText();
 
         var selection = comboBoxTypOfKey.getValue();
-        switch (selection) {
-            case KEY_CONSTANT_VALUE:
-                generatedInputValue = new ConstantKeyValue(key, addStringInputJSON.getText());
-                break;
-            case CONSTANT_VALUE:
-                generatedInputValue = new ConstantValue(addStringInputJSON.getText());
-                break;
-            case KEY_INTEGER_VALUE:
-                generatedInputValue = new IntegerInput(key, Integer.valueOf(addMinValueField.getText()), Integer.valueOf(addMaxValueField.getText()));
-                break;
-            case KEY_DYNAMIC_VALUE:
-                generatedInputValue = new DynamicKeyValue(key, addStringInputJSON.getText(),asBase64.isSelected());
-                break;
-            case ARRAY_KEY:
-                generatedInputValue = new ArrayKeyInput(key);
-                break;
-            case PARENT_KEY:
-                generatedInputValue = new ParentKeyInput(key, valueInJson.isSelected(), asBase64.isSelected());
-                break;
-            default:
-                generatedInputValue = new GeneralInput(key);
-                break;
-        }
+        generatedInputValue = switch (selection) {
+            case KEY_CONSTANT_VALUE -> new ConstantKeyValue(key, addStringInputJSON.getText());
+            case CONSTANT_VALUE -> new ConstantValue(addStringInputJSON.getText());
+            case KEY_INTEGER_VALUE ->
+                    new IntegerInput(key, Integer.valueOf(addMinValueField.getText()), Integer.valueOf(addMaxValueField.getText()));
+            case KEY_DYNAMIC_VALUE -> new DynamicKeyValue(key, addStringInputJSON.getText(), asBase64.isSelected());
+            case ARRAY_KEY -> new ArrayKeyInput(key);
+            case PARENT_KEY -> new ParentKeyInput(key, valueInJson.isSelected(), asBase64.isSelected());
+            default -> new GeneralInput(key);
+        };
 
         Integer freeEntryID = functionInputFormat.getGeneralInputs().stream().mapToInt(GeneralInput::getEntryID).max().orElse(0) + 1;
         generatedInputValue.setEntryID(freeEntryID);

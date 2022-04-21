@@ -13,15 +13,16 @@ public class UtilityConverter {
         List<SourceCodeLine> tableItems = new LinkedList<>();
         if (file != null) {
             try {
-                var reader = Files.newBufferedReader(file.toPath());
-                String line = reader.readLine();
-                long lineNumber = 0;
-                while (line != null) {
-                    SourceCodeLine sourceEntry = new SourceCodeLine();
-                    sourceEntry.setSourceLine(line);
-                    sourceEntry.setLineNumber(lineNumber++);
-                    tableItems.add(sourceEntry);
-                    line = reader.readLine();
+                try (var reader = Files.newBufferedReader(file.toPath())) {
+                    String line = reader.readLine();
+                    long lineNumber = 0;
+                    while (line != null) {
+                        SourceCodeLine sourceEntry = new SourceCodeLine();
+                        sourceEntry.setSourceLine(line);
+                        sourceEntry.setLineNumber(lineNumber++);
+                        tableItems.add(sourceEntry);
+                        line = reader.readLine();
+                    }
                 }
             } catch (IOException e) {
                 System.err.println("Could not read file: " + e.getMessage());

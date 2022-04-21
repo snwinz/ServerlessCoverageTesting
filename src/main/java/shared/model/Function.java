@@ -4,6 +4,7 @@ package shared.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class Function {
@@ -39,7 +40,7 @@ public final class Function {
             }
         }
         results.clear();
-        results.addAll(Arrays.stream(parts).filter(o -> o != null).collect(Collectors.toList()));
+        results.addAll(Arrays.stream(parts).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
 

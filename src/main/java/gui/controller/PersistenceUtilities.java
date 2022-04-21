@@ -64,10 +64,10 @@ public class PersistenceUtilities {
                 inputArrow.setOriginalStartOffsetPositionY(arrow.getOriginalStartOffsetPositionY());
                 inputArrow.setAccessMode(arrow.getAccessMode());
                 inputArrow.setId(arrow.getIdentifier());
-                var pred = model.getNode(arrow.getPredecessor());
+                var pre = model.getNode(arrow.getPredecessor());
                 var suc = model.getNode(arrow.getSuccessor());
-                inputArrow.setPredecessor(pred.orElseThrow(() -> {
-                    throw new IllegalStateException("pred not available");
+                inputArrow.setPredecessor(pre.orElseThrow(() -> {
+                    throw new IllegalStateException("pre not available");
                 }).getIdentifier());
                 inputArrow.setSuccessor(suc.orElseThrow(() -> {
                     throw new IllegalStateException("suc not available");

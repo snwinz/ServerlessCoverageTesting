@@ -25,7 +25,7 @@ public class DynamicTCSelectionController {
     }
 
     public void setup(TestSuite testSuite, Graph model) {
-        this.view = new DynamicTCSelectionView(testSuite, model, this);
+        this.view = new DynamicTCSelectionView(testSuite, this);
         view.setMaximized(true);
         view.show();
     }
@@ -36,7 +36,7 @@ public class DynamicTCSelectionController {
         }
     }
 
-    public void startDynamicTCCalculation(List<Testcase> testcasesToBeCreated, Graph model, Commands commands) {
+    public void startDynamicTCCalculation(List<Testcase> testcasesToBeCreated, Commands commands) {
         DynamicTestCaseGenerator dynamicTestCaseGenerator = new DynamicTestCaseGenerator();
         Thread thread = new Thread(() -> dynamicTestCaseGenerator.generateTestcases(testcasesToBeCreated, commands));
         thread.start();

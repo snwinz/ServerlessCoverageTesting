@@ -15,16 +15,13 @@ import java.io.File;
 import java.util.List;
 
 public class TestCaseExecutionController {
-    private final Graph model;
     private TestCaseExecutionView view;
 
-    public TestCaseExecutionController(Graph model) {
-
-        this.model = model;
+    public TestCaseExecutionController() {
     }
 
-    public void setup(List<Testcase> testcases, File tcFile) {
-        this.view = new TestCaseExecutionView(this, testcases, tcFile, model);
+    public void setup(List<Testcase> testcases) {
+        this.view = new TestCaseExecutionView(this, testcases);
         view.showAndWait();
     }
 

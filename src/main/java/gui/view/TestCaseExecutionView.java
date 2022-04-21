@@ -1,21 +1,12 @@
 package gui.view;
 
 import gui.controller.TestCaseExecutionController;
-import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
 import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -25,31 +16,26 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import shared.model.Testcase;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class TestCaseExecutionView extends Stage {
     private final TestCaseExecutionController controller;
-    private final Graph model;
-    private final Spinner<Integer> numberOfRuns = new Spinner<>(2, 100, 2);
     private final TextField resetFunctionName = new TextField();
     private final TextField regionAWS = new TextField();
     private final List<TestcaseWrapper> testcases;
-    private final File tcFile;
     private final List<CheckboxWrapper<TestcaseWrapper>> selectedTestcases = new ArrayList<>();
 
 
-    public TestCaseExecutionView(TestCaseExecutionController controller, List<Testcase> testcases, File tcFile, Graph model) {
+    public TestCaseExecutionView(TestCaseExecutionController controller, List<Testcase> testcases) {
         this.controller = controller;
-        this.model = model;
-        this.testcases = testcases.stream().map(tc -> new TestcaseWrapper(tc)).toList();
-        this.tcFile = tcFile;
+        this.testcases = testcases.stream().map(TestcaseWrapper::new).toList();
         getConfigProperties();
         createView();
     }
@@ -119,7 +105,7 @@ public class TestCaseExecutionView extends Stage {
                 HBox.setMargin(statusLightTestcase, new Insets(0, 5, 0, 5));
 
 
-                var checkboxForTestcase = new CheckboxWrapper<TestcaseWrapper>(testcase);
+                var checkboxForTestcase = new CheckboxWrapper<>(testcase);
                 selectedTestcases.add(checkboxForTestcase);
                 HBox.setMargin(checkboxForTestcase, new Insets(0, 5, 0, 5));
 
@@ -192,9 +178,7 @@ public class TestCaseExecutionView extends Stage {
                     TextArea expectedOutputTextArea = new TextArea(expectedOutput);
                     expectedOutputTextArea.setEditable(true);
                     expectedOutputTextArea.setPrefHeight(25);
-                    expectedOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> {
-                        originalFunction.setResults(newValue);
-                    });
+                    expectedOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> originalFunction.setResults(newValue));
                     function.expectedResultProperty().bindBidirectional(expectedOutputTextArea.textProperty());
                     grid.add(expectedOutputTextArea, 4, lastRow);
 
@@ -233,7 +217,7 @@ public class TestCaseExecutionView extends Stage {
             executeTCs.setOnAction(e -> {
                 saveConfigProperties();
                 var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
-                testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(functions -> functions.stream()).forEach(FunctionWrapper::reset);
+                testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 controller.executeTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
             });
 
@@ -241,7 +225,7 @@ public class TestCaseExecutionView extends Stage {
             Button executeAllTCs = new Button("Execute all TCs");
             executeAllTCs.setOnAction(e -> {
                 saveConfigProperties();
-                testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(functions -> functions.stream()).forEach(FunctionWrapper::reset);
+                testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
@@ -285,7 +269,7 @@ public class TestCaseExecutionView extends Stage {
         var saveTCs = new MenuItem("Save TCs");
 
         saveTCs.setOnAction(event -> {
-            var testcasesOriginal = testcases.stream().map(tc -> tc.getTestcase()).toList();
+            var testcasesOriginal = testcases.stream().map(TestcaseWrapper::getTestcase).toList();
             controller.saveTestcases(testcasesOriginal);
         });
 
@@ -300,7 +284,6 @@ public class TestCaseExecutionView extends Stage {
         String pathOfProperties = "settingTCExecution.xml";
 
         try {
-            properties.setProperty("numberOfRuns", String.valueOf(numberOfRuns.getValue()));
             properties.setProperty("resetFunctionName", resetFunctionName.getText());
             properties.setProperty("regionAWS", regionAWS.getText());
 
@@ -323,15 +306,12 @@ public class TestCaseExecutionView extends Stage {
         try {
             properties.loadFromXML(Files.newInputStream(path));
 
-            String numberOfTriesText = properties.getProperty("numberOfRuns");
-            numberOfRuns.getValueFactory().setValue(Integer.valueOf(numberOfTriesText));
-
             String resetFunctionNameText = properties.getProperty("resetFunctionName");
             resetFunctionName.setText(resetFunctionNameText);
 
             String regionAWSText = properties.getProperty("regionAWS");
             regionAWS.setText(regionAWSText);
-        } catch (IOException | NumberFormatException e) {
+        } catch (IOException e) {
             System.err.println("Problem while reading " + pathOfProperties);
             e.printStackTrace();
         }

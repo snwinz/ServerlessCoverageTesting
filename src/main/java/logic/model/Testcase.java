@@ -213,14 +213,6 @@ public class Testcase {
         this.numberOfRuns = numberOfRuns;
     }
 
-    public boolean isTestCovered() {
-        return testCovered.get();
-    }
-
-    public BooleanProperty testCoveredProperty() {
-        return testCovered;
-    }
-
     public int getNumberOfRuns() {
         return numberOfRuns;
     }

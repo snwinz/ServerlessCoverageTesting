@@ -15,12 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Analyzer {
-    private final boolean adaptForDeletes;
-
-    public Analyzer(boolean adaptForDeletes) {
-        this.adaptForDeletes = adaptForDeletes;
-    }
+public record Analyzer(boolean adaptForDeletes) {
 
     public String getSuggestionForInstrumentation(String sourceAsJSON, String graphAsJSON) {
         SourceCode sourceCode = SourceCode.getSourceCodeObject(sourceAsJSON);
@@ -47,14 +42,14 @@ public class Analyzer {
         ParserRuleContext program = parser.program();
 
 
-        InstrumentationIdentifier<Object> visitor = new InstrumentationIdentifier<>(copyWithLinesOnly, graph, sourceCode.getIdOfNode(),adaptForDeletes);
+        InstrumentationIdentifier<Object> visitor = new InstrumentationIdentifier<>(copyWithLinesOnly, graph, sourceCode.getIdOfNode(), adaptForDeletes);
         visitor.visit(program);
         SourceCode analyzedSourceCode = new SourceCode(copyWithLinesOnly);
         analyzedSourceCode.setIdOfNode(sourceCode.getIdOfNode());
 
 
         TreeViewer viewer = new TreeViewer(Arrays.asList(
-                parser.getRuleNames()),program);
+                parser.getRuleNames()), program);
         viewer.open();
 
 

@@ -108,12 +108,5 @@ public class Arrow {
         return accessMode;
     }
 
-    public boolean hasAccessMode(AccessMode mode) {
-        if (accessMode != null) {
-            return accessMode.contains(mode);
-        } else {
-            return false;
-        }
-    }
 
 }

@@ -7,7 +7,7 @@ import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithUseS
 import java.util.List;
 
 public interface UseViaDB {
-    FunctionWithUseSourceLine getUse();
+    FunctionWithUseSourceLine use();
 
 
 

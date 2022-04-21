@@ -3,7 +3,6 @@ package logic.model;
 import com.google.gson.annotations.Expose;
 import shared.model.AccessMode;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class ArrowModel {
@@ -46,15 +45,6 @@ public class ArrowModel {
 
     public void setAccessMode(Set<AccessMode> accessMode) {
         this.accessMode = accessMode;
-    }
-
-    public void addAccessMode(AccessMode mode) {
-        if (accessMode != null) {
-            this.accessMode.add(mode);
-        } else {
-            this.accessMode = new HashSet<>();
-            this.accessMode.add(mode);
-        }
     }
 
     public NodeModel getSuccessorNode() {

@@ -7,17 +7,7 @@ import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithUseS
 
 import java.util.List;
 
-public class UseViaDBWrite implements UseViaDB {
-    private final FunctionWithUseSourceLine use;
-
-    public UseViaDBWrite(FunctionWithUseSourceLine use) {
-        this.use = use;
-    }
-
-    @Override
-    public FunctionWithUseSourceLine getUse() {
-        return this.use;
-    }
+public record UseViaDBWrite(FunctionWithUseSourceLine use) implements UseViaDB {
 
     @Override
     public List<Testcase> getTestcases(FunctionWithDefSourceLine def) {
@@ -26,6 +16,6 @@ public class UseViaDBWrite implements UseViaDB {
         var function2 = new ServerlessFunction(use.getFunction());
         String target = String.format("def %s should be covered by %s ", def, use);
         Testcase testcase = new Testcase(List.of(function1, function2), target, logStatements);
-       return List.of(testcase);
+        return List.of(testcase);
     }
 }

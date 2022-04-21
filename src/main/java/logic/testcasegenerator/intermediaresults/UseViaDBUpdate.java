@@ -16,7 +16,7 @@ public record UseViaDBUpdate(FunctionWithUseSourceLine use,
                              NodeModel db) implements UseViaDB {
 
     @Override
-    public FunctionWithUseSourceLine getUse() {
+    public FunctionWithUseSourceLine use() {
         return this.use;
     }
 

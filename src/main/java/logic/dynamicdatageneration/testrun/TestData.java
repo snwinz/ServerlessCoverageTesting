@@ -7,7 +7,6 @@ import shared.model.input.DynamicKeyValue;
 import shared.model.input.IntegerInput;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TestData {
 

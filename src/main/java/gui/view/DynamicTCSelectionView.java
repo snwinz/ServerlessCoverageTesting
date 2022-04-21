@@ -32,7 +32,6 @@ public class DynamicTCSelectionView extends Stage {
 
 
     private final TestSuite testSuite;
-    private final Graph model;
     private final List<CheckboxWrapper<Testcase>> availableTestcases = new ArrayList<>();
     private final DynamicTCSelectionController controller;
     private final Spinner<Integer> numberOfTries = new Spinner<>(1, 100, 2);
@@ -46,10 +45,9 @@ public class DynamicTCSelectionView extends Stage {
     private final TextField resetFunctionName = new TextField();
     private final TextField regionAWS = new TextField();
 
-    public DynamicTCSelectionView(TestSuite testSuite, Graph model, DynamicTCSelectionController controller) {
+    public DynamicTCSelectionView(TestSuite testSuite, DynamicTCSelectionController controller) {
         this.controller = controller;
         this.testSuite = testSuite;
-        this.model = model;
         this.setTitle("Select test targets for dynamic test case generation");
         createView();
         getConfigProperties();
@@ -205,7 +203,7 @@ public class DynamicTCSelectionView extends Stage {
         unselectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(false)));
 
         lastRow.getChildren().addAll(getAllDataButton, getAllTCsWithInput,exportAllTCsWithInput, selectAllTestCases, unselectAllTestCases);
-        grid.add(lastRow, 1, grid.getRowCount());
+        grid.add(lastRow, 1, grid.getRowCount(),5,1);
         HBox.setMargin(getAllDataButton, new Insets(10, 10, 10, 10));
         HBox.setMargin(getAllTCsWithInput, new Insets(10, 10, 10, 10));
         HBox.setMargin(exportAllTCsWithInput, new Insets(10, 10, 10, 10));
@@ -280,7 +278,7 @@ public class DynamicTCSelectionView extends Stage {
             commands.setResetFunctionName(resetFunctionName.getText());
             commands.setRegion(regionAWS.getText());
             saveConfigProperties();
-            controller.startDynamicTCCalculation(testcasesToBeCreated, model, commands);
+            controller.startDynamicTCCalculation(testcasesToBeCreated, commands);
         };
     }
 

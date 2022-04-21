@@ -401,7 +401,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
                 potentialTestcasesForUse.addAll(testcases);
                 List<Testcase> additionalTestcases = new ArrayList<>();
                 for (var testcase : testcases) {
-                    additionalTestcases.addAll(getTestcasesInfluencingFunction(defCoupledViaDbEntry.getDef().getFunction(), testcase));
+                    additionalTestcases.addAll(getTestcasesInfluencingFunction(defCoupledViaDbEntry.def().getFunction(), testcase));
                 }
                 potentialTestcasesForUse.addAll(additionalTestcases);
             }
@@ -667,7 +667,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             }
             var usesForDefViaDB = findAllUsesOfADefCoupledByADataStorage(defOfTestTarget);
             for (var useCoupledViaDbEntry : usesForDefViaDB) {
-                if (useOfTestTarget.equals(useCoupledViaDbEntry.getUse())) {
+                if (useOfTestTarget.equals(useCoupledViaDbEntry.use())) {
                     var testcases = useCoupledViaDbEntry.getTestcases(defOfTestTarget);
                     var logStatementsOfTarget = List.of(defOfTestTarget.getLogMessage() + useOfTestTarget.getLogMessage());
                     testcases.forEach(tc -> tc.setLogsOfTarget(logStatementsOfTarget));

@@ -16,12 +16,6 @@ public class ArrayKeyInput extends GeneralInput {
         this.setEntryID(generalInput.getEntryID());
     }
 
-    public String getJsonFormat2(List<GeneralInput> generalInputs) {
-        var children = generalInputs.stream().filter(entry -> entry.getParentId().equals(this.getEntryID())).collect(Collectors.toList());
-        var allChildren = children.stream().map(child -> child.getJsonFormat(generalInputs)).collect(Collectors.joining(","));
-        return String.format("{\"%s\" : [ %s]}", this.getKey(), allChildren);
-    }
-
     @Override
     public ArrayKeyInput getCopy() {
         return new ArrayKeyInput(this);
@@ -36,8 +30,7 @@ public class ArrayKeyInput extends GeneralInput {
                 .map(child -> child.getJsonFormat(generalInputs)).collect(Collectors.joining(",", "{", "}"));
         var allOnlyValueChildren = children.stream().filter(a -> (a instanceof ConstantValue))
                 .map(child -> child.getJsonFormat(generalInputs)).collect(Collectors.joining(",", "\"", "\""));
-        final String entries = createEntries(allKeyValueChildren, allOnlyValueChildren);
-        return entries;
+        return createEntries(allKeyValueChildren, allOnlyValueChildren);
     }
 
 
@@ -51,8 +44,7 @@ public class ArrayKeyInput extends GeneralInput {
                     .map(child -> child.getJsonWithData(generalInputs)).collect(Collectors.joining(",", "{", "}"));
             var allOnlyValueChildren = children.stream().filter(a -> (a instanceof ConstantValue))
                     .map(child -> child.getJsonWithData(generalInputs)).filter(entry -> !"".equals(entry)).collect(Collectors.joining(",", "\"", "\""));
-            final String entries = createEntries(allKeyValueChildren, allOnlyValueChildren);
-            return entries;
+            return createEntries(allKeyValueChildren, allOnlyValueChildren);
         }
     }
 
