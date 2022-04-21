@@ -11,6 +11,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class TestcaseExecutor {
+    public static final String PREVIOUSOUTPUT_PREFIX = "##PREVIOUSOUTPUT__";
+    public static final String PREVIOUSOUTPUT_SUFFIX = "__PREVIOUSOUTPUT##";
+    public static final String SEPARATOR = "__";
     private final AWSInvoker executor;
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -54,12 +57,18 @@ public class TestcaseExecutor {
     private void checkCorrectnessOfOutput(String result, FunctionWrapper function, Map<String, List<String>> outputValues) {
         boolean passed = true;
         for (var part : function.getFunction().getResults()) {
-            while (part.contains("##PREVIOUSOUTPUT__")) {
-                var splitPart = part.split(Pattern.quote("##PREVIOUSOUTPUT__"), 2)[1];
-                splitPart = splitPart.split(Pattern.quote("__PREVIOUSOUTPUT##"), 2)[0];
-                var valueArray = splitPart.split(Pattern.quote("__"));
+            while (part.contains(PREVIOUSOUTPUT_PREFIX) && part.contains(PREVIOUSOUTPUT_SUFFIX)) {
+                int startPositionMarker = part.indexOf(PREVIOUSOUTPUT_PREFIX);
+                var splitPart = part.substring(startPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
+                int endPositionMarker = splitPart.indexOf(PREVIOUSOUTPUT_SUFFIX);
+                if (endPositionMarker == -1) {
+                    passed = false;
+                    break;
+                }
+                splitPart = splitPart.substring(0, endPositionMarker);
+                var valueArray = splitPart.split(Pattern.quote(SEPARATOR));
                 var partsOfKey = Arrays.copyOfRange(valueArray, 0, valueArray.length - 1);
-                String key = String.join("__", partsOfKey);
+                String key = String.join(SEPARATOR, partsOfKey);
                 int number;
                 if (partsOfKey.length == 0 || !outputValues.containsKey(key)) {
                     passed = false;
@@ -71,11 +80,12 @@ public class TestcaseExecutor {
                     passed = false;
                     break;
                 }
-                var partBeforeOutputValue = part.split(Pattern.quote("##PREVIOUSOUTPUT__"), 2)[0];
+
+                String partBeforeOutputValue = part.substring(0, startPositionMarker);
                 var outputValue = outputValues.get(key).get(number);
-                var potentialPartAfterOutputValue = part.split(Pattern.quote("##PREVIOUSOUTPUT__"), 2)[1].split(Pattern.quote("##"), 2);
-                var partAfterOutputValue = potentialPartAfterOutputValue.length == 2 ? potentialPartAfterOutputValue[1] : "";
-                part = partBeforeOutputValue + outputValue + partAfterOutputValue;
+                var potentialPartAfterOutputValue = part.substring(endPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
+                potentialPartAfterOutputValue = potentialPartAfterOutputValue.substring(potentialPartAfterOutputValue.indexOf(PREVIOUSOUTPUT_SUFFIX) + PREVIOUSOUTPUT_SUFFIX.length());
+                part = partBeforeOutputValue + outputValue + potentialPartAfterOutputValue;
             }
             if (result.contains(part)) {
                 var splitResult = result.split(Pattern.quote(part));
@@ -198,7 +208,7 @@ public class TestcaseExecutor {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 var outputValue = entry.getValue().get(i);
                 if (outputValue.length() > 3 && result.contains(outputValue)) {
-                    result = result.replaceAll(Pattern.quote(outputValue), String.format("##PREVIOUSOUTPUT__%s__%d__PREVIOUSOUTPUT##", entry.getKey(), i));
+                    result = result.replaceAll(Pattern.quote(outputValue), String.format(PREVIOUSOUTPUT_PREFIX + "%s" + SEPARATOR + "%d" + PREVIOUSOUTPUT_SUFFIX, entry.getKey(), i));
                 }
             }
         }

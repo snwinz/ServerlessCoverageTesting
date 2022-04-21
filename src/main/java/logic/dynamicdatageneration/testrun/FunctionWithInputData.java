@@ -8,6 +8,8 @@ import shared.model.input.IntegerInput;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static logic.testcaseexecution.TestcaseExecutor.*;
+
 public class FunctionWithInputData {
 
     private ServerlessFunction function;
@@ -141,7 +143,7 @@ public class FunctionWithInputData {
     private void setRandomEntryOfOutputAsValue(GeneralInput inputData, List<Pair> inputValues) {
         if (inputValues != null && inputValues.size() > 0) {
             var item = getRandomItem2(inputValues);
-            var inputText = String.format("##PREVIOUSOUTPUT__%s__%s__PREVIOUSOUTPUT##", item.getKey(),item.getOccurence());
+            var inputText = String.format(PREVIOUSOUTPUT_PREFIX + "%s" + SEPARATOR + "%s" + PREVIOUSOUTPUT_SUFFIX, item.getKey(), item.getOccurence());
             inputData.setGeneratedValue(inputText);
         }
 
