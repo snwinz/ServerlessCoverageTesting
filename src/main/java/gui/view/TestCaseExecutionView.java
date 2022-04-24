@@ -190,28 +190,34 @@ public class TestCaseExecutionView extends Stage {
 
                 }
             }
+            Label adminLabel = new Label("Administration:");
+            grid.add(adminLabel, 1, grid.getRowCount());
 
-
-            HBox executionButtons = new HBox();
+            HBox adminButtons = new HBox();
 
             Button selectAllTestCases = new Button("Select all test cases");
 
             Button unselectAllTestCases = new Button("Unselect all test cases");
             selectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(true));
-                executionButtons.getChildren().remove(selectAllTestCases);
-                executionButtons.getChildren().add(0, unselectAllTestCases);
+                adminButtons.getChildren().remove(selectAllTestCases);
+                adminButtons.getChildren().add(0, unselectAllTestCases);
             });
             unselectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(false));
-                executionButtons.getChildren().remove(unselectAllTestCases);
-                executionButtons.getChildren().add(0, selectAllTestCases);
+                adminButtons.getChildren().remove(unselectAllTestCases);
+                adminButtons.getChildren().add(0, selectAllTestCases);
             });
 
 
             Button showPassedTCs = new Button("Show passed TCs");
             showPassedTCs.setOnAction(e -> controller.showPassedTCs(testcases));
 
+            ViewHelper.addToGridInHBox(grid, adminButtons, selectAllTestCases, unselectAllTestCases, showPassedTCs);
+            adminButtons.getChildren().remove(unselectAllTestCases);
+
+            Label executionLabel = new Label("Execution:");
+            grid.add(executionLabel, 1, grid.getRowCount());
 
             Button executeTCs = new Button("Execute selected TCs");
             executeTCs.setOnAction(e -> {
@@ -229,14 +235,35 @@ public class TestCaseExecutionView extends Stage {
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
+            HBox executionBox = new HBox();
+            ViewHelper.addToGridInHBox(grid, executionBox, executeTCs, executeAllTCs);
+            executionBox.getChildren().remove(unselectAllTestCases);
 
-            executionButtons.getChildren().addAll(selectAllTestCases, executeTCs, executeAllTCs, showPassedTCs);
-            grid.add(executionButtons, 1, grid.getRowCount(), 5, 1);
-            HBox.setMargin(selectAllTestCases, new Insets(10, 10, 10, 10));
-            HBox.setMargin(unselectAllTestCases, new Insets(10, 10, 10, 10));
-            HBox.setMargin(showPassedTCs, new Insets(10, 10, 10, 10));
-            HBox.setMargin(executeTCs, new Insets(10, 10, 10, 10));
-            HBox.setMargin(executeAllTCs, new Insets(10, 10, 10, 10));
+
+            Label calibrationLabel = new Label("Calibration:");
+            grid.add(calibrationLabel, 1, grid.getRowCount());
+
+            Button calibrateSelectedTestcases = new Button("Calibrate selected TCs");
+            calibrateSelectedTestcases.setOnAction(e -> {
+                saveConfigProperties();
+                var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
+                testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
+                controller.calibrateTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
+            });
+
+
+            Button calibrateAllTestcases = new Button("Calibrate all TCs");
+            calibrateAllTestcases.setOnAction(e -> {
+                saveConfigProperties();
+                testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
+                controller.calibrateTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
+            });
+
+            HBox calibrationBox = new HBox();
+            ViewHelper.addToGridInHBox(grid, calibrationBox, calibrateSelectedTestcases, calibrateAllTestcases);
+            calibrationBox.getChildren().remove(unselectAllTestCases);
+
+
 
 
             Label logLabel = new Label("Logs:");
@@ -249,15 +276,11 @@ public class TestCaseExecutionView extends Stage {
             Button getLogs = new Button("get Logs");
             getLogs.setOnAction(e -> controller.getLogs(regionAWS.getText()));
 
-            logRow.getChildren().addAll(deleteLogs, getLogs);
-            grid.add(logRow, 1, grid.getRowCount());
+            ViewHelper.addToGridInHBox(grid, logRow, deleteLogs, getLogs);
             HBox.setMargin(deleteLogs, new Insets(10, 10, 10, 10));
             HBox.setMargin(getLogs, new Insets(10, 10, 10, 10));
 
-
             return scrollpane;
-
-
         }
     }
 

@@ -1,11 +1,10 @@
 package gui.controller;
 
-import logic.evaluation.TestcaseEvaluator;
-import gui.model.Graph;
 import gui.view.StandardPresentationView;
 import gui.view.TestCaseExecutionView;
 import gui.view.wrapper.TestcaseWrapper;
 import javafx.stage.FileChooser;
+import logic.evaluation.TestcaseEvaluator;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
 import logic.testcaseexecution.TestcaseExecutor;
@@ -58,6 +57,11 @@ public class TestCaseExecutionController {
         var thread = new Thread(() -> tcExecutor.executeTCs(testcases, resetFunction));
         thread.start();
     }
+    public void calibrateTestcases(List<TestcaseWrapper> testcases, String region, String resetFunction) {
+        TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
+        var thread = new Thread(() -> tcExecutor.calibrate(testcases, resetFunction));
+        thread.start();
+    }
 
     public void deleteLogs(String region) {
         Executor executor = new AWSInvoker(region);
@@ -80,4 +84,6 @@ public class TestCaseExecutionController {
         view.show();
 
     }
+
+
 }

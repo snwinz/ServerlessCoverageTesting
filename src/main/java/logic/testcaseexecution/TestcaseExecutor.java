@@ -33,6 +33,7 @@ public class TestcaseExecutor {
             LOGGER.info(invocation);
 
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
+            System.out.println(result);
 
             checkCorrectnessOfOutput(result, function, outputValues);
 
@@ -56,6 +57,7 @@ public class TestcaseExecutor {
 
     private void checkCorrectnessOfOutput(String result, FunctionWrapper function, Map<String, List<String>> outputValues) {
         boolean passed = true;
+        List<String> incorrectParts = new LinkedList<>();
         for (var part : function.getFunction().getResults()) {
             while (part.contains(PREVIOUSOUTPUT_PREFIX) && part.contains(PREVIOUSOUTPUT_SUFFIX)) {
                 int startPositionMarker = part.indexOf(PREVIOUSOUTPUT_PREFIX);
@@ -88,11 +90,9 @@ public class TestcaseExecutor {
                 part = partBeforeOutputValue + outputValue + potentialPartAfterOutputValue;
             }
             if (result.contains(part)) {
-                var splitResult = result.split(Pattern.quote(part));
-                if (splitResult.length > 1) {
-                    result = splitResult[1];
-                }
+                result.substring(result.indexOf(part) + part.length());
             } else {
+                incorrectParts.add(part);
                 passed = false;
                 break;
             }
@@ -100,6 +100,7 @@ public class TestcaseExecutor {
         function.passedProperty().set(true);
         function.executedProperty().set(true);
         if (!passed) {
+            function.addTextToOutput("The following parts were not correct:\n" + String.join("\n", incorrectParts));
             function.passedProperty().set(false);
         }
     }
@@ -108,6 +109,13 @@ public class TestcaseExecutor {
         KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(result);
         var outputKeyValues = keyValueJsonGenerator.getKeyValues();
         outputValues.putAll(outputKeyValues);
+    }
+
+
+    public void calibrate(List<TestcaseWrapper> testcases, String resetFunction) {
+        for (var testcase : testcases) {
+            this.calibrate(testcase, resetFunction);
+        }
     }
 
     public void calibrate(TestcaseWrapper testcase, String resetFunction) {
@@ -170,7 +178,8 @@ public class TestcaseExecutor {
                     secondResult = "";
                     break;
                 } else {
-                    secondResult = secondResult.split(Pattern.quote(matchIdentified))[1];
+                    int startIndex = secondResult.indexOf(matchIdentified) + matchIdentified.length();
+                    secondResult = secondResult.substring(startIndex);
                 }
             } else {
                 firstResult = firstResult.substring(1);
@@ -193,6 +202,7 @@ public class TestcaseExecutor {
             LOGGER.info(invocation);
             function.addTextToOutput(invocation);
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
+            System.out.println(result);
             result = replaceResultsOfPreviousOutput(result, outputValues);
             addResultToOutputvalues(result, outputValues);
             String resultInfoMessage = String.format("result: %s", result);

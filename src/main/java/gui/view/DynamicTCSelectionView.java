@@ -1,7 +1,6 @@
 package gui.view;
 
 import gui.controller.DynamicTCSelectionController;
-import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
 import gui.view.wrapper.Commands;
 import javafx.beans.property.BooleanProperty;
@@ -184,7 +183,7 @@ public class DynamicTCSelectionView extends Stage {
         }
 
 
-        HBox lastRow = new HBox();
+        HBox buttonBox = new HBox();
 
         Button getAllDataButton = new Button("All tc data");
         getAllDataButton.setOnAction(e -> controller.showTestSuitData(testSuite));
@@ -202,13 +201,7 @@ public class DynamicTCSelectionView extends Stage {
         Button unselectAllTestCases = new Button("Unselect all test cases");
         unselectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(false)));
 
-        lastRow.getChildren().addAll(getAllDataButton, getAllTCsWithInput,exportAllTCsWithInput, selectAllTestCases, unselectAllTestCases);
-        grid.add(lastRow, 1, grid.getRowCount(),5,1);
-        HBox.setMargin(getAllDataButton, new Insets(10, 10, 10, 10));
-        HBox.setMargin(getAllTCsWithInput, new Insets(10, 10, 10, 10));
-        HBox.setMargin(exportAllTCsWithInput, new Insets(10, 10, 10, 10));
-        HBox.setMargin(selectAllTestCases, new Insets(10, 10, 10, 10));
-        HBox.setMargin(unselectAllTestCases, new Insets(10, 10, 10, 10));
+        ViewHelper.addToGridInHBox(grid, buttonBox, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput, selectAllTestCases, unselectAllTestCases);
         return scrollpane;
     }
 
