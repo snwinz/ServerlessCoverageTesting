@@ -33,7 +33,6 @@ public class TestcaseExecutor {
             LOGGER.info(invocation);
 
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
-            System.out.println(result);
 
             checkCorrectnessOfOutput(result, function, outputValues);
 
@@ -90,7 +89,7 @@ public class TestcaseExecutor {
                 part = partBeforeOutputValue + outputValue + potentialPartAfterOutputValue;
             }
             if (result.contains(part)) {
-                result.substring(result.indexOf(part) + part.length());
+                result = result.substring(result.indexOf(part) + part.length());
             } else {
                 incorrectParts.add(part);
                 passed = false;

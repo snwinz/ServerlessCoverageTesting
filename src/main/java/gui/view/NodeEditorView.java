@@ -66,23 +66,11 @@ public class NodeEditorView extends Stage {
 
     private GridPane getGrid() {
         NodeType typeOfEnum = node.getType();
-        GridPane grid;
-        switch (typeOfEnum) {
-            case FUNCTION: {
-                grid = getFunctionGrid(node);
-                break;
-            }
-            case DATA_STORAGE:
-                grid = getDataStorageGrid(node);
-                break;
-            case STANDARD_NODE:
-            default:
-                grid = getStandardNodeGrid(node);
-                break;
-
-        }
-        return grid;
-
+        return switch (typeOfEnum) {
+            case FUNCTION -> getFunctionGrid(node);
+            case DATA_STORAGE -> getDataStorageGrid(node);
+            default -> getStandardNodeGrid(node);
+        };
     }
 
     private GridPane getStandardNodeGrid(DraggableNode node) {
@@ -200,27 +188,27 @@ public class NodeEditorView extends Stage {
 
     private EventHandler<ActionEvent> getUpdateButtonHandler() {
         return event -> {
-            var infos = new NodeInputData();
-            infos.setNodeType(node.getType());
-            infos.setName(nodeNameArea.getText());
+            var info = new NodeInputData();
+            info.setNodeType(node.getType());
+            info.setName(nodeNameArea.getText());
             List<SourceEntryWrapper> sourceList = new ArrayList<>(tableView.getItems());
             var sourceListUnwrapped = sourceList.stream().map(SourceEntryWrapper::getSourceEntry).collect(Collectors.toList());
-            infos.setSourceData(sourceListUnwrapped);
-            infos.setInputFormats(functionInputFormat);
+            info.setSourceData(sourceListUnwrapped);
+            info.setInputFormats(functionInputFormat);
 
-            infos.setId(node.getIdentifier());
+            info.setId(node.getIdentifier());
             try {
                 var x = Double.parseDouble(xArea.getText());
                 var y = Double.parseDouble(yArea.getText());
-                infos.setX(x);
-                infos.setY(y);
+                info.setX(x);
+                info.setY(y);
             } catch
             (NumberFormatException e) {
                 System.err.printf("Values x: %s and y: %s could not be parsed. Default value 100 for each is used.", xArea.getText(), yArea.getText());
-                infos.setX(100);
-                infos.setY(100);
+                info.setX(100);
+                info.setY(100);
             }
-            controller.updateNodeToGraph(infos);
+            controller.updateNodeToGraph(info);
             this.close();
         };
     }
