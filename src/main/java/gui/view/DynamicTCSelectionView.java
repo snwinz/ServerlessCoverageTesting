@@ -19,6 +19,8 @@ import logic.model.ServerlessFunction;
 import logic.model.TestSuite;
 import logic.model.Testcase;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +29,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-public class DynamicTCSelectionView extends Stage {
+public class DynamicTCSelectionView extends Stage implements PropertyChangeListener {
 
 
     private final TestSuite testSuite;
@@ -185,15 +187,17 @@ public class DynamicTCSelectionView extends Stage {
 
         HBox buttonBox = new HBox();
 
-        Button getAllDataButton = new Button("All tc data");
+        Button getAllDataButton = new Button("All tc data with run results");
         getAllDataButton.setOnAction(e -> controller.showTestSuitData(testSuite));
 
         Button getAllTCsWithInput = new Button("All test cases with input");
         getAllTCsWithInput.setOnAction(e -> controller.showTestSuiteForExecution(testSuite));
 
-        Button exportAllTCsWithInput = new Button("Export all test cases with input");
+        Button exportAllTCsWithInput = new Button("Export all test cases with input to JSON");
         exportAllTCsWithInput.setOnAction(e -> controller.exportTestSuitForExecution(testSuite));
 
+        Button exportAllTCsWithInputEachTarget = new Button("Export tc for each target with input to JSON");
+        exportAllTCsWithInputEachTarget.setOnAction(e -> controller.exportTestSuitOfTargetsForExecution(testSuite));
 
         Button selectAllTestCases = new Button("Select all test cases");
         selectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(true)));
@@ -201,7 +205,8 @@ public class DynamicTCSelectionView extends Stage {
         Button unselectAllTestCases = new Button("Unselect all test cases");
         unselectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(false)));
 
-        ViewHelper.addToGridInHBox(grid, buttonBox, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput, selectAllTestCases, unselectAllTestCases);
+        ViewHelper.addToGridInHBox(grid, buttonBox, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput,
+                exportAllTCsWithInputEachTarget, selectAllTestCases, unselectAllTestCases);
         return scrollpane;
     }
 
@@ -352,5 +357,10 @@ public class DynamicTCSelectionView extends Stage {
             System.err.println("Problem while reading " + pathOfProperties);
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
     }
 }

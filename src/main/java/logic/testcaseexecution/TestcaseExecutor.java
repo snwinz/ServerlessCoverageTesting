@@ -2,8 +2,8 @@ package logic.testcaseexecution;
 
 import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
-import logic.executionplatforms.KeyValueJsonGenerator;
 import logic.executionplatforms.AWSInvoker;
+import logic.executionplatforms.KeyValueJsonGenerator;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -34,9 +34,11 @@ public class TestcaseExecutor {
 
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
 
+            //TODO getLogs
             checkCorrectnessOfOutput(result, function, outputValues);
+            //TODO check correctness of logs
 
-            addResultToOutputvalues(result, outputValues);
+            addResultToOutputValues(result, outputValues);
 
             String resultFormatted = String.format("result: %s", result);
 
@@ -48,6 +50,7 @@ public class TestcaseExecutor {
 
     public void executeTCs(List<TestcaseWrapper> testcases, String resetFunction) {
         for (var testcase : testcases) {
+            //TODO reset LOGS
             executor.callResetFunction(resetFunction);
             this.executeTC(testcase);
         }
@@ -104,7 +107,7 @@ public class TestcaseExecutor {
         }
     }
 
-    private void addResultToOutputvalues(String result, Map<String, List<String>> outputValues) {
+    private void addResultToOutputValues(String result, Map<String, List<String>> outputValues) {
         KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(result);
         var outputKeyValues = keyValueJsonGenerator.getKeyValues();
         outputValues.putAll(outputKeyValues);
@@ -118,14 +121,16 @@ public class TestcaseExecutor {
     }
 
     public void calibrate(TestcaseWrapper testcase, String resetFunction) {
+        //TODO deleteLogs
         var functions = testcase.getFunctionsWrapped();
         executor.callResetFunction(resetFunction);
         List<String> resultsFirstExecution = getResultOfExecution(functions);
+        //TODO getLogs
         executor.callResetFunction(resetFunction);
         List<String> resultsSecondExecution = getResultOfExecution(functions);
-
+        //TODO getLogs
         var calibratedResults = calibrateResults(resultsFirstExecution, resultsSecondExecution);
-
+        //TODO calibrateLogs
         if (functions.size() == calibratedResults.size()) {
 
             for (int i = 0; i < functions.size(); i++) {
@@ -203,7 +208,7 @@ public class TestcaseExecutor {
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
             System.out.println(result);
             result = replaceResultsOfPreviousOutput(result, outputValues);
-            addResultToOutputvalues(result, outputValues);
+            addResultToOutputValues(result, outputValues);
             String resultInfoMessage = String.format("result: %s", result);
             function.addTextToOutput(resultInfoMessage);
             LOGGER.info(String.format(resultInfoMessage));
@@ -223,6 +228,7 @@ public class TestcaseExecutor {
         }
         return result;
     }
+
 
 
 }

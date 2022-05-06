@@ -83,6 +83,20 @@ public class DynamicTCSelectionController {
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         var fileToSave = fileChooser.showSaveDialog(view);
-        PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
+        if (fileToSave != null) {
+            PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
+        }
+    }
+
+    public void exportTestSuitOfTargetsForExecution(TestSuite testSuite) {
+        var testSuiteExecution = testSuite.getTestSuiteForExecutionOfTargets();
+        var fileChooser = new FileChooser();
+        var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        var fileToSave = fileChooser.showSaveDialog(view);
+        if (fileToSave != null) {
+            PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
+        }
     }
 }

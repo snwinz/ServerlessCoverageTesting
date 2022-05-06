@@ -14,18 +14,18 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import shared.model.Function;
 import shared.model.Testcase;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class TestCaseExecutionView extends Stage {
+public class TestCaseExecutionView extends Stage implements PropertyChangeListener {
     private final TestCaseExecutionController controller;
     private final TextField resetFunctionName = new TextField();
     private final TextField regionAWS = new TextField();
@@ -35,9 +35,18 @@ public class TestCaseExecutionView extends Stage {
 
     public TestCaseExecutionView(TestCaseExecutionController controller, List<Testcase> testcases) {
         this.controller = controller;
-        this.testcases = testcases.stream().map(TestcaseWrapper::new).toList();
+        addFunctionToEmptyTCs(testcases);
+        this.testcases = testcases.stream().map(TestcaseWrapper::new).collect(Collectors.toCollection(LinkedList::new));
         getConfigProperties();
         createView();
+    }
+
+    private void addFunctionToEmptyTCs(List<Testcase> testcases) {
+     for(var tc : testcases){
+        if( tc.functions().size() == 0){
+            tc.addFunction(new Function("functionName","parameters"));
+        }
+     }
     }
 
     private void createView() {
@@ -79,7 +88,6 @@ public class TestCaseExecutionView extends Stage {
             resetFunctionBox.getChildren().addAll(resetLabel, resetFunctionName, startResetButton);
             HBox essentialFunctionality = new HBox();
             essentialFunctionality.getChildren().addAll(regionBox, resetFunctionBox);
-
             grid.add(essentialFunctionality, 3, 1, 4, 1);
 
 
@@ -95,7 +103,7 @@ public class TestCaseExecutionView extends Stage {
 
 
             for (var testcase : testcases) {
-                int lastRow = grid.getRowCount();
+                final int rowOfTestcase = grid.getRowCount();
                 HBox testcaseDashboard = new HBox();
                 Label testTargetLabel = new Label(testcase.getTestcase().target());
                 testTargetLabel.setMaxWidth(300);
@@ -110,12 +118,14 @@ public class TestCaseExecutionView extends Stage {
                 HBox.setMargin(checkboxForTestcase, new Insets(0, 5, 0, 5));
 
                 testcaseDashboard.getChildren().addAll(testTargetLabel, statusLightTestcase, checkboxForTestcase);
-                grid.add(testcaseDashboard, 1, lastRow);
+                grid.add(testcaseDashboard, 1, rowOfTestcase);
 
                 Button executeTC = new Button("execute TC");
                 Button calibrateTC = new Button("calibrate TC");
+                Button addFunction = new Button("add Function");
                 HBox.setMargin(executeTC, new Insets(10, 10, 10, 10));
                 HBox.setMargin(calibrateTC, new Insets(10, 10, 10, 10));
+                HBox.setMargin(addFunction, new Insets(10, 10, 10, 10));
 
                 executeTC.setOnAction(e -> {
                     testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
@@ -125,14 +135,16 @@ public class TestCaseExecutionView extends Stage {
                     testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
                     controller.calibrateOutput(testcase, regionAWS.getText(), resetFunctionName.getText());
                 });
+                addFunction.setOnAction(e -> controller.addFunctionToTestcase(testcase));
 
                 HBox buttons = new HBox();
-                buttons.getChildren().addAll(executeTC, calibrateTC);
-                grid.add(buttons, 3, lastRow);
+                buttons.getChildren().addAll(executeTC, calibrateTC, addFunction);
+                grid.add(buttons, 3, rowOfTestcase);
 
                 var functions = testcase.getFunctionsWrapped();
+
                 for (var function : functions) {
-                    lastRow = grid.getRowCount();
+                    final int lastRow = grid.getRowCount();
                     Circle statusLightFunction = new Circle(100 / 3.0 / 2, 100 / 4.0, 10);
                     function.passedProperty().addListener((observable, oldValue, newValue) -> {
                         if (newValue) {
@@ -264,8 +276,6 @@ public class TestCaseExecutionView extends Stage {
             calibrationBox.getChildren().remove(unselectAllTestCases);
 
 
-
-
             Label logLabel = new Label("Logs:");
             grid.add(logLabel, 1, grid.getRowCount());
 
@@ -340,4 +350,20 @@ public class TestCaseExecutionView extends Stage {
         }
     }
 
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        var value = evt.getNewValue();
+        if ("functionAdded".equals(evt.getPropertyName()) && value instanceof Testcase testcase) {
+            for (int i = 0; i < testcases.size(); i++) {
+                var tcWrapped = testcases.get(i);
+                if(testcase == tcWrapped.getTestcase()){
+                    TestcaseWrapper wrapperUpdated = new TestcaseWrapper(testcase);
+                    testcases.remove(i);
+                    testcases.add(i,wrapperUpdated);
+                    break;
+                }
+            }
+            createView();
+        }
+    }
 }

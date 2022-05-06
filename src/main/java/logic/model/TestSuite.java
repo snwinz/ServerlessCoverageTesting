@@ -131,22 +131,44 @@ public class TestSuite {
             var testcases = target.getTestcases();
             for (var testcase : testcases) {
                 if (testcase.isSpecificTargetCovered()) {
-                    var functionsForExecution = new LinkedList<Function>();
-                    var testData = testcase.getTestData();
-                    for (var function : testData.getTestFunctions()) {
-                        var functionName =
-                                function.getFunction().getName();
-                        var argument = function.getJSON();
-                        functionsForExecution.add(new Function(functionName, argument));
-                    }
-                    var logsToCoverForExecution = testcase.getLogsToCover();
-                    String targetForExecution = target.getCoverageTargetDescription();
-                    var testcaseForExecution = new Testcase(functionsForExecution, logsToCoverForExecution, targetForExecution);
-                    result.add(testcaseForExecution);
+                    addTestcaseToResult(result, target, testcase);
                 }
             }
         }
         return result;
 
+    }
+
+    public List<Testcase> getTestSuiteForExecutionOfTargets() {
+        List<Testcase> result = new ArrayList<>();
+        for (var target : this.testTargets) {
+            var testcases = target.getTestcases().stream().filter(logic.model.Testcase::isSpecificTargetCovered).toList();
+            if (testcases.size() > 0) {
+                var testcase = testcases.get(0);
+                addTestcaseToResult(result, target, testcase);
+            } else {
+                var functions = new LinkedList<Function>();
+                var logs = new LinkedList<String>();
+                String targetForExecution = target.getCoverageTargetDescription();
+                var testcase = new Testcase(functions, logs, targetForExecution);
+                result.add(testcase);
+            }
+        }
+        return result;
+
+    }
+
+    private void addTestcaseToResult(List<Testcase> result, CoverageTarget target, logic.model.Testcase testcase) {
+        var functionsForExecution = new LinkedList<Function>();
+        var testData = testcase.getTestData();
+        for (var function : testData.getTestFunctions()) {
+            var functionName = function.getFunction().getName();
+            var argument = function.getJSON();
+            functionsForExecution.add(new Function(functionName, argument));
+        }
+        var logsToCoverForExecution = testcase.getLogsToCover();
+        String targetForExecution = target.getCoverageTargetDescription();
+        var testcaseForExecution = new Testcase(functionsForExecution, logsToCoverForExecution, targetForExecution);
+        result.add(testcaseForExecution);
     }
 }

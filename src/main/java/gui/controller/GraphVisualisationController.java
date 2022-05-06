@@ -9,6 +9,7 @@ import gui.view.graphcomponents.DraggableArrow;
 import gui.view.graphcomponents.DraggableNode;
 import javafx.stage.FileChooser;
 import logic.logevaluation.CoverageCalculation;
+import shared.model.Testcase;
 
 import java.io.File;
 import java.util.List;
@@ -160,8 +161,8 @@ public class GraphVisualisationController {
         var tcFile = fileChooser.showOpenDialog(view);
         if (tcFile != null) {
             var testcases = PersistenceUtilities.loadTCs(tcFile.getAbsolutePath());
-            TestCaseExecutionController controller = new TestCaseExecutionController();
-            controller.setup(testcases);
+            TestCaseExecutionController controller = new TestCaseExecutionController(testcases);
+            controller.setup();
 
         }
     }

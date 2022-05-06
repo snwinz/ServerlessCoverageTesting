@@ -19,6 +19,7 @@ public final class Testcase {
         return functions;
     }
 
+
     public String target() {
         return target;
     }
@@ -47,4 +48,7 @@ public final class Testcase {
     }
 
 
+    public void addFunction(Function function) {
+        this.functions.add(function);
+    }
 }

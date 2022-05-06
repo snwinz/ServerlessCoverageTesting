@@ -1,5 +1,6 @@
 package gui.controller;
 
+import gui.model.TestcasesContainer;
 import gui.view.StandardPresentationView;
 import gui.view.TestCaseExecutionView;
 import gui.view.wrapper.TestcaseWrapper;
@@ -14,14 +15,18 @@ import java.io.File;
 import java.util.List;
 
 public class TestCaseExecutionController {
-    private TestCaseExecutionView view;
+    private final TestCaseExecutionView view;
+    private final TestcasesContainer model;
 
-    public TestCaseExecutionController() {
+    public TestCaseExecutionController(List<Testcase> testcases) {
+        this.model = new TestcasesContainer(testcases);
+        this.view = new TestCaseExecutionView(this, testcases);
     }
 
-    public void setup(List<Testcase> testcases) {
-        this.view = new TestCaseExecutionView(this, testcases);
-        view.showAndWait();
+    public void setup() {
+        model.addPropertyChangeListener(view);
+        view.setMaximized(true);
+        view.show();
     }
 
     public void executeReset(String resetFunction, String region) {
@@ -57,6 +62,7 @@ public class TestCaseExecutionController {
         var thread = new Thread(() -> tcExecutor.executeTCs(testcases, resetFunction));
         thread.start();
     }
+
     public void calibrateTestcases(List<TestcaseWrapper> testcases, String region, String resetFunction) {
         TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
         var thread = new Thread(() -> tcExecutor.calibrate(testcases, resetFunction));
@@ -85,5 +91,7 @@ public class TestCaseExecutionController {
 
     }
 
-
+    public void addFunctionToTestcase(TestcaseWrapper testcase) {
+        this.model.addFunctionToTestcase(testcase.getTestcase());
+    }
 }
