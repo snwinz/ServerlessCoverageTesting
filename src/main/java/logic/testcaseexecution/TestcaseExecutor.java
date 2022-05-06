@@ -45,14 +45,16 @@ public class TestcaseExecutor {
             LOGGER.info(resultFormatted);
             function.addTextToOutput(resultFormatted);
         }
-        if (testcase.getTestcase().getLogsToBeCovered().size() > 0) {
-            var logs = executor.getAllNewLogs(0L);
-            checkCorrectnessOfLogs(logs, testcase);
-        }
-
+        checkCorrectnessOfLogs(testcase);
     }
 
-    private void checkCorrectnessOfLogs(List<String> logs, TestcaseWrapper testcase) {
+    private void checkCorrectnessOfLogs(TestcaseWrapper testcase) {
+        testcase.executedProperty().set(true);
+        if (testcase.getTestcase().getLogsToBeCovered().size() == 0) {
+            testcase.passedProperty().set(true);
+            return;
+        }
+        var logs = executor.getAllNewLogs(0L);
         boolean passed = true;
         List<String> incorrectParts = new LinkedList<>();
         List<String> logsCompare = filterLogs(logs);
@@ -68,9 +70,13 @@ public class TestcaseExecutor {
         var functions = testcase.getFunctionsWrapped();
         if (functions.size() > 0) {
             var lastFunction = functions.get(functions.size() - 1);
-            if (!passed) {
+            if (passed) {
+                boolean allFunctionsSuccessful = functions.stream().allMatch(FunctionWrapper::isPassed);
+                testcase.passedProperty().set(allFunctionsSuccessful);
+            } else {
                 lastFunction.addTextToOutput("The following parts were not correct in log:\n" + String.join("\n", incorrectParts));
-                lastFunction.passedProperty().set(false);
+                testcase.passedProperty().set(true);
+                testcase.passedProperty().set(false);
             }
         }
 
@@ -177,25 +183,42 @@ public class TestcaseExecutor {
     }
 
     public void calibrate(TestcaseWrapper testcase, String resetFunction) {
-        //TODO deleteLogs
+        executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
-        executor.callResetFunction(resetFunction);
         List<String> resultsFirstExecution = getResultOfExecution(functions);
-        //TODO getLogs
-        executor.callResetFunction(resetFunction);
+        List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
+        executor.resetApplication(resetFunction);
         List<String> resultsSecondExecution = getResultOfExecution(functions);
-        //TODO getLogs
+        List<String> resultsSecondExecutionLogs = executor.getAllNewLogs(0L);
         var calibratedResults = calibrateResults(resultsFirstExecution, resultsSecondExecution);
-        //TODO calibrateLogs
+
         if (functions.size() == calibratedResults.size()) {
 
             for (int i = 0; i < functions.size(); i++) {
                 var function = functions.get(i);
                 var expectedOutput = String.join("*", calibratedResults.get(i));
+                var originalFunction = function.getFunction();
+                originalFunction.setExpectedOutputs(expectedOutput);
                 function.expectedResultProperty().set(expectedOutput);
             }
         }
+        var calibratedLogs = calibrateLogs(resultsFirstExecutionLogs, resultsSecondExecutionLogs);
+        String expectedLog = String.join("*", calibratedLogs);
+        var originalTestcase = testcase.getTestcase();
+        originalTestcase.setExpectedLogOutput(expectedLog);
+        testcase.expectedLogsProperty().set(expectedLog);
+    }
 
+    private List<String> calibrateLogs(List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
+        List<String> result = new LinkedList<>();
+        var firstExecutionFiltered = filterLogs(resultsFirstExecutionLogs);
+        var secondExecutionFiltered = filterLogs(resultsSecondExecutionLogs);
+        for (var entry : firstExecutionFiltered) {
+            if (secondExecutionFiltered.contains(entry)) {
+                result.add(entry);
+            }
+        }
+        return result;
     }
 
     private List<List<String>> calibrateResults(List<String> resultsFirstExecution, List<String> resultsSecondExecution) {

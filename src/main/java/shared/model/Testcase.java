@@ -61,7 +61,7 @@ public final class Testcase {
     }
 
 
-    public void setExpectetdLogOutput(String newValue) {
+    public void setExpectedLogOutput(String newValue) {
         var parts = newValue.split("\\*");
         for (int i = 0; i < parts.length - 1; i++) {
             String part = parts[i];
@@ -71,6 +71,6 @@ public final class Testcase {
             }
         }
         expectedLogs.clear();
-        expectedLogs.addAll(Arrays.stream(parts).filter(Objects::nonNull).collect(Collectors.toList()));
+        expectedLogs.addAll(Arrays.stream(parts).filter(Objects::nonNull).filter(entry -> !"".equals(entry.trim())).collect(Collectors.toList()));
     }
 }

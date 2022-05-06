@@ -17,6 +17,10 @@ public class FunctionWrapper {
         return executed;
     }
 
+    public boolean isPassed() {
+        return passed.get();
+    }
+
     public FunctionWrapper(Function function) {
         this.function = function;
     }
@@ -45,7 +49,8 @@ public class FunctionWrapper {
         return expectedResult;
     }
 
-     public void reset() {
+
+    public void reset() {
         this.output.set("");
         this.passed.set(false);
         this.executed.set(false);

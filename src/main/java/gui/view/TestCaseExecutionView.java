@@ -129,10 +129,12 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
 
                 executeTC.setOnAction(e -> {
                     testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
+                    testcase.reset();
                     controller.executeTC(testcase, regionAWS.getText());
                 });
                 calibrateTC.setOnAction(e -> {
                     testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
+                    testcase.reset();
                     controller.calibrateOutput(testcase, regionAWS.getText(), resetFunctionName.getText());
                 });
                 addFunction.setOnAction(e -> controller.addFunctionToTestcase(testcase));
@@ -143,14 +145,25 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
 
                 var originalTestcase = testcase.getTestcase();
                 var logsToBeCovered = originalTestcase.getLogsToBeCovered();
-
-
+                logsToBeCovered = logsToBeCovered.stream().map(part -> part.replace("*", "\\*")).collect(Collectors.toList());
                 String expectedLogOutput = String.join("*", logsToBeCovered);
                 TextArea expectedLogOutputTextArea = new TextArea(expectedLogOutput);
                 expectedLogOutputTextArea.setEditable(true);
                 expectedLogOutputTextArea.setPrefHeight(25);
-                expectedLogOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> originalTestcase.setExpectetdLogOutput(newValue));
+                expectedLogOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> originalTestcase.setExpectedLogOutput(newValue));
                 testcase.expectedLogsProperty().bindBidirectional(expectedLogOutputTextArea.textProperty());
+                testcase.passedProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        statusLightTestcase.setFill(Color.GREEN);
+                    } else {
+                        statusLightTestcase.setFill(Color.RED);
+                    }
+                });
+                testcase.executedProperty().addListener((observable, oldValue, newValue) -> {
+                    if (!newValue) {
+                        statusLightTestcase.setFill(Color.BLACK);
+                    }
+                });
 
                 grid.add(expectedLogOutputTextArea, 4, rowOfTestcase);
 
@@ -162,20 +175,18 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                     function.passedProperty().addListener((observable, oldValue, newValue) -> {
                         if (newValue) {
                             statusLightFunction.setFill(Color.GREEN);
-                            if (testcase.getFunctionsWrapped().stream().allMatch(f -> f.passedProperty().get())) {
-                                statusLightTestcase.setFill(Color.GREEN);
-                            }
+
                         } else {
                             statusLightFunction.setFill(Color.RED);
-                            statusLightTestcase.setFill(Color.RED);
                         }
                     });
+
                     function.executedProperty().addListener((observable, oldValue, newValue) -> {
                         if (!newValue) {
                             statusLightFunction.setFill(Color.BLACK);
-                            statusLightTestcase.setFill(Color.BLACK);
                         }
                     });
+
                     grid.add(statusLightFunction, 2, lastRow);
                     var originalFunction = function.getFunction();
                     String functionInvocation = String.format("%s %s", originalFunction.getName(), originalFunction.getParameter());
@@ -249,6 +260,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 saveConfigProperties();
                 var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
                 testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
+                testcasesSelected.forEach(TestcaseWrapper::reset);
                 controller.executeTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
             });
 
@@ -257,6 +269,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             executeAllTCs.setOnAction(e -> {
                 saveConfigProperties();
                 testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
+                testcases.forEach(TestcaseWrapper::reset);
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
@@ -273,6 +286,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 saveConfigProperties();
                 var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
                 testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
+                testcasesSelected.forEach(TestcaseWrapper::reset);
                 controller.calibrateTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
             });
 
@@ -281,6 +295,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             calibrateAllTestcases.setOnAction(e -> {
                 saveConfigProperties();
                 testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
+                testcases.forEach(TestcaseWrapper::reset);
                 controller.calibrateTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
