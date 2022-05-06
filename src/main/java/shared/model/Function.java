@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public final class Function {
     private String name;
     private String parameter;
-    private final List<String> results = new ArrayList<>();
+    private final List<String> expectedOutputs = new ArrayList<>();
 
     public Function(String name, String parameter) {
         this.name = name;
@@ -26,11 +26,11 @@ public final class Function {
         return parameter;
     }
 
-    public List<String> getResults() {
-        return List.copyOf(results);
+    public List<String> getExpectedOutputs() {
+        return List.copyOf(expectedOutputs);
     }
 
-    public void setResults(String newValue) {
+    public void setExpectedOutputs(String newValue) {
         var parts = newValue.split("\\*");
         for (int i = 0; i < parts.length - 1; i++) {
             String part = parts[i];
@@ -39,8 +39,8 @@ public final class Function {
                 parts[i] = null;
             }
         }
-        results.clear();
-        results.addAll(Arrays.stream(parts).filter(Objects::nonNull).collect(Collectors.toList()));
+        expectedOutputs.clear();
+        expectedOutputs.addAll(Arrays.stream(parts).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
 

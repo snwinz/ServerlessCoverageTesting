@@ -35,13 +35,6 @@ public class TestCaseExecutionController {
         thread.start();
     }
 
-    public void executeTC(TestcaseWrapper testcase, String region) {
-        TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
-        var thread = new Thread(() -> tcExecutor.executeTC(testcase));
-        thread.start();
-
-    }
-
     public void saveTestcases(List<Testcase> testcasesOriginal) {
         var fileChooser = new FileChooser();
         var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
@@ -55,6 +48,13 @@ public class TestCaseExecutionController {
         TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
         var thread = new Thread(() -> tcExecutor.calibrate(testcase, resetFunction));
         thread.start();
+    }
+
+    public void executeTC(TestcaseWrapper testcase, String region) {
+        TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
+        var thread = new Thread(() -> tcExecutor.executeTC(testcase));
+        thread.start();
+
     }
 
     public void executeTestcases(List<TestcaseWrapper> testcases, String region, String resetFunction) {

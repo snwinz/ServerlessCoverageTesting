@@ -34,9 +34,9 @@ public class TestcaseExecutor {
 
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
 
-            //TODO getLogs
+
             checkCorrectnessOfOutput(result, function, outputValues);
-            //TODO check correctness of logs
+
 
             addResultToOutputValues(result, outputValues);
 
@@ -45,12 +45,68 @@ public class TestcaseExecutor {
             LOGGER.info(resultFormatted);
             function.addTextToOutput(resultFormatted);
         }
+        if (testcase.getTestcase().getLogsToBeCovered().size() > 0) {
+            var logs = executor.getAllNewLogs(0L);
+            checkCorrectnessOfLogs(logs, testcase);
+        }
 
+    }
+
+    private void checkCorrectnessOfLogs(List<String> logs, TestcaseWrapper testcase) {
+        boolean passed = true;
+        List<String> incorrectParts = new LinkedList<>();
+        List<String> logsCompare = filterLogs(logs);
+
+        for (var part : testcase.getTestcase().getLogsToBeCovered()) {
+
+            if (!removePartFromList(logsCompare, part)) {
+                incorrectParts.add(part);
+                passed = false;
+                break;
+            }
+        }
+        var functions = testcase.getFunctionsWrapped();
+        if (functions.size() > 0) {
+            var lastFunction = functions.get(functions.size() - 1);
+            if (!passed) {
+                lastFunction.addTextToOutput("The following parts were not correct in log:\n" + String.join("\n", incorrectParts));
+                lastFunction.passedProperty().set(false);
+            }
+        }
+
+    }
+
+    private boolean removePartFromList(List<String> logsCompare, String part) {
+        boolean removed = false;
+        for (int i = 0; i < logsCompare.size(); i++) {
+            var log = logsCompare.get(i);
+            if (log.contains(part)) {
+                int position = log.indexOf(part);
+                log = log.substring(0, position) + log.substring(position + part.length());
+                logsCompare.remove(i);
+                logsCompare.add(i, log);
+                removed = true;
+                break;
+            }
+        }
+        return removed;
+    }
+
+    private List<String> filterLogs(List<String> logs) {
+        List<String> listFiltered = new LinkedList<>();
+        for (var log : logs) {
+            if (log.contains("INFO")) {
+                String entry = log.substring(log.indexOf("\tINFO\t") + 6);
+                entry = entry.substring(0, entry.length() - 1);
+                listFiltered.add(entry);
+            }
+        }
+        return listFiltered;
     }
 
     public void executeTCs(List<TestcaseWrapper> testcases, String resetFunction) {
         for (var testcase : testcases) {
-            //TODO reset LOGS
+            executor.deleteOldLogs();
             executor.callResetFunction(resetFunction);
             this.executeTC(testcase);
         }
@@ -60,7 +116,7 @@ public class TestcaseExecutor {
     private void checkCorrectnessOfOutput(String result, FunctionWrapper function, Map<String, List<String>> outputValues) {
         boolean passed = true;
         List<String> incorrectParts = new LinkedList<>();
-        for (var part : function.getFunction().getResults()) {
+        for (var part : function.getFunction().getExpectedOutputs()) {
             while (part.contains(PREVIOUSOUTPUT_PREFIX) && part.contains(PREVIOUSOUTPUT_SUFFIX)) {
                 int startPositionMarker = part.indexOf(PREVIOUSOUTPUT_PREFIX);
                 var splitPart = part.substring(startPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
@@ -228,7 +284,6 @@ public class TestcaseExecutor {
         }
         return result;
     }
-
 
 
 }

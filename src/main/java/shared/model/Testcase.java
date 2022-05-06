@@ -1,13 +1,17 @@
 package shared.model;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class Testcase {
     private final List<Function> functions;
     private final List<String> coverageLogs;
     private final String target;
+    private final List<String> expectedLogs = new ArrayList<>();
 
     public Testcase(List<Function> functions, List<String> coverageLogs, String target) {
         this.functions = functions;
@@ -50,5 +54,23 @@ public final class Testcase {
 
     public void addFunction(Function function) {
         this.functions.add(function);
+    }
+
+    public List<String> getLogsToBeCovered() {
+        return List.copyOf(expectedLogs);
+    }
+
+
+    public void setExpectetdLogOutput(String newValue) {
+        var parts = newValue.split("\\*");
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i];
+            if (part.endsWith("\\")) {
+                parts[i + 1] = part.substring(0, part.length() - 1) + "*" + parts[i + 1];
+                parts[i] = null;
+            }
+        }
+        expectedLogs.clear();
+        expectedLogs.addAll(Arrays.stream(parts).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 }

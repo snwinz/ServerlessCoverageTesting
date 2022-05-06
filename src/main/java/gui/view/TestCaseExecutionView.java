@@ -42,11 +42,11 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
     }
 
     private void addFunctionToEmptyTCs(List<Testcase> testcases) {
-     for(var tc : testcases){
-        if( tc.functions().size() == 0){
-            tc.addFunction(new Function("functionName","parameters"));
+        for (var tc : testcases) {
+            if (tc.functions().size() == 0) {
+                tc.addFunction(new Function("functionName", "parameters"));
+            }
         }
-     }
     }
 
     private void createView() {
@@ -141,6 +141,19 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 buttons.getChildren().addAll(executeTC, calibrateTC, addFunction);
                 grid.add(buttons, 3, rowOfTestcase);
 
+                var originalTestcase = testcase.getTestcase();
+                var logsToBeCovered = originalTestcase.getLogsToBeCovered();
+
+
+                String expectedLogOutput = String.join("*", logsToBeCovered);
+                TextArea expectedLogOutputTextArea = new TextArea(expectedLogOutput);
+                expectedLogOutputTextArea.setEditable(true);
+                expectedLogOutputTextArea.setPrefHeight(25);
+                expectedLogOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> originalTestcase.setExpectetdLogOutput(newValue));
+                testcase.expectedLogsProperty().bindBidirectional(expectedLogOutputTextArea.textProperty());
+
+                grid.add(expectedLogOutputTextArea, 4, rowOfTestcase);
+
                 var functions = testcase.getFunctionsWrapped();
 
                 for (var function : functions) {
@@ -183,14 +196,14 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                     });
                     grid.add(functionDescription, 3, lastRow);
 
-                    var partsToBeCovered = originalFunction.getResults();
+                    var partsToBeCovered = originalFunction.getExpectedOutputs();
                     partsToBeCovered = partsToBeCovered.stream().map(part -> part.replace("*", "\\*")).collect(Collectors.toList());
 
                     String expectedOutput = String.join("*", partsToBeCovered);
                     TextArea expectedOutputTextArea = new TextArea(expectedOutput);
                     expectedOutputTextArea.setEditable(true);
                     expectedOutputTextArea.setPrefHeight(25);
-                    expectedOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> originalFunction.setResults(newValue));
+                    expectedOutputTextArea.textProperty().addListener((observable, oldValue, newValue) -> originalFunction.setExpectedOutputs(newValue));
                     function.expectedResultProperty().bindBidirectional(expectedOutputTextArea.textProperty());
                     grid.add(expectedOutputTextArea, 4, lastRow);
 
@@ -356,10 +369,10 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
         if ("functionAdded".equals(evt.getPropertyName()) && value instanceof Testcase testcase) {
             for (int i = 0; i < testcases.size(); i++) {
                 var tcWrapped = testcases.get(i);
-                if(testcase == tcWrapped.getTestcase()){
+                if (testcase == tcWrapped.getTestcase()) {
                     TestcaseWrapper wrapperUpdated = new TestcaseWrapper(testcase);
                     testcases.remove(i);
-                    testcases.add(i,wrapperUpdated);
+                    testcases.add(i, wrapperUpdated);
                     break;
                 }
             }
