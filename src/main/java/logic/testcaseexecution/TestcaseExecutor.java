@@ -137,7 +137,7 @@ public class TestcaseExecutor {
 
     private void checkCorrectnessOfLogs(TestcaseWrapper testcase) {
         testcase.executedProperty().set(true);
-        if (testcase.getTestcase().getLogsToBeCovered().size() == 0) {
+        if (testcase.getTestcase().getLogsToBeCovered().size() == 0 && !testcase.isSaveLogs()) {
             testcase.passedProperty().set(true);
             return;
         }
@@ -145,10 +145,10 @@ public class TestcaseExecutor {
         boolean passed = true;
         List<String> incorrectParts = new LinkedList<>();
         List<String> logsCompare = filterLogs(logs);
-        testcase.setLogsMeasured(List.copyOf(logsCompare));
-
+        if(testcase.isSaveLogs()){
+            testcase.setLogsMeasured(List.copyOf(logsCompare));
+        }
         for (var part : testcase.getTestcase().getLogsToBeCovered()) {
-
             if (!removePartFromList(logsCompare, part)) {
                 incorrectParts.add(part);
                 passed = false;

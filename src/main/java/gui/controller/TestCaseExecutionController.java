@@ -1,6 +1,8 @@
 package gui.controller;
 
+import gui.model.Graph;
 import gui.model.TestcasesContainer;
+import gui.view.LogEvaluationView;
 import gui.view.StandardPresentationView;
 import gui.view.TestCaseExecutionView;
 import gui.view.wrapper.TestcaseWrapper;
@@ -13,14 +15,17 @@ import shared.model.Testcase;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class TestCaseExecutionController {
     private final TestCaseExecutionView view;
     private final TestcasesContainer model;
 
-    public TestCaseExecutionController(List<Testcase> testcases) {
+    public TestCaseExecutionController(List<Testcase> testcases, Graph graph) {
         this.model = new TestcasesContainer(testcases);
-        this.view = new TestCaseExecutionView(this, testcases);
+        this.view = new TestCaseExecutionView(this, testcases, graph);
+
     }
 
     public void setup() {
@@ -74,7 +79,12 @@ public class TestCaseExecutionController {
         executor.deleteOldLogs();
     }
 
-    public void getLogs(String region) {
+    public void resetApplication(String resetFunction, String region) {
+        Executor executor = new AWSInvoker(region);
+        executor.resetApplication(resetFunction);
+    }
+
+    public void getLogsOnPlatform(String region) {
         Executor executor = new AWSInvoker(region);
 
         var logs = executor.getAllNewLogs(0L);
@@ -93,5 +103,22 @@ public class TestCaseExecutionController {
 
     public void addFunctionToTestcase(TestcaseWrapper testcase) {
         this.model.addFunctionToTestcase(testcase.getTestcase());
+    }
+
+
+    public void getLogsOfTestcases(List<TestcaseWrapper> testcases) {
+        var allLogLists = testcases.stream().map(TestcaseWrapper::getLogsMeasured)
+                .filter(Objects::nonNull).flatMap(entry -> entry.stream()).toList();
+        var text = String.join("\n", allLogLists);
+        var view = new StandardPresentationView("logs of testcases", text);
+        view.show();
+    }
+
+    public void evaluateLogs(List<TestcaseWrapper> testcases, Graph graph) {
+        var allLogs = testcases.stream().map(TestcaseWrapper::getLogsMeasured)
+                .filter(Objects::nonNull).flatMap(entry -> entry.stream()).toList();
+        LogEvaluationController controller = new LogEvaluationController(allLogs,graph);
+        controller.setup();
+
     }
 }

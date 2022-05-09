@@ -1,6 +1,7 @@
 package gui.view;
 
 import gui.controller.TestCaseExecutionController;
+import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
 import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
@@ -29,12 +30,14 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
     private final TestCaseExecutionController controller;
     private final TextField resetFunctionName = new TextField();
     private final TextField regionAWS = new TextField();
+    private final Graph graph;
     private final List<TestcaseWrapper> testcases;
     private final List<CheckboxWrapper<TestcaseWrapper>> selectedTestcases = new ArrayList<>();
+    private final CheckBox keepLogsCheckbox = new CheckBox("save logs");
 
-
-    public TestCaseExecutionView(TestCaseExecutionController controller, List<Testcase> testcases) {
+    public TestCaseExecutionView(TestCaseExecutionController controller, List<Testcase> testcases, Graph graph) {
         this.controller = controller;
+        this.graph = graph;
         addFunctionToEmptyTCs(testcases);
         this.testcases = testcases.stream().map(TestcaseWrapper::new).collect(Collectors.toCollection(LinkedList::new));
         getConfigProperties();
@@ -74,19 +77,22 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             var regionLabel = new Label("AWS region:");
             HBox.setMargin(regionLabel, new Insets(10, 0, 10, 10));
             HBox.setMargin(regionAWS, new Insets(10, 10, 10, 0));
-            HBox regionBox = new HBox();
-            regionBox.getChildren().addAll(regionLabel, regionAWS);
 
             var resetLabel = new Label("Reset function:");
-            var startResetButton = new Button("Start reset");
+            var startResetButton = new Button("execute reset function");
+            var deleteLog = new Button("delete logs");
+            var resetApplication = new Button("reset application");
             startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
+            deleteLog.setOnAction(e -> controller.deleteLogs(regionAWS.getText()));
+            resetApplication.setOnAction(e -> controller.resetApplication(resetFunctionName.getText(), regionAWS.getText()));
             HBox.setMargin(startResetButton, new Insets(10, 10, 10, 10));
+            HBox.setMargin(deleteLog, new Insets(10, 10, 10, 10));
+            HBox.setMargin(resetApplication, new Insets(10, 10, 10, 10));
             HBox.setMargin(resetLabel, new Insets(10, 0, 10, 10));
             HBox.setMargin(resetFunctionName, new Insets(10, 10, 10, 0));
-            HBox resetFunctionBox = new HBox();
-            resetFunctionBox.getChildren().addAll(resetLabel, resetFunctionName, startResetButton);
 
-            ViewHelper.addToGridInHBox(grid, regionBox, resetFunctionBox);
+
+            ViewHelper.addToGridInHBox(grid, regionLabel, regionAWS, resetLabel, resetFunctionName, keepLogsCheckbox, startResetButton, deleteLog, resetApplication);
 
             Label operationsLabel = new Label("Operations:");
             grid.add(operationsLabel, 3, 2);
@@ -231,7 +237,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
 
             Button unselectAllTestCases = new Button("Unselect all test cases");
             Button showPassedTCs = new Button("Show passed TCs");
-            HBox adminButtons =  ViewHelper.addToGridInHBox(grid,  selectAllTestCases, unselectAllTestCases, showPassedTCs);
+            HBox adminButtons = ViewHelper.addToGridInHBox(grid, selectAllTestCases, unselectAllTestCases, showPassedTCs);
             selectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(true));
                 adminButtons.getChildren().remove(selectAllTestCases);
@@ -269,7 +275,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
-            ViewHelper.addToGridInHBox(grid,  executeTCs, executeAllTCs);
+            ViewHelper.addToGridInHBox(grid, executeTCs, executeAllTCs);
 
             Label calibrationLabel = new Label("Calibration:");
             grid.add(calibrationLabel, 1, grid.getRowCount());
@@ -292,7 +298,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 controller.calibrateTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
-            ViewHelper.addToGridInHBox(grid,  calibrateSelectedTestcases, calibrateAllTestcases);
+            ViewHelper.addToGridInHBox(grid, calibrateSelectedTestcases, calibrateAllTestcases);
 
             Label logLabel = new Label("Logs:");
             grid.add(logLabel, 1, grid.getRowCount());
@@ -300,12 +306,19 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             Button deleteLogs = new Button("delete Logs");
             deleteLogs.setOnAction(e -> controller.deleteLogs(regionAWS.getText()));
 
-            Button getLogs = new Button("get Logs");
-            getLogs.setOnAction(e -> controller.getLogs(regionAWS.getText()));
+            Button getLogsOfTestcases = new Button("get all logs of testcases");
+            getLogsOfTestcases.setOnAction(e -> controller.getLogsOfTestcases(testcases));
 
-            ViewHelper.addToGridInHBox(grid, deleteLogs, getLogs);
+            Button getAllLogsOnPlatform = new Button("get all logs on platform");
+            getAllLogsOnPlatform.setOnAction(e -> controller.getLogsOnPlatform(regionAWS.getText()));
+
+            Button evaluateLogs = new Button("Evaluate logs");
+            evaluateLogs.setOnAction(e -> controller.evaluateLogs(testcases, graph));
+
             HBox.setMargin(deleteLogs, new Insets(10, 10, 10, 10));
-            HBox.setMargin(getLogs, new Insets(10, 10, 10, 10));
+            HBox.setMargin(getAllLogsOnPlatform, new Insets(10, 10, 10, 10));
+            HBox.setMargin(getLogsOfTestcases, new Insets(10, 10, 10, 10));
+            ViewHelper.addToGridInHBox(grid, deleteLogs, getLogsOfTestcases, getAllLogsOnPlatform, evaluateLogs);
 
             return scrollpane;
         }
@@ -336,6 +349,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
         try {
             properties.setProperty("resetFunctionName", resetFunctionName.getText());
             properties.setProperty("regionAWS", regionAWS.getText());
+            properties.setProperty("keepLogs", Boolean.toString(keepLogsCheckbox.isSelected()));
 
             Path path = Path.of(pathOfProperties);
             properties.storeToXML(Files.newOutputStream(path), null);
@@ -361,6 +375,10 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
 
             String regionAWSText = properties.getProperty("regionAWS");
             regionAWS.setText(regionAWSText);
+
+            String keepLogsText = properties.getProperty("keepLogs");
+            boolean keepLogs = Boolean.parseBoolean(keepLogsText);
+            keepLogsCheckbox.setSelected(keepLogs);
         } catch (IOException e) {
             System.err.println("Problem while reading " + pathOfProperties);
             e.printStackTrace();
