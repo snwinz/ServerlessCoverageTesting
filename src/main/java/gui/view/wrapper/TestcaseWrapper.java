@@ -15,6 +15,7 @@ public class TestcaseWrapper {
     private final BooleanProperty passed = new SimpleBooleanProperty();
     private final List<FunctionWrapper> functionsWrapped = new LinkedList<>();
     private final BooleanProperty executed = new SimpleBooleanProperty();
+    private List<String> logList;
 
     public TestcaseWrapper(Testcase testcase) {
         this.testcase = testcase;
@@ -51,5 +52,9 @@ public class TestcaseWrapper {
 
     public BooleanProperty executedProperty() {
         return executed;
+    }
+
+    public void setLogsMeasured(List<String> logList) {
+    this.logList = logList;
     }
 }

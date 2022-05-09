@@ -83,13 +83,10 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             HBox.setMargin(startResetButton, new Insets(10, 10, 10, 10));
             HBox.setMargin(resetLabel, new Insets(10, 0, 10, 10));
             HBox.setMargin(resetFunctionName, new Insets(10, 10, 10, 0));
-            startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
             HBox resetFunctionBox = new HBox();
             resetFunctionBox.getChildren().addAll(resetLabel, resetFunctionName, startResetButton);
-            HBox essentialFunctionality = new HBox();
-            essentialFunctionality.getChildren().addAll(regionBox, resetFunctionBox);
-            grid.add(essentialFunctionality, 3, 1, 4, 1);
 
+            ViewHelper.addToGridInHBox(grid, regionBox, resetFunctionBox);
 
             Label operationsLabel = new Label("Operations:");
             grid.add(operationsLabel, 3, 2);
@@ -229,11 +226,12 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             Label adminLabel = new Label("Administration:");
             grid.add(adminLabel, 1, grid.getRowCount());
 
-            HBox adminButtons = new HBox();
 
             Button selectAllTestCases = new Button("Select all test cases");
 
             Button unselectAllTestCases = new Button("Unselect all test cases");
+            Button showPassedTCs = new Button("Show passed TCs");
+            HBox adminButtons =  ViewHelper.addToGridInHBox(grid,  selectAllTestCases, unselectAllTestCases, showPassedTCs);
             selectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(true));
                 adminButtons.getChildren().remove(selectAllTestCases);
@@ -246,10 +244,8 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             });
 
 
-            Button showPassedTCs = new Button("Show passed TCs");
             showPassedTCs.setOnAction(e -> controller.showPassedTCs(testcases));
 
-            ViewHelper.addToGridInHBox(grid, adminButtons, selectAllTestCases, unselectAllTestCases, showPassedTCs);
             adminButtons.getChildren().remove(unselectAllTestCases);
 
             Label executionLabel = new Label("Execution:");
@@ -273,10 +269,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
-            HBox executionBox = new HBox();
-            ViewHelper.addToGridInHBox(grid, executionBox, executeTCs, executeAllTCs);
-            executionBox.getChildren().remove(unselectAllTestCases);
-
+            ViewHelper.addToGridInHBox(grid,  executeTCs, executeAllTCs);
 
             Label calibrationLabel = new Label("Calibration:");
             grid.add(calibrationLabel, 1, grid.getRowCount());
@@ -299,22 +292,18 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 controller.calibrateTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
-            HBox calibrationBox = new HBox();
-            ViewHelper.addToGridInHBox(grid, calibrationBox, calibrateSelectedTestcases, calibrateAllTestcases);
-            calibrationBox.getChildren().remove(unselectAllTestCases);
-
+            ViewHelper.addToGridInHBox(grid,  calibrateSelectedTestcases, calibrateAllTestcases);
 
             Label logLabel = new Label("Logs:");
             grid.add(logLabel, 1, grid.getRowCount());
 
-            HBox logRow = new HBox();
             Button deleteLogs = new Button("delete Logs");
             deleteLogs.setOnAction(e -> controller.deleteLogs(regionAWS.getText()));
 
             Button getLogs = new Button("get Logs");
             getLogs.setOnAction(e -> controller.getLogs(regionAWS.getText()));
 
-            ViewHelper.addToGridInHBox(grid, logRow, deleteLogs, getLogs);
+            ViewHelper.addToGridInHBox(grid, deleteLogs, getLogs);
             HBox.setMargin(deleteLogs, new Insets(10, 10, 10, 10));
             HBox.setMargin(getLogs, new Insets(10, 10, 10, 10));
 

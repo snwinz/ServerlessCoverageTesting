@@ -184,9 +184,6 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
 
         }
 
-
-        HBox buttonBox = new HBox();
-
         Button getAllDataButton = new Button("All tc data with run results");
         getAllDataButton.setOnAction(e -> controller.showTestSuitData(testSuite));
 
@@ -205,7 +202,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         Button unselectAllTestCases = new Button("Unselect all test cases");
         unselectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(false)));
 
-        ViewHelper.addToGridInHBox(grid, buttonBox, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput,
+        ViewHelper.addToGridInHBox(grid, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput,
                 exportAllTCsWithInputEachTarget, selectAllTestCases, unselectAllTestCases);
         return scrollpane;
     }

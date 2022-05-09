@@ -48,40 +48,6 @@ public class TestcaseExecutor {
         checkCorrectnessOfLogs(testcase);
     }
 
-    private void checkCorrectnessOfLogs(TestcaseWrapper testcase) {
-        testcase.executedProperty().set(true);
-        if (testcase.getTestcase().getLogsToBeCovered().size() == 0) {
-            testcase.passedProperty().set(true);
-            return;
-        }
-        var logs = executor.getAllNewLogs(0L);
-        boolean passed = true;
-        List<String> incorrectParts = new LinkedList<>();
-        List<String> logsCompare = filterLogs(logs);
-
-        for (var part : testcase.getTestcase().getLogsToBeCovered()) {
-
-            if (!removePartFromList(logsCompare, part)) {
-                incorrectParts.add(part);
-                passed = false;
-                break;
-            }
-        }
-        var functions = testcase.getFunctionsWrapped();
-        if (functions.size() > 0) {
-            var lastFunction = functions.get(functions.size() - 1);
-            if (passed) {
-                boolean allFunctionsSuccessful = functions.stream().allMatch(FunctionWrapper::isPassed);
-                testcase.passedProperty().set(allFunctionsSuccessful);
-            } else {
-                lastFunction.addTextToOutput("The following parts were not correct in log:\n" + String.join("\n", incorrectParts));
-                testcase.passedProperty().set(true);
-                testcase.passedProperty().set(false);
-            }
-        }
-
-    }
-
     private boolean removePartFromList(List<String> logsCompare, String part) {
         boolean removed = false;
         for (int i = 0; i < logsCompare.size(); i++) {
@@ -167,6 +133,43 @@ public class TestcaseExecutor {
             function.addTextToOutput("The following parts were not correct:\n" + String.join("\n", incorrectParts));
             function.passedProperty().set(false);
         }
+    }
+
+    private void checkCorrectnessOfLogs(TestcaseWrapper testcase) {
+        testcase.executedProperty().set(true);
+        if (testcase.getTestcase().getLogsToBeCovered().size() == 0) {
+            testcase.passedProperty().set(true);
+            return;
+        }
+        var logs = executor.getAllNewLogs(0L);
+        boolean passed = true;
+        List<String> incorrectParts = new LinkedList<>();
+        List<String> logsCompare = filterLogs(logs);
+        testcase.setLogsMeasured(List.copyOf(logsCompare));
+
+        for (var part : testcase.getTestcase().getLogsToBeCovered()) {
+
+            if (!removePartFromList(logsCompare, part)) {
+                incorrectParts.add(part);
+                passed = false;
+                break;
+            }
+        }
+        var functions = testcase.getFunctionsWrapped();
+        if (functions.size() > 0) {
+            var lastFunction = functions.get(functions.size() - 1);
+            if (passed) {
+                boolean allFunctionsSuccessful = functions.stream().allMatch(FunctionWrapper::isPassed);
+                testcase.passedProperty().set(true);
+                testcase.passedProperty().set(false);
+                testcase.passedProperty().set(allFunctionsSuccessful);
+            } else {
+                lastFunction.addTextToOutput("The following parts were not correct in log:\n" + String.join("\n", incorrectParts));
+                testcase.passedProperty().set(true);
+                testcase.passedProperty().set(false);
+            }
+        }
+
     }
 
     private void addResultToOutputValues(String result, Map<String, List<String>> outputValues) {
