@@ -131,6 +131,8 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 HBox.setMargin(addFunction, new Insets(10, 10, 10, 10));
 
                 executeTC.setOnAction(e -> {
+                    testcase.setSaveLogs(keepLogsCheckbox.isSelected());
+                    testcases.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
                     testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
                     testcase.reset();
                     controller.executeTC(testcase, regionAWS.getText());
@@ -261,6 +263,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             executeTCs.setOnAction(e -> {
                 saveConfigProperties();
                 var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
+                testcasesSelected.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
                 testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 testcasesSelected.forEach(TestcaseWrapper::reset);
                 controller.executeTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
@@ -270,6 +273,7 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             Button executeAllTCs = new Button("Execute all TCs");
             executeAllTCs.setOnAction(e -> {
                 saveConfigProperties();
+                testcases.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
                 testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 testcases.forEach(TestcaseWrapper::reset);
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());

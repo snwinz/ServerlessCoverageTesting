@@ -117,8 +117,8 @@ public class TestCaseExecutionController {
     public void evaluateLogs(List<TestcaseWrapper> testcases, Graph graph) {
         var allLogs = testcases.stream().map(TestcaseWrapper::getLogsMeasured)
                 .filter(Objects::nonNull).flatMap(entry -> entry.stream()).toList();
-        LogEvaluationController controller = new LogEvaluationController(allLogs,graph);
-        controller.setup();
+        LogEvaluationController controller = new LogEvaluationController(graph);
+        controller.setup(allLogs);
 
     }
 }

@@ -8,22 +8,22 @@ import logic.logevaluation.EvaluationLogic;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public class LogEvaluationController {
     private final LogEvaluationView view;
     private final EvaluationLogic model;
 
-    public LogEvaluationController(List<String> allLogs, Graph graph) {
-        this.view = new LogEvaluationView(allLogs, graph);
+    public LogEvaluationController(Graph graph) {
+        this.view = new LogEvaluationView();
         this.model = new EvaluationLogic(graph);
-
     }
 
-    public void setup() {
+    public void setup(List<String> allLogs) {
         view.setup(this, model);
         view.show();
+        model.addPropertyChangeListener(view);
+        model.setLogs(allLogs);
     }
 
 
@@ -31,8 +31,8 @@ public class LogEvaluationController {
         view.close();
     }
 
-    public void calculateCoverage(List<String> log) {
-        model.calculateCoverage(log);
+    public void calculateCoverage() {
+        model.calculateCoverage();
     }
 
     public void openLogFile() {

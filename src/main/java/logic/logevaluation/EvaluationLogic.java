@@ -3,7 +3,10 @@ package logic.logevaluation;
 import gui.model.Graph;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,9 +17,12 @@ import static java.util.Map.Entry.comparingByValue;
 
 public class EvaluationLogic {
 
-    private final StringProperty coverageText = new SimpleStringProperty();
+    private final StringProperty coverageText = new SimpleStringProperty("");
+    private final StringProperty logText = new SimpleStringProperty("");
     private final Graph graph;
     private List<String> logs;
+
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public EvaluationLogic(Graph graph) {
         this.graph = graph;
@@ -30,14 +36,14 @@ public class EvaluationLogic {
         return coverageText;
     }
 
-    public void calculateCoverage(List<String> logStatements) {
+    public void calculateCoverage() {
         StringBuilder result = new StringBuilder();
         LinkedList<LogEvaluator> evaluators = new LinkedList<>();
-        evaluators.add(new LogEvaluatorAllResources(logStatements));
-        evaluators.add(new LogEvaluatorAllRelations(logStatements));
-        evaluators.add(new LogEvaluatorDefs(logStatements));
-        evaluators.add(new LogEvaluatorDefUse(logStatements));
-        evaluators.add(new LogEvaluatorUses(logStatements));
+        evaluators.add(new LogEvaluatorAllResources(logs));
+        evaluators.add(new LogEvaluatorAllRelations(logs));
+        evaluators.add(new LogEvaluatorDefs(logs));
+        evaluators.add(new LogEvaluatorDefUse(logs));
+        evaluators.add(new LogEvaluatorUses(logs));
 
 
         for (LogEvaluator evaluator : evaluators) {
@@ -57,6 +63,19 @@ public class EvaluationLogic {
 
     public void setLogs(List<String> logs) {
         this.logs = logs;
+        if (logs != null) {
+            var logText = String.join("\n", logs);
+            logTextProperty().set(logText);
+        }
     }
 
+
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        pcs.addPropertyChangeListener(l);
+    }
+
+
+    public StringProperty logTextProperty() {
+        return logText;
+    }
 }

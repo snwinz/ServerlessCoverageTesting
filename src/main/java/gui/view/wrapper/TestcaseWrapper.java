@@ -67,6 +67,7 @@ public class TestcaseWrapper {
         return saveLogs;
     }
 
+
     public void setSaveLogs(boolean saveLogs) {
         this.saveLogs = saveLogs;
     }

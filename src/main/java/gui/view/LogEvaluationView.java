@@ -1,7 +1,6 @@
 package gui.view;
 
 import gui.controller.LogEvaluationController;
-import gui.model.Graph;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -12,27 +11,21 @@ import logic.logevaluation.EvaluationLogic;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 
 public class LogEvaluationView extends Stage implements PropertyChangeListener {
-    private final Graph graph;
-    private final List<String> allLogs;
     private final TextArea log = new TextArea();
     private final TextArea output = new TextArea();
     private LogEvaluationController controller;
     private EvaluationLogic model;
 
 
-    public LogEvaluationView(List<String> allLogs, Graph graph) {
-        this.allLogs = allLogs;
-        this.graph = graph;
+    public LogEvaluationView() {
     }
 
     public void setup(LogEvaluationController controller, EvaluationLogic model) {
-        createView();
-        log.setText(String.join("\n", allLogs));
         this.controller = controller;
         this.model = model;
+        createView();
     }
 
     private void createView() {
@@ -57,10 +50,11 @@ public class LogEvaluationView extends Stage implements PropertyChangeListener {
             scrollpane.setContent(grid);
 
             Label descriptionLog = new Label("Log to be evaluated:");
-            log.setText(String.join("\n", allLogs));
 
 
             grid.addRow(grid.getRowCount(), descriptionLog);
+            log.textProperty().bind(model.logTextProperty());
+            log.setEditable(false);
             grid.addRow(grid.getRowCount(), log);
 
             Label coverage = new Label("Coverage:");
@@ -70,7 +64,7 @@ public class LogEvaluationView extends Stage implements PropertyChangeListener {
             grid.addRow(grid.getRowCount(), output);
 
             Button calculateCoverage = new Button("Calculate Coverage");
-            calculateCoverage.setOnAction(e -> controller.calculateCoverage(allLogs));
+            calculateCoverage.setOnAction(e -> controller.calculateCoverage());
             ViewHelper.addToGridInHBox(grid, calculateCoverage);
             return scrollpane;
         }
@@ -86,17 +80,16 @@ public class LogEvaluationView extends Stage implements PropertyChangeListener {
         close.setOnAction(event -> {
             controller.exit();
         });
-        close.setOnAction(event -> {
+        openLogFile.setOnAction(event -> {
             controller.openLogFile();
         });
-        file.getItems().addAll(close,openLogFile);
+        file.getItems().addAll(close, openLogFile);
         menuBar.getMenus().addAll(file);
         return menuBar;
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-
     }
 
 }

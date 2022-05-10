@@ -3,4 +3,5 @@
 <properties>
 <entry key="resetFunctionName">resetFunction</entry>
 <entry key="regionAWS">eu-central-1</entry>
+<entry key="keepLogs">true</entry>
 </properties>
