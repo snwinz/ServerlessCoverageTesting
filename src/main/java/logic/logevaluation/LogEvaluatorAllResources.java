@@ -20,15 +20,16 @@ public class LogEvaluatorAllResources extends LogEvaluator {
         }
     }
 
-    private boolean isStatement(String statement) {
+    private static boolean isStatement(String statement) {
         return statement.startsWith(LogNameConfiguration.RESOURCE_MARKER);
     }
 
     @Override
-    public Map<String, Integer> getCoveredResources() {
+    public Map<String, Integer> getUnitsCovered() {
         List<String> coveredResources =
-                logs.stream().filter(s -> s.startsWith(LogNameConfiguration.RESOURCE_MARKER)).map(a -> a.replaceAll(LogNameConfiguration.RELATION_MARKER, "")).collect(Collectors.toList());
-
+                logs.stream().filter(LogEvaluatorAllResources::isStatement)
+                        .map(a -> a.replaceAll(LogNameConfiguration.RESOURCE_MARKER, "").trim())
+                        .collect(Collectors.toList());
         return countNumberOfOccurrences(coveredResources);
     }
 

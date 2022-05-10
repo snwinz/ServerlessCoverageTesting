@@ -2,7 +2,6 @@ package logic.testcasegenerator;
 
 import logic.model.*;
 import logic.testcasegenerator.coveragetargets.*;
-import logic.testcasegenerator.coveragetargets.coverageelements.DefUsePair;
 import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithDefSourceLine;
 import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithSourceLine;
 import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithUseSourceLine;
@@ -16,12 +15,16 @@ import java.util.stream.Collectors;
 import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.*;
 
 public class TestCaseGeneratorImpl implements TestCaseGenerator {
+
+    private final TargetGenerator targetGenerator = new TargetGenerator();
+    private final GraphHelper graphHelper = new GraphHelper();
+
     @Override
     public TestSuite getResourceCoverage(String graphJSON) {
         Graph graph = new Graph(graphJSON);
         graph.addRelationsToElements();
 
-        List<CoverageTargetAllResources> coverageTargets = getAllTargetsToBeCoveredByAllResources(graph);
+        List<CoverageTargetAllResources> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllResources(graph);
 
         for (var target : coverageTargets) {
             var node = target.getCoverageElement();
@@ -73,11 +76,6 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         return testcases;
     }
 
-    private List<CoverageTargetAllResources> getAllTargetsToBeCoveredByAllResources(Graph graph) {
-        List<CoverageTargetAllResources> result = new ArrayList<>();
-        graph.getNodes().forEach(node -> result.add(new CoverageTargetAllResources(node)));
-        return result;
-    }
 
     private List<NodeModel> getFunctionCallingResource(NodeModel resource, List<ArrowModel> arrows) {
         List<ArrowModel> arrowsNotConsidered = new ArrayList<>(arrows);
@@ -108,7 +106,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         Graph graph = new Graph(graphJSON);
         graph.addRelationsToElements();
 
-        List<CoverageTargetAllRelations> coverageTargets = getAllTargetsToBeCoveredByAllRelations(graph);
+        List<CoverageTargetAllRelations> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllRelations(graph);
 
         for (var target : coverageTargets) {
             var arrow = target.getCoverageElement();
@@ -156,12 +154,6 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         return testcases;
     }
 
-    private List<CoverageTargetAllRelations> getAllTargetsToBeCoveredByAllRelations(Graph graph) {
-        List<CoverageTargetAllRelations> result = new ArrayList<>();
-        graph.getArrows().forEach(arrow -> result.add(new CoverageTargetAllRelations(arrow)));
-        return result;
-    }
-
     private List<NodeModel> getFunctionsCallingBinding(ArrowModel arrow, Graph graph) {
         List<NodeModel> resultFunctions = new ArrayList<>();
         Queue<ArrowModel> relationsToIterate = new LinkedList<>();
@@ -193,7 +185,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         Graph graph = new Graph(graphJSON);
         graph.addRelationsToElements();
 
-        List<CoverageTargetAllDefs> coverageTargets = getAllTargetsToBeCoveredByAllDefs(graph);
+        List<CoverageTargetAllDefs> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllDefs(graph);
 
         for (var target : coverageTargets) {
             var def = target.getCoverageElement();
@@ -211,84 +203,6 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     }
 
 
-    private List<CoverageTargetAllDefs> getAllTargetsToBeCoveredByAllDefs(Graph graph) {
-        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(graph);
-        List<CoverageTargetAllDefs> lambdaDefs = new ArrayList<>();
-        allDefsOfGraph.forEach(def -> lambdaDefs.add(new CoverageTargetAllDefs(def)));
-        return lambdaDefs;
-    }
-
-    private List<FunctionWithDefSourceLine> getAllDefsOfGraph(Graph graph) {
-        List<FunctionWithDefSourceLine> functionsWithDefSourceLine = new ArrayList<>();
-        for (var node : graph.getNodes()) {
-            if (NodeType.FUNCTION.equals(node.getType())) {
-                List<SourceCodeLine> entries = node.getSourceList();
-                for (var entry : entries) {
-                    if ((entry.getDefContainer() != null && !entry.getDefContainer().isBlank())) {
-                        FunctionWithDefSourceLine functionWithDef = new FunctionWithDefSourceLine(node, entry);
-                        functionsWithDefSourceLine.add(functionWithDef);
-                    }
-                }
-            }
-        }
-        return functionsWithDefSourceLine;
-    }
-
-
-    private List<FunctionWithUseSourceLine> findAllUsesOfADefOnItsSuccessors(FunctionWithSourceLine def) {
-        List<ArrowModel> arrows = getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
-        List<FunctionWithUseSourceLine> result = new ArrayList<>();
-        for (var arrow : arrows) {
-            var successor = arrow.getSuccessorNode();
-            if (NodeType.FUNCTION.equals(successor.getType())) {
-                List<FunctionWithUseSourceLine> usagesForArrow = getUsesInAFunction(successor, arrow.getIdentifier());
-                result.addAll(usagesForArrow);
-            } else if (NodeType.DATA_STORAGE.equals(successor.getType())) {
-                result.addAll(getUsagesAfterNode(successor));
-
-            } else {
-                result.addAll(getUsagesAfterNode(successor));
-            }
-        }
-        return result;
-    }
-
-
-    private List<FunctionWithUseSourceLine> findAllUsesOfFunctionLinesOfADefCoupledByADataStorage(FunctionWithSourceLine def) {
-        List<ArrowModel> arrows = getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
-        List<FunctionWithUseSourceLine> result = new ArrayList<>();
-        for (var arrow : arrows) {
-            if (arrow.hasAccessMode(AccessMode.DELETE) || arrow.hasAccessMode(AccessMode.UPDATE) || arrow.hasAccessMode(AccessMode.CREATE)) {
-                var successor = arrow.getSuccessorNode();
-                if (NodeType.DATA_STORAGE.equals(successor.getType())) {
-                    result.addAll(getReadUsageOfDB(successor));
-                }
-            }
-        }
-        return result;
-    }
-
-
-    private List<FunctionWithUseSourceLine> getUsagesAfterNode(NodeModel node) {
-        List<FunctionWithUseSourceLine> result = new ArrayList<>();
-        var arrows = node.getOutgoingArrows();
-        Set<Long> visitedNodes = new HashSet<>();
-        Queue<ArrowModel> arrowsToBeVisited = new LinkedList<>(arrows);
-        while (!arrowsToBeVisited.isEmpty()) {
-            var arrow = arrowsToBeVisited.remove();
-            var successorNode = arrow.getSuccessorNode();
-            if (visitedNodes.add(successorNode.getIdentifier())) {
-                if (NodeType.FUNCTION.equals(successorNode.getType())) {
-                    result.addAll(getUsesInAFunction(successorNode, arrow.getIdentifier()));
-                } else {
-                    arrowsToBeVisited.addAll(successorNode.getOutgoingArrows());
-                }
-
-            }
-        }
-        return result;
-    }
-
     private List<FunctionWithUseSourceLine> getReadUsageOfDB(NodeModel dbNode) {
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
         var arrows = dbNode.getIncomingArrows();
@@ -303,7 +217,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     private List<FunctionWithUseSourceLine> getUsesInAFunction(NodeModel node, long idOfArrow) {
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
-        var uses = node.getSourceList().stream().filter(sourceCodeLine -> sourceCodeLine.getUse() != null && !sourceCodeLine.getUse().isBlank()).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencingUse().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).collect(Collectors.toList());
+        var uses = node.getSourceList().stream().filter(sourceCodeLine -> sourceCodeLine.getUse() != null && !sourceCodeLine.getUse().isBlank()).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencingUse().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).toList();
         uses.forEach(use -> result.add(new FunctionWithUseSourceLine(node, use)));
         return result;
     }
@@ -329,7 +243,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         Graph graph = new Graph(graphJSON);
         graph.addRelationsToElements();
 
-        List<CoverageTargetAllDefUse> coverageTargets = getAllTargetsToBeCoveredByAllDefUse(graph);
+        List<CoverageTargetAllDefUse> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllDefUse(graph);
         for (var target : coverageTargets) {
             List<Testcase> testcases = getTestcaseForTarget(target);
             target.addTestcases(testcases);
@@ -360,22 +274,6 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         return potentialTestcases;
 
     }
-
-    private List<CoverageTargetAllDefUse> getAllTargetsToBeCoveredByAllDefUse(Graph graph) {
-        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(graph);
-        List<CoverageTargetAllDefUse> result = new ArrayList<>();
-        for (var def : allDefsOfGraph) {
-            CoverageTargetAllDefUse target = new CoverageTargetAllDefUse(def);
-            result.add(target);
-        }
-        List<FunctionWithUseSourceLine> allUsesOfGraph = getAllUsesOfGraph(graph);
-        for (var use : allUsesOfGraph) {
-            CoverageTargetAllDefUse target = new CoverageTargetAllDefUse(use);
-            result.add(target);
-        }
-        return result;
-    }
-
 
     private List<Testcase> getTestcasesCoveringDefinitionOfUse(FunctionWithUseSourceLine use) {
         List<FunctionWithDefSourceLine> defsForUseOnPath = findAllDefsOfAUseOnItsPredecessors(use);
@@ -422,7 +320,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     private List<Testcase> getTestcasesCoveringUseOfDefinition(FunctionWithDefSourceLine def) {
 
-        List<FunctionWithUseSourceLine> usesForDefOnPath = findAllUsesOfADefOnItsSuccessors(def);
+        List<FunctionWithUseSourceLine> usesForDefOnPath = graphHelper.findAllUsesOfADefOnItsSuccessors(def);
         boolean isUseFoundForDef = usesForDefOnPath.size() > 0;
         var usesForDefViaDB = findAllUsesOfADefCoupledByADataStorage(def);
         boolean isUseFoundForCoupled = usesForDefViaDB.size() > 0;
@@ -526,7 +424,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
                 if (idsOfInfluencedArrows == null) {
                     continue;
                 }
-                var nodesInfluencedByDefOfTheUseNode = outgoingArrows.stream().filter(arrow -> idsOfInfluencedArrows.contains(arrow.getIdentifier())).map(ArrowModel::getSuccessorNode).filter(Objects::nonNull).collect(Collectors.toList());
+                var nodesInfluencedByDefOfTheUseNode = outgoingArrows.stream().filter(arrow -> idsOfInfluencedArrows.contains(arrow.getIdentifier())).map(ArrowModel::getSuccessorNode).filter(Objects::nonNull).toList();
                 if (nodesInfluencedByDefOfTheUseNode.contains(def.getFunction())) {
                     callToDefNodeFromUse = true;
                 }
@@ -537,7 +435,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
                     if (idsOfInfluencingArrows == null) {
                         continue;
                     }
-                    var influencingNodes = useOnPath.getFunction().getIncomingArrows().stream().filter(arrow -> idsOfInfluencingArrows.contains(arrow.getIdentifier())).map(ArrowModel::getPredecessorNode).filter(Objects::nonNull).collect(Collectors.toList());
+                    var influencingNodes = useOnPath.getFunction().getIncomingArrows().stream().filter(arrow -> idsOfInfluencingArrows.contains(arrow.getIdentifier())).map(ArrowModel::getPredecessorNode).filter(Objects::nonNull).toList();
                     if (influencingNodes.contains(def.getFunction())) {
                         isSuccessorAlsoPredecessor = true;
                         break;
@@ -592,7 +490,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     private List<FunctionWithDefSourceLine> getDefsInAFunction(NodeModel node, long idOfArrow) {
         List<FunctionWithDefSourceLine> result = new ArrayList<>();
-        var defs = node.getSourceList().stream().filter(sourceCodeLine -> (sourceCodeLine.getDefContainer() != null && !sourceCodeLine.getDefContainer().isBlank())).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencedByDef() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencedByDef().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencedByDef().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).collect(Collectors.toList());
+        var defs = node.getSourceList().stream().filter(sourceCodeLine -> (sourceCodeLine.getDefContainer() != null && !sourceCodeLine.getDefContainer().isBlank())).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencedByDef() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencedByDef().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencedByDef().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).toList();
         defs.forEach(def -> result.add(new FunctionWithDefSourceLine(node, def)));
         return result;
     }
@@ -618,7 +516,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         Graph graph = new Graph(graphJSON);
         graph.addRelationsToElements();
 
-        List<CoverageTargetAllUses> coverageTargets = getAllTargetsToBeCoveredByAllUses(graph);
+        List<CoverageTargetAllUses> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllUses(graph);
         for (var target : coverageTargets) {
             List<Testcase> testcases = getTestcaseForTarget(target);
             target.addTestcases(testcases);
@@ -654,7 +552,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             potentialTestcases.add(testcase);
         } else {
             String target = String.format("def %s should be covered by %s ", defOfTestTarget, useOfTestTarget);
-            List<FunctionWithUseSourceLine> usesForDefOnPath = findAllUsesOfADefOnItsSuccessors(defOfTestTarget);
+            List<FunctionWithUseSourceLine> usesForDefOnPath = graphHelper.findAllUsesOfADefOnItsSuccessors(defOfTestTarget);
             for (var use : usesForDefOnPath) {
                 if (useOfTestTarget.equals(use)) {
                     var logStatements = List.of(defOfTestTarget.getLogMessage() + useOfTestTarget.getLogMessage());
@@ -688,68 +586,18 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         return potentialTestcases;
     }
 
-    private List<CoverageTargetAllUses> getAllTargetsToBeCoveredByAllUses(Graph graph) {
-        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(graph);
-        List<CoverageTargetAllUses> result = new ArrayList<>();
-        for (var def : allDefsOfGraph) {
-            List<FunctionWithUseSourceLine> usesOnPath = findAllUsesOfADefOnItsSuccessors(def);
-            for (var use : usesOnPath) {
-                var defUsePair = new DefUsePair(def, use);
-                var coverageTarget = new CoverageTargetAllUses(defUsePair);
-                result.add(coverageTarget);
-            }
-            List<FunctionWithUseSourceLine> usesViaDB = findAllUsesOfFunctionLinesOfADefCoupledByADataStorage(def);
-            for (var use : usesViaDB) {
-                var defUsePair = new DefUsePair(def, use);
-                var coverageTarget = new CoverageTargetAllUses(defUsePair);
-                result.add(coverageTarget);
-            }
-            if (usesOnPath.isEmpty() && usesViaDB.isEmpty()) {
-                var defUsePair = new DefUsePair(def, null);
-                var coverageTarget = new CoverageTargetAllUses(defUsePair);
-                result.add(coverageTarget);
-            }
-        }
-        List<FunctionWithUseSourceLine> allUsesOfGraph = getAllUsesOfGraph(graph);
-        for (var use : allUsesOfGraph) {
-            var isAlreadyUsed = result.stream().filter(target -> use.equals(target.getCoverageElement().getUse())).findAny();
-            if (isAlreadyUsed.isEmpty()) {
-                var defUsePair = new DefUsePair(null, use);
-                var coverageTarget = new CoverageTargetAllUses(defUsePair);
-                result.add(coverageTarget);
-            }
-        }
-        return result;
-    }
-
-    private List<FunctionWithUseSourceLine> getAllUsesOfGraph(Graph graph) {
-        List<FunctionWithUseSourceLine> functionsWithUseSourceLine = new ArrayList<>();
-        for (var node : graph.getNodes()) {
-            if (NodeType.FUNCTION.equals(node.getType())) {
-                List<SourceCodeLine> entries = node.getSourceList();
-                for (var entry : entries) {
-                    if (entry.getUse() != null && !entry.getUse().isBlank()) {
-                        FunctionWithUseSourceLine functionWithUse = new FunctionWithUseSourceLine(node, entry);
-                        functionsWithUseSourceLine.add(functionWithUse);
-                    }
-                }
-            }
-        }
-        return functionsWithUseSourceLine;
-    }
 
     private List<FunctionWithDefSourceLine> getWriteOnlyNodesOfDB(ArrowModel dbArrow) {
         var db = dbArrow.getSuccessorNode();
         var writeNodeArrows = db.getIncomingArrows().stream().filter(arrow -> arrow.getAccessMode() != null && arrow.getAccessMode().size() == 1
-                && arrow.hasAccessMode(AccessMode.CREATE)).collect(Collectors.toList());
+                && arrow.hasAccessMode(AccessMode.CREATE)).toList();
         List<FunctionWithDefSourceLine> result = new ArrayList<>();
         for (var writeNodeArrow : writeNodeArrows) {
             var writeNode = writeNodeArrow.getPredecessorNode();
             var writeLines = writeNode.getSourceList().stream()
                     .filter(line -> line.getDefContainer() != null)
-                    .filter(line -> line.getRelationsInfluencedByDef().contains(writeNodeArrow.getIdentifier()))
-                    .collect(Collectors.toList());
-            var writeFunctionsWithLine = writeLines.stream().map(line -> new FunctionWithDefSourceLine(writeNode, line)).collect(Collectors.toList());
+                    .filter(line -> line.getRelationsInfluencedByDef().contains(writeNodeArrow.getIdentifier())).toList();
+            var writeFunctionsWithLine = writeLines.stream().map(line -> new FunctionWithDefSourceLine(writeNode, line)).toList();
             result.addAll(writeFunctionsWithLine);
 
         }
@@ -759,7 +607,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     private List<FunctionWithUseSourceLine> getUsesOfFunctionOnDB(NodeModel function, ArrowModel dbArrow) {
         var usesInDef = function.getSourceList().stream().
                 filter(line -> line.getUse() != null)
-                .filter(line -> line.getRelationsInfluencingUse().contains(dbArrow.getIdentifier())).collect(Collectors.toList());
+                .filter(line -> line.getRelationsInfluencingUse().contains(dbArrow.getIdentifier())).toList();
         return usesInDef.stream().map(line -> new FunctionWithUseSourceLine(function, line)).collect(Collectors.toList());
     }
 
@@ -773,8 +621,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         }
         List<Testcase> additionalTestcases = new ArrayList<>();
         var readArrowsOfDB = function.getOutgoingArrows().stream()
-                .filter(arrow -> arrow.hasAccessMode(AccessMode.READ))
-                .collect(Collectors.toList());
+                .filter(arrow -> arrow.hasAccessMode(AccessMode.READ)).toList();
         for (var dbArrow : readArrowsOfDB) {
             var writeNodes = getWriteOnlyNodesOfDB(dbArrow);
             var useNodesOfDef = getUsesOfFunctionOnDB(function, dbArrow);

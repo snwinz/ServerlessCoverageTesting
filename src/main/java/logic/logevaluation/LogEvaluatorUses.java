@@ -19,15 +19,23 @@ public class LogEvaluatorUses extends LogEvaluator {
         }
     }
 
-    private boolean isStatement(String statement) {
-        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER);
+    private static boolean isStatement(String statement) {
+        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER) && !statement.contains("undefined");
     }
 
-    public Map<String, Integer> getCoveredResources() {
+    public Map<String, Integer> getUnitsCovered() {
         List<String> coveredUnits =
-                logs.stream().filter(s -> s.startsWith(LogNameConfiguration.DEFLOG_MARKER)).collect(Collectors.toList());
-
+                logs.stream().filter(LogEvaluatorUses::isStatement)
+                        .map(LogEvaluatorUses::cutDef)
+                        .collect(Collectors.toList());
         return countNumberOfOccurrences(coveredUnits);
+    }
+
+    private static String cutDef(String logStatement) {
+        String shortenedLogStatement = logStatement.substring(
+                logStatement.indexOf(LogNameConfiguration.LOGDELIMITER + LogNameConfiguration.LOGDELIMITER)
+                        + LogNameConfiguration.LOGDELIMITER.length());
+        return shortenedLogStatement.contains(LogNameConfiguration.DEFLOG_MARKER) ? shortenedLogStatement : logStatement;
     }
 
     @Override

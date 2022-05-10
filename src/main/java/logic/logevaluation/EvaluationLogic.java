@@ -3,7 +3,6 @@ package logic.logevaluation;
 import gui.model.Graph;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -49,15 +48,18 @@ public class EvaluationLogic {
         for (LogEvaluator evaluator : evaluators) {
 
             result.append(evaluator.getCriteriaName()).append(System.lineSeparator());
-            Map<String, Integer> unitsCovered = evaluator.getCoveredResources();
+            Map<String, Integer> unitsCovered = evaluator.getUnitsCovered();
 
-            var unitsCoveredSortedByOccurrence = unitsCovered.entrySet().stream().sorted(Collections.reverseOrder(comparingByValue()))
+            var unitsCoveredSortedByOccurrence = unitsCovered.entrySet().stream()
+                    .sorted(Collections.reverseOrder(comparingByValue()))
                     .collect(Collectors.toList());
             for (var entry : unitsCoveredSortedByOccurrence) {
                 result.append(String.format("%s\t%sx%n", entry.getKey(), entry.getValue()));
             }
             result.append(String.format("%n%n"));
         }
+        coverageText.setValue(result.toString());
+
 
     }
 

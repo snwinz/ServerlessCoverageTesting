@@ -19,25 +19,31 @@ public class LogEvaluatorDefUse extends LogEvaluator {
         }
     }
 
-    private boolean isStatement(String statement) {
-        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER);
+    private static boolean isStatement(String statement) {
+        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER) && !statement.contains("undefined");
     }
 
-    public Map<String, Integer> getCoveredResources() {
+    public Map<String, Integer> getUnitsCovered() {
         List<String> coveredDefs =
-                logs.stream().filter(s -> s.startsWith(LogNameConfiguration.DEFLOG_MARKER)).
-                        map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[0]).collect(Collectors.toList());
+                logs.stream().filter(LogEvaluatorDefUse::isStatement)
+                        .map(LogEvaluatorDefUse::cutDef)
+                        .map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[0])
+                        .collect(Collectors.toList());
         List<String> coveredUses =
-                logs.stream().filter(s -> s.startsWith(LogNameConfiguration.DEFLOG_MARKER)).filter(entry -> entry.contains(LogNameConfiguration.USELOG_MARKER)).
+                logs.stream().filter(LogEvaluatorDefUse::isStatement).filter(entry -> entry.contains(LogNameConfiguration.USELOG_MARKER)).
                         map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[1]).map(entry -> LogNameConfiguration.USELOG_MARKER + entry).collect(Collectors.toList());
-
 
         Map<String, Integer> unitsCovered = countNumberOfOccurrences(coveredDefs);
         Map<String, Integer> unitsCoveredUses = countNumberOfOccurrences(coveredUses);
         unitsCovered.putAll(unitsCoveredUses);
         return unitsCovered;
     }
-
+    private static String cutDef(String logStatement) {
+        String shortenedLogStatement = logStatement.substring(
+                logStatement.indexOf(LogNameConfiguration.LOGDELIMITER + LogNameConfiguration.LOGDELIMITER)
+                        + LogNameConfiguration.LOGDELIMITER.length());
+        return shortenedLogStatement.contains(LogNameConfiguration.DEFLOG_MARKER) ? shortenedLogStatement : logStatement;
+    }
     @Override
     public String getCriteriaName() {
         return "All DefUse";

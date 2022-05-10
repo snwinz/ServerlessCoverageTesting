@@ -6,7 +6,7 @@ import java.util.Map;
 
 public abstract class LogEvaluator {
 
-    abstract public Map<String, Integer> getCoveredResources();
+    abstract public Map<String, Integer> getUnitsCovered();
 
 
     public Map<String, Integer> countNumberOfOccurrences(List<String> inputList) {

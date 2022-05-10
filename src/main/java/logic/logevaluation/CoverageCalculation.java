@@ -31,7 +31,7 @@ public class CoverageCalculation {
             for (LogEvaluator evaluator : evaluators) {
 
                 result.append(evaluator.getCriteriaName()).append(System.lineSeparator());
-                Map<String, Integer> unitsCovered = evaluator.getCoveredResources();
+                Map<String, Integer> unitsCovered = evaluator.getUnitsCovered();
 
                 var unitsCoveredSortedByOccurrence = unitsCovered.entrySet().stream().sorted(Collections.reverseOrder(comparingByValue()))
                         .collect(Collectors.toList());
