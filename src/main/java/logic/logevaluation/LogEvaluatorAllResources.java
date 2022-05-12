@@ -1,6 +1,9 @@
 package logic.logevaluation;
 
 
+import logic.model.LogicGraph;
+import logic.testcasegenerator.TargetGenerator;
+import logic.testcasegenerator.coveragetargets.CoverageTargetAllResources;
 import logic.testcasegenerator.coveragetargets.LogNameConfiguration;
 
 import java.util.ArrayList;
@@ -28,7 +31,8 @@ public class LogEvaluatorAllResources extends LogEvaluator {
     public Map<String, Integer> getUnitsCovered() {
         List<String> coveredResources =
                 logs.stream().filter(LogEvaluatorAllResources::isStatement)
-                        .map(a -> a.replaceAll(LogNameConfiguration.RESOURCE_MARKER, "").trim())
+                        .map(a -> a.replaceAll(LogNameConfiguration.RESOURCE_MARKER, "")
+                        .replace(LogNameConfiguration.LOGDELIMITER, "").trim())
                         .collect(Collectors.toList());
         return countNumberOfOccurrences(coveredResources);
     }
@@ -36,6 +40,15 @@ public class LogEvaluatorAllResources extends LogEvaluator {
     @Override
     public String getCriteriaName() {
         return "All Resources";
+    }
+
+    @Override
+    public List<String> getTargets(LogicGraph logicGraph) {
+        TargetGenerator testcaseGenerator = new TargetGenerator();
+        var targets = testcaseGenerator.getAllTargetsToBeCoveredByAllResources(logicGraph);
+        return targets.stream()
+                .map(CoverageTargetAllResources::getCoverageElement)
+                .map(element -> String.valueOf(element.getIdentifier())).toList();
     }
 
 }

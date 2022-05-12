@@ -1,6 +1,10 @@
 package logic.logevaluation;
 
+import logic.model.LogicGraph;
+import logic.testcasegenerator.TargetGenerator;
+import logic.testcasegenerator.coveragetargets.CoverageTargetAllDefUse;
 import logic.testcasegenerator.coveragetargets.LogNameConfiguration;
+import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithSourceLine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +42,24 @@ public class LogEvaluatorDefUse extends LogEvaluator {
         unitsCovered.putAll(unitsCoveredUses);
         return unitsCovered;
     }
+
     private static String cutDef(String logStatement) {
         String shortenedLogStatement = logStatement.substring(
                 logStatement.indexOf(LogNameConfiguration.LOGDELIMITER + LogNameConfiguration.LOGDELIMITER)
                         + LogNameConfiguration.LOGDELIMITER.length());
         return shortenedLogStatement.contains(LogNameConfiguration.DEFLOG_MARKER) ? shortenedLogStatement : logStatement;
     }
+
     @Override
     public String getCriteriaName() {
         return "All DefUse";
+    }
+
+    @Override
+    public List<String> getTargets(LogicGraph logicGraph) {
+        TargetGenerator testcaseGenerator = new TargetGenerator();
+        var targets = testcaseGenerator.getAllTargetsToBeCoveredByAllDefUse(logicGraph);
+        return targets.stream().map(CoverageTargetAllDefUse::getCoverageElement).map(FunctionWithSourceLine::getLogMessage).toList();
     }
 
 }

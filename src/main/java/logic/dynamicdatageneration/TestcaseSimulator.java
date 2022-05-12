@@ -107,22 +107,21 @@ public class TestcaseSimulator {
         for (var function : testData.getTestFunctions()) {
             function.changeData(testData);
             String functionName = function.getName();
-
-
             String jsonData = function.getJSON();
             testData.addInputOfFunction(function);
-            String invocation = String.format("invoke function '%s' with json '%s'", functionName, jsonData);
-
-            LOGGER.info(invocation);
-            testcase.addTextToWriteOutput(invocation);
-
-            String result = executor.invokeFunction(functionName, jsonData, testData.getOutputValues());
-            testData.addResultToOutput(result);
-            String resultFormatted = String.format("result: %s", result);
-
-            LOGGER.info(resultFormatted);
-            testcase.addTextToWriteOutput(resultFormatted);
+            invokeFunction(testcase, testData, functionName, jsonData);
         }
+    }
+
+    private void invokeFunction(Testcase testcase, TestData testData, String functionName, String jsonData) {
+        String invocation = String.format("invoke function '%s' with json '%s'", functionName, jsonData);
+        LOGGER.info(invocation);
+        testcase.addTextToWriteOutput(invocation);
+        String result = executor.invokeFunction(functionName, jsonData, testData.getOutputValues());
+        testData.addResultToOutput(result);
+        String resultFormatted = String.format("result: %s", result);
+        LOGGER.info(resultFormatted);
+        testcase.addTextToWriteOutput(resultFormatted);
     }
 
     private void executeFunctionsWithOldData(Testcase testcase, TestData testData) {
@@ -131,14 +130,7 @@ public class TestcaseSimulator {
         for (var function : testData.getTestFunctions()) {
             String functionName = function.getName();
             String jsonData = function.getJSON();
-            String invocation = String.format("invoke function '%s' with json '%s'", functionName, jsonData);
-            LOGGER.info(invocation);
-            testcase.addTextToWriteOutput(invocation);
-            String result = executor.invokeFunction(functionName, jsonData, testData.getOutputValues());
-            testData.addResultToOutput(result);
-            String resultFormatted = String.format("result: %s", result);
-            LOGGER.info(resultFormatted);
-            testcase.addTextToWriteOutput(resultFormatted);
+            invokeFunction(testcase, testData, functionName, jsonData);
         }
     }
 

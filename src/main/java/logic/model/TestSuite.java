@@ -53,18 +53,18 @@ public class TestSuite {
         testTargets.addAll(coverageTarget);
     }
 
-    public void calculateOracleNodes(Graph graph) {
+    public void calculateOracleNodes(LogicGraph logicGraph) {
         for (var target : testTargets) {
             for (var testcase : target.getTestcases()) {
-                testcase.calculateNodesForOracle(graph);
+                testcase.calculateNodesForOracle(logicGraph);
             }
         }
     }
 
-    public void calculateStateNodes(Graph graph) {
+    public void calculateStateNodes(LogicGraph logicGraph) {
         for (var target : testTargets) {
             for (var testcase : target.getTestcases()) {
-                testcase.calculateNodesHoldingState(graph);
+                testcase.calculateNodesHoldingState(logicGraph);
             }
         }
     }

@@ -1,6 +1,6 @@
 package logic.testcasegenerator;
 
-import logic.model.Graph;
+import logic.model.LogicGraph;
 import logic.model.SourceCodeLine;
 import logic.testcasegenerator.coveragetargets.*;
 import logic.testcasegenerator.coveragetargets.coverageelements.DefUsePair;
@@ -14,29 +14,29 @@ import java.util.List;
 public class TargetGenerator {
     private final GraphHelper graphHelper = new GraphHelper();
 
-    public List<CoverageTargetAllResources> getAllTargetsToBeCoveredByAllResources(Graph graph) {
+    public List<CoverageTargetAllResources> getAllTargetsToBeCoveredByAllResources(LogicGraph logicGraph) {
         List<CoverageTargetAllResources> result = new ArrayList<>();
-        graph.getNodes().forEach(node -> result.add(new CoverageTargetAllResources(node)));
+        logicGraph.getNodes().forEach(node -> result.add(new CoverageTargetAllResources(node)));
         return result;
     }
 
 
-    public List<CoverageTargetAllRelations> getAllTargetsToBeCoveredByAllRelations(Graph graph) {
+    public List<CoverageTargetAllRelations> getAllTargetsToBeCoveredByAllRelations(LogicGraph logicGraph) {
         List<CoverageTargetAllRelations> result = new ArrayList<>();
-        graph.getArrows().forEach(arrow -> result.add(new CoverageTargetAllRelations(arrow)));
+        logicGraph.getArrows().forEach(arrow -> result.add(new CoverageTargetAllRelations(arrow)));
         return result;
     }
 
-    public List<CoverageTargetAllDefs> getAllTargetsToBeCoveredByAllDefs(Graph graph) {
-        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(graph);
+    public List<CoverageTargetAllDefs> getAllTargetsToBeCoveredByAllDefs(LogicGraph logicGraph) {
+        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(logicGraph);
         List<CoverageTargetAllDefs> lambdaDefs = new ArrayList<>();
         allDefsOfGraph.forEach(def -> lambdaDefs.add(new CoverageTargetAllDefs(def)));
         return lambdaDefs;
     }
 
-    public List<FunctionWithDefSourceLine> getAllDefsOfGraph(Graph graph) {
+    public List<FunctionWithDefSourceLine> getAllDefsOfGraph(LogicGraph logicGraph) {
         List<FunctionWithDefSourceLine> functionsWithDefSourceLine = new ArrayList<>();
-        for (var node : graph.getNodes()) {
+        for (var node : logicGraph.getNodes()) {
             if (NodeType.FUNCTION.equals(node.getType())) {
                 List<SourceCodeLine> entries = node.getSourceList();
                 for (var entry : entries) {
@@ -50,14 +50,14 @@ public class TargetGenerator {
         return functionsWithDefSourceLine;
     }
 
-    public List<CoverageTargetAllDefUse> getAllTargetsToBeCoveredByAllDefUse(Graph graph) {
-        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(graph);
+    public List<CoverageTargetAllDefUse> getAllTargetsToBeCoveredByAllDefUse(LogicGraph logicGraph) {
+        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(logicGraph);
         List<CoverageTargetAllDefUse> result = new ArrayList<>();
         for (var def : allDefsOfGraph) {
             CoverageTargetAllDefUse target = new CoverageTargetAllDefUse(def);
             result.add(target);
         }
-        List<FunctionWithUseSourceLine> allUsesOfGraph = graphHelper.getAllUsesOfGraph(graph);
+        List<FunctionWithUseSourceLine> allUsesOfGraph = graphHelper.getAllUsesOfGraph(logicGraph);
         for (var use : allUsesOfGraph) {
             CoverageTargetAllDefUse target = new CoverageTargetAllDefUse(use);
             result.add(target);
@@ -65,8 +65,8 @@ public class TargetGenerator {
         return result;
     }
 
-    public List<CoverageTargetAllUses> getAllTargetsToBeCoveredByAllUses(Graph graph) {
-        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(graph);
+    public List<CoverageTargetAllUses> getAllTargetsToBeCoveredByAllUses(LogicGraph logicGraph) {
+        List<FunctionWithDefSourceLine> allDefsOfGraph = getAllDefsOfGraph(logicGraph);
         List<CoverageTargetAllUses> result = new ArrayList<>();
         for (var def : allDefsOfGraph) {
             List<FunctionWithUseSourceLine> usesOnPath = graphHelper.findAllUsesOfADefOnItsSuccessors(def);
@@ -87,7 +87,7 @@ public class TargetGenerator {
                 result.add(coverageTarget);
             }
         }
-        List<FunctionWithUseSourceLine> allUsesOfGraph = graphHelper.getAllUsesOfGraph(graph);
+        List<FunctionWithUseSourceLine> allUsesOfGraph = graphHelper.getAllUsesOfGraph(logicGraph);
         for (var use : allUsesOfGraph) {
             var isAlreadyUsed = result.stream().filter(target -> use.equals(target.getCoverageElement().getUse())).findAny();
             if (isAlreadyUsed.isEmpty()) {

@@ -1,7 +1,7 @@
 package logic.testcasegenerator;
 
 import logic.model.ArrowModel;
-import logic.model.Graph;
+import logic.model.LogicGraph;
 import logic.model.NodeModel;
 import logic.model.SourceCodeLine;
 import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithSourceLine;
@@ -10,13 +10,12 @@ import shared.model.AccessMode;
 import shared.model.NodeType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GraphHelper {
 
-    List<FunctionWithUseSourceLine> getAllUsesOfGraph(Graph graph) {
+    List<FunctionWithUseSourceLine> getAllUsesOfGraph(LogicGraph logicGraph) {
         List<FunctionWithUseSourceLine> functionsWithUseSourceLine = new ArrayList<>();
-        for (var node : graph.getNodes()) {
+        for (var node : logicGraph.getNodes()) {
             if (NodeType.FUNCTION.equals(node.getType())) {
                 List<SourceCodeLine> entries = node.getSourceList();
                 for (var entry : entries) {
@@ -62,7 +61,7 @@ public class GraphHelper {
         return result;
     }
 
-    private List<ArrowModel> getSuccessorArrowsToBeConsidered(NodeModel node, List<Long> relationsInfluenced) {
+    public List<ArrowModel> getSuccessorArrowsToBeConsidered(NodeModel node, List<Long> relationsInfluenced) {
         List<ArrowModel> result;
         if (relationsInfluenced.contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)) {
             result = node.getOutgoingArrows();
@@ -77,7 +76,7 @@ public class GraphHelper {
         return result;
     }
 
-    private List<FunctionWithUseSourceLine> getReadUsageOfDB(NodeModel dbNode) {
+    public List<FunctionWithUseSourceLine> getReadUsageOfDB(NodeModel dbNode) {
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
         var arrows = dbNode.getIncomingArrows();
         for (var arrow : arrows) {
@@ -91,7 +90,7 @@ public class GraphHelper {
 
     private List<FunctionWithUseSourceLine> getUsesInAFunction(NodeModel node, long idOfArrow) {
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
-        var uses = node.getSourceList().stream().filter(sourceCodeLine -> sourceCodeLine.getUse() != null && !sourceCodeLine.getUse().isBlank()).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencingUse().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).collect(Collectors.toList());
+        var uses = node.getSourceList().stream().filter(sourceCodeLine -> sourceCodeLine.getUse() != null && !sourceCodeLine.getUse().isBlank()).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencingUse().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).toList();
         uses.forEach(use -> result.add(new FunctionWithUseSourceLine(node, use)));
         return result;
     }

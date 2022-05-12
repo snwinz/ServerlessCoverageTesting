@@ -21,14 +21,14 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     @Override
     public TestSuite getResourceCoverage(String graphJSON) {
-        Graph graph = new Graph(graphJSON);
-        graph.addRelationsToElements();
+        LogicGraph logicGraph = new LogicGraph(graphJSON);
+        logicGraph.addRelationsToElements();
 
-        List<CoverageTargetAllResources> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllResources(graph);
+        List<CoverageTargetAllResources> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllResources(logicGraph);
 
         for (var target : coverageTargets) {
             var node = target.getCoverageElement();
-            List<Testcase> testcases = getTestcasesCoveringNode(node, graph);
+            List<Testcase> testcases = getTestcasesCoveringNode(node, logicGraph);
             var targetCoverageStatement = List.of(String.format("%s%d%s", RESOURCE_MARKER, node.getIdentifier(), LOGDELIMITER));
             List<Testcase> additionalTestcases = new ArrayList<>();
             for (var testcase : testcases) {
@@ -41,12 +41,12 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
         TestSuite testsuite = new TestSuite();
         testsuite.add(coverageTargets);
-        testsuite.calculateOracleNodes(graph);
-        testsuite.calculateStateNodes(graph);
+        testsuite.calculateOracleNodes(logicGraph);
+        testsuite.calculateStateNodes(logicGraph);
         return testsuite;
     }
 
-    private List<Testcase> getTestcasesCoveringNode(NodeModel node, Graph graph) {
+    private List<Testcase> getTestcasesCoveringNode(NodeModel node, LogicGraph logicGraph) {
         List<Testcase> testcases = new ArrayList<>();
         var logStatements = List.of(String.format("%s%d%s", RESOURCE_MARKER, node.getIdentifier(), LOGDELIMITER));
 
@@ -57,7 +57,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             Testcase testcase = new Testcase(functions, target, logStatements);
             testcases.add(testcase);
         } else {
-            var allArrows = graph.getArrows();
+            var allArrows = logicGraph.getArrows();
             List<NodeModel> functionsToBeCalled = getFunctionCallingResource(node, allArrows);
             for (var function : functionsToBeCalled) {
                 String target = String.format("Coverage of %s by calling %s", node, function);
@@ -103,14 +103,14 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     @Override
     public TestSuite getRelationCoverage(String graphJSON) {
-        Graph graph = new Graph(graphJSON);
-        graph.addRelationsToElements();
+        LogicGraph logicGraph = new LogicGraph(graphJSON);
+        logicGraph.addRelationsToElements();
 
-        List<CoverageTargetAllRelations> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllRelations(graph);
+        List<CoverageTargetAllRelations> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllRelations(logicGraph);
 
         for (var target : coverageTargets) {
             var arrow = target.getCoverageElement();
-            List<Testcase> testcases = getTestCasesCoveringArrow(arrow, graph);
+            List<Testcase> testcases = getTestCasesCoveringArrow(arrow, logicGraph);
 
             List<Testcase> additionalTestcases = new ArrayList<>();
             for (var testcase : testcases) {
@@ -125,15 +125,15 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
         TestSuite testsuite = new TestSuite();
         testsuite.add(coverageTargets);
-        testsuite.calculateOracleNodes(graph);
-        testsuite.calculateStateNodes(graph);
+        testsuite.calculateOracleNodes(logicGraph);
+        testsuite.calculateStateNodes(logicGraph);
         return testsuite;
 
     }
 
-    private List<Testcase> getTestCasesCoveringArrow(ArrowModel arrow, Graph graph) {
+    private List<Testcase> getTestCasesCoveringArrow(ArrowModel arrow, LogicGraph logicGraph) {
         List<Testcase> testcases = new ArrayList<>();
-        List<NodeModel> functions = getFunctionsCallingBinding(arrow, graph);
+        List<NodeModel> functions = getFunctionsCallingBinding(arrow, logicGraph);
         var predecessorNode = arrow.getPredecessorNode();
         var successorNode = arrow.getSuccessorNode();
         var logStatements = List.of(String.format("%s%d%s", RELATION_MARKER, arrow.getIdentifier(), LOGDELIMITER));
@@ -154,10 +154,10 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         return testcases;
     }
 
-    private List<NodeModel> getFunctionsCallingBinding(ArrowModel arrow, Graph graph) {
+    private List<NodeModel> getFunctionsCallingBinding(ArrowModel arrow, LogicGraph logicGraph) {
         List<NodeModel> resultFunctions = new ArrayList<>();
         Queue<ArrowModel> relationsToIterate = new LinkedList<>();
-        List<ArrowModel> relationsNotInvestigatedYet = new ArrayList<>(graph.getArrows());
+        List<ArrowModel> relationsNotInvestigatedYet = new ArrayList<>(logicGraph.getArrows());
         relationsToIterate.add(arrow);
         relationsNotInvestigatedYet.remove(arrow);
         while (!relationsToIterate.isEmpty()) {
@@ -182,10 +182,10 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     @Override
     public TestSuite getAllDefsCoverage(String graphJSON) {
-        Graph graph = new Graph(graphJSON);
-        graph.addRelationsToElements();
+        LogicGraph logicGraph = new LogicGraph(graphJSON);
+        logicGraph.addRelationsToElements();
 
-        List<CoverageTargetAllDefs> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllDefs(graph);
+        List<CoverageTargetAllDefs> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllDefs(logicGraph);
 
         for (var target : coverageTargets) {
             var def = target.getCoverageElement();
@@ -197,61 +197,25 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
         TestSuite testsuite = new TestSuite();
         testsuite.add(coverageTargets);
-        testsuite.calculateOracleNodes(graph);
-        testsuite.calculateStateNodes(graph);
+        testsuite.calculateOracleNodes(logicGraph);
+        testsuite.calculateStateNodes(logicGraph);
         return testsuite;
-    }
-
-
-    private List<FunctionWithUseSourceLine> getReadUsageOfDB(NodeModel dbNode) {
-        List<FunctionWithUseSourceLine> result = new ArrayList<>();
-        var arrows = dbNode.getIncomingArrows();
-        for (var arrow : arrows) {
-            var predecessor = arrow.getPredecessorNode();
-            if (arrow.hasAccessMode(AccessMode.READ) && NodeType.FUNCTION.equals(predecessor.getType())) {
-                result.addAll(getUsesInAFunction(predecessor, arrow.getIdentifier()));
-            }
-        }
-        return result;
-    }
-
-    private List<FunctionWithUseSourceLine> getUsesInAFunction(NodeModel node, long idOfArrow) {
-        List<FunctionWithUseSourceLine> result = new ArrayList<>();
-        var uses = node.getSourceList().stream().filter(sourceCodeLine -> sourceCodeLine.getUse() != null && !sourceCodeLine.getUse().isBlank()).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencingUse().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).toList();
-        uses.forEach(use -> result.add(new FunctionWithUseSourceLine(node, use)));
-        return result;
-    }
-
-
-    private List<ArrowModel> getSuccessorArrowsToBeConsidered(NodeModel node, List<Long> relationsInfluenced) {
-        List<ArrowModel> result;
-        if (relationsInfluenced.contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)) {
-            result = node.getOutgoingArrows();
-        } else {
-            result = new ArrayList<>();
-            for (var relation : node.getOutgoingArrows()) {
-                if (relationsInfluenced.contains(relation.getIdentifier())) {
-                    result.add(relation);
-                }
-            }
-        }
-        return result;
     }
 
     @Override
     public TestSuite getDefUseCoverage(String graphJSON) {
-        Graph graph = new Graph(graphJSON);
-        graph.addRelationsToElements();
+        LogicGraph logicGraph = new LogicGraph(graphJSON);
+        logicGraph.addRelationsToElements();
 
-        List<CoverageTargetAllDefUse> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllDefUse(graph);
+        List<CoverageTargetAllDefUse> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllDefUse(logicGraph);
         for (var target : coverageTargets) {
             List<Testcase> testcases = getTestcaseForTarget(target);
             target.addTestcases(testcases);
         }
         TestSuite testsuite = new TestSuite();
         testsuite.add(coverageTargets);
-        testsuite.calculateOracleNodes(graph);
-        testsuite.calculateStateNodes(graph);
+        testsuite.calculateOracleNodes(logicGraph);
+        testsuite.calculateStateNodes(logicGraph);
         return testsuite;
     }
 
@@ -366,7 +330,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
 
     private List<DefViaDB> findAllDefsOfAUseCoupledByADataStorage(FunctionWithUseSourceLine use) {
-        List<ArrowModel> arrows = getSuccessorArrowsToBeConsidered(use.getFunction(), use.getSourceCodeLine().getRelationsInfluencingUse());
+        List<ArrowModel> arrows = graphHelper.getSuccessorArrowsToBeConsidered(use.getFunction(), use.getSourceCodeLine().getRelationsInfluencingUse());
         List<DefViaDB> results = new LinkedList<>();
         for (var arrow : arrows) {
             if (arrow.hasAccessMode(AccessMode.READ)) {
@@ -385,13 +349,13 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     }
 
     private List<UseViaDB> findAllUsesOfADefCoupledByADataStorage(FunctionWithDefSourceLine def) {
-        List<ArrowModel> arrows = getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
+        List<ArrowModel> arrows = graphHelper.getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
         List<UseViaDB> results = new LinkedList<>();
         for (var arrow : arrows) {
             if (arrow.hasAccessMode(AccessMode.DELETE) || arrow.hasAccessMode(AccessMode.UPDATE) || arrow.hasAccessMode(AccessMode.CREATE)) {
                 var potentialDB = arrow.getSuccessorNode();
                 if (NodeType.DATA_STORAGE.equals(potentialDB.getType())) {
-                    var readUsagesOfDb = getReadUsageOfDB(potentialDB);
+                    var readUsagesOfDb = graphHelper.getReadUsageOfDB(potentialDB);
                     if (arrow.hasAccessMode(AccessMode.DELETE)) {
                         for (var readUse : readUsagesOfDb) {
                             results.add(new UseViaDBDelete(readUse, potentialDB));
@@ -513,18 +477,18 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     @Override
     public TestSuite getAllUsesCoverage(String graphJSON) {
-        Graph graph = new Graph(graphJSON);
-        graph.addRelationsToElements();
+        LogicGraph logicGraph = new LogicGraph(graphJSON);
+        logicGraph.addRelationsToElements();
 
-        List<CoverageTargetAllUses> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllUses(graph);
+        List<CoverageTargetAllUses> coverageTargets = targetGenerator.getAllTargetsToBeCoveredByAllUses(logicGraph);
         for (var target : coverageTargets) {
             List<Testcase> testcases = getTestcaseForTarget(target);
             target.addTestcases(testcases);
         }
         TestSuite testsuite = new TestSuite();
         testsuite.add(coverageTargets);
-        testsuite.calculateOracleNodes(graph);
-        testsuite.calculateStateNodes(graph);
+        testsuite.calculateOracleNodes(logicGraph);
+        testsuite.calculateStateNodes(logicGraph);
 
         return testsuite;
     }
@@ -644,6 +608,4 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
         }
         return additionalTestcases;
     }
-
-
 }

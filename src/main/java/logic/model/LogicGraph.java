@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class Graph {
+public class LogicGraph {
 
     @Expose
     private final List<ArrowModel> arrows;
@@ -15,9 +15,9 @@ public class Graph {
     private final List<NodeModel> nodes;
 
 
-    public Graph(String graphJSON) {
+    public LogicGraph(String graphJSON) {
         var gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-        Graph modelLoaded = gson.fromJson(graphJSON, Graph.class);
+        LogicGraph modelLoaded = gson.fromJson(graphJSON, LogicGraph.class);
         this.arrows = modelLoaded.getArrows();
         this.nodes = modelLoaded.getNodes();
         updateTypesOfInput();

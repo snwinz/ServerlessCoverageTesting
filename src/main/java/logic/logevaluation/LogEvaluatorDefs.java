@@ -1,8 +1,14 @@
 package logic.logevaluation;
 
+import logic.model.LogicGraph;
+import logic.testcasegenerator.TargetGenerator;
+import logic.testcasegenerator.coveragetargets.CoverageTargetAllDefs;
 import logic.testcasegenerator.coveragetargets.LogNameConfiguration;
+import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithDefSourceLine;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -41,6 +47,13 @@ public class LogEvaluatorDefs extends LogEvaluator {
     @Override
     public String getCriteriaName() {
         return "All Defs";
+    }
+
+    @Override
+    public List<String> getTargets(LogicGraph logicGraph) {
+        TargetGenerator testcaseGenerator = new TargetGenerator();
+        var targets = testcaseGenerator.getAllTargetsToBeCoveredByAllDefs(logicGraph);
+        return targets.stream().map(CoverageTargetAllDefs::getCoverageElement).map(FunctionWithDefSourceLine::getLogMessage).toList();
     }
 
 }

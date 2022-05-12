@@ -112,12 +112,12 @@ public class Testcase {
         this.specificTargetCovered = testState;
     }
 
-    public void calculateNodesForOracle(Graph graph) {
+    public void calculateNodesForOracle(LogicGraph logicGraph) {
         Set<NodeModel> nodesWalked = new HashSet<>();
         Set<NodeModel> nodesToCover = new HashSet<>();
 
         for (var function : functionNames) {
-            var rootNode = graph.findNodeByID(function.getId());
+            var rootNode = logicGraph.findNodeByID(function.getId());
             if (rootNode.isPresent()) {
                 nodesWalked.add(rootNode.get());
                 if (nodesToCover.add(rootNode.get())) {
@@ -128,13 +128,13 @@ public class Testcase {
         nodesForOracle = nodesToCover;
     }
 
-    public void calculateNodesHoldingState(Graph graph) {
+    public void calculateNodesHoldingState(LogicGraph logicGraph) {
 
         Set<NodeModel> nodesWithState = new HashSet<>();
 
         Set<NodeModel> nodesWalked = new HashSet<>();
         for (var function : functionNames) {
-            var rootNode = graph.findNodeByID(function.getId());
+            var rootNode = logicGraph.findNodeByID(function.getId());
             rootNode.ifPresent(nodeModel -> findStateNodesAfter(nodeModel, nodesWalked, nodesWithState));
         }
         nodesHoldingState = nodesWithState;

@@ -1,5 +1,7 @@
 package logic.logevaluation;
 
+import logic.model.LogicGraph;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,4 +19,5 @@ public abstract class LogEvaluator {
 
     abstract public String getCriteriaName();
 
+    public abstract List<String> getTargets(LogicGraph graph);
 }

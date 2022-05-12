@@ -8,10 +8,10 @@ import gui.view.StandardPresentationView;
 import gui.view.graphcomponents.DraggableArrow;
 import gui.view.graphcomponents.DraggableNode;
 import javafx.stage.FileChooser;
-import logic.logevaluation.CoverageCalculation;
-import shared.model.Testcase;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 public class GraphVisualisationController {
@@ -53,7 +53,8 @@ public class GraphVisualisationController {
         for (DraggableArrow arrow : arrows) {
             arrow.updateOffset();
             model.updateArrowPosition(arrow.getIdentifier(), arrow.getOriginalStartOffsetPositionX(),
-                    arrow.getOriginalStartOffsetPositionY(), arrow.getOriginalEndOffsetPositionX(), arrow.getOriginalEndOffsetPositionY());
+                    arrow.getOriginalStartOffsetPositionY(), arrow.getOriginalEndOffsetPositionX(),
+                    arrow.getOriginalEndOffsetPositionY());
         }
         model.informObservers();
     }
@@ -124,7 +125,8 @@ public class GraphVisualisationController {
 
     public void updateArrowPosition(DraggableArrow arrow) {
         model.updateArrowPosition(arrow.getIdentifier(), arrow.getOriginalStartOffsetPositionX(),
-                arrow.getOriginalStartOffsetPositionY(), arrow.getOriginalEndOffsetPositionX(), arrow.getOriginalEndOffsetPositionY());
+                arrow.getOriginalStartOffsetPositionY(), arrow.getOriginalEndOffsetPositionX(),
+                arrow.getOriginalEndOffsetPositionY());
     }
 
 
@@ -147,23 +149,31 @@ public class GraphVisualisationController {
         controller.setup();
     }
 
-    public void analyzeLogFile(File file) {
-        CoverageCalculation coverageCalculation = new CoverageCalculation();
-        String result = coverageCalculation.calculateCoverage(file);
-        StandardPresentationView view = new StandardPresentationView("Coverage");
-        view.setText(result);
-        view.show();
-    }
-
     public void executeTestcases() {
         var fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         var tcFile = fileChooser.showOpenDialog(view);
         if (tcFile != null) {
             var testcases = PersistenceUtilities.loadTCs(tcFile.getAbsolutePath());
-            TestCaseExecutionController controller = new TestCaseExecutionController(testcases,model);
+            TestCaseExecutionController controller = new TestCaseExecutionController(testcases, model);
             controller.setup();
 
+        }
+    }
+
+    public void evaluateLog(Graph graph) {
+
+        var fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        var file = fileChooser.showOpenDialog(view);
+        if (file != null) {
+            try {
+                var logs = Files.readAllLines(file.toPath());
+                LogEvaluationController controller = new LogEvaluationController(graph);
+                controller.setup(logs);
+            } catch (IOException e) {
+                System.err.println("Error while reading file " + file.getName());
+            }
         }
     }
 }
