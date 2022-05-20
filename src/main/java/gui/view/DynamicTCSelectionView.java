@@ -202,8 +202,26 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         Button unselectAllTestCases = new Button("Unselect all test cases");
         unselectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(false)));
 
+
+        Button selectAllUncoveredTestCases = new Button("Select uncovered testing targets");
+        selectAllUncoveredTestCases.setOnAction(e ->
+                {
+                    availableTestcases.forEach(cb -> cb.setSelected(true));
+                    var targets = testSuite.getTestTargets();
+                    var coveredTC = availableTestcases.stream().map(CheckboxWrapper::getEntry).filter(Testcase::isCovered).collect(Collectors.toSet());
+                    for (var target : targets) {
+                        if (target.getTestcases().stream().anyMatch(coveredTC::contains)) {
+                            for (var tc : availableTestcases) {
+                                if (target.getTestcases().contains(tc.getEntry())) {
+                                    tc.setSelected(false);
+                                }
+                            }
+                        }
+                    }
+                }
+        );
         ViewHelper.addToGridInHBox(grid, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput,
-                exportAllTCsWithInputEachTarget, selectAllTestCases, unselectAllTestCases);
+                exportAllTCsWithInputEachTarget, selectAllTestCases, unselectAllTestCases, selectAllUncoveredTestCases);
         return scrollpane;
     }
 

@@ -2,7 +2,6 @@ package gui.controller;
 
 import gui.model.Graph;
 import gui.model.TestcasesContainer;
-import gui.view.LogEvaluationView;
 import gui.view.StandardPresentationView;
 import gui.view.TestCaseExecutionView;
 import gui.view.wrapper.TestcaseWrapper;
@@ -16,7 +15,6 @@ import shared.model.Testcase;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class TestCaseExecutionController {
     private final TestCaseExecutionView view;
