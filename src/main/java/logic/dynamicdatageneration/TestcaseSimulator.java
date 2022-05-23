@@ -1,6 +1,6 @@
 package logic.dynamicdatageneration;
 
-import gui.view.wrapper.Commands;
+import gui.view.wrapper.ExecutionSettings;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
 import logic.dynamicdatageneration.testrun.FunctionWithInputData;
@@ -26,14 +26,12 @@ public class TestcaseSimulator {
     }
 
 
-    public Optional<TestData> simulateTestcase(Testcase testcase, Commands commands) {
+    public Optional<TestData> simulateTestcase(Testcase testcase, ExecutionSettings executionSettings) {
 
 
         testcase.setCovered(false);
         testcase.setSpecificTargetCovered(false);
-        executor.deleteOldLogs();
-
-        TestData testDataCreated = new TestData(testcase.getFunctions(), commands);
+        TestData testDataCreated = new TestData(testcase.getFunctions(), executionSettings);
 
         for (int actualRun = 1; actualRun <= maximalNumberOfTries; actualRun++) {
             try {

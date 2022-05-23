@@ -1,25 +1,30 @@
 package gui.view.wrapper;
 
-public class Commands {
+public class ExecutionSettings {
 
 
-    private String resetFunctionName;
+    private final String resetFunctionName;
+    private final String region;
 
 
     private int numberOfTries = 1;
 
-    private Double probChangeGoodData;
+    private double probChangeGoodData;
 
-    private Double probEntryUndefined;
-    private Double probSimilarInputAsValue;
-    private Double probRandomInputAsValue;
-    private Double probSimilarOutputAsValue;
-    private Double probRandomOutputAsValue;
-    private Double probSameValueEverywhere;
-    private String region;
+    private double probEntryUndefined;
+    private double probSimilarInputAsValue;
+    private double probRandomInputAsValue;
+    private double probSimilarOutputAsValue;
+    private double probRandomOutputAsValue;
+    private double probSameValueEverywhere;
+
+    public ExecutionSettings(String region, String resetFunctionName) {
+        this.region = region;
+        this.resetFunctionName = resetFunctionName;
+    }
 
 
-    public Double getProbChangeGoodData() {
+    public double getProbChangeGoodData() {
         return probChangeGoodData;
     }
 
@@ -35,7 +40,7 @@ public class Commands {
         this.probChangeGoodData = probChangeGoodData;
     }
 
-    public Double getProbEntryUndefined() {
+    public double getProbEntryUndefined() {
         return probEntryUndefined;
     }
 
@@ -43,7 +48,7 @@ public class Commands {
         this.probEntryUndefined = probEntryUndefined;
     }
 
-    public Double getProbSimilarInputAsValue() {
+    public double getProbSimilarInputAsValue() {
         return probSimilarInputAsValue;
     }
 
@@ -51,7 +56,7 @@ public class Commands {
         this.probSimilarInputAsValue = probSimilarInputAsValue;
     }
 
-    public Double getProbRandomInputAsValue() {
+    public double getProbRandomInputAsValue() {
         return probRandomInputAsValue;
     }
 
@@ -59,7 +64,7 @@ public class Commands {
         this.probRandomInputAsValue = probRandomInputAsValue;
     }
 
-    public Double getProbSimilarOutputAsValue() {
+    public double getProbSimilarOutputAsValue() {
         return probSimilarOutputAsValue;
     }
 
@@ -67,7 +72,7 @@ public class Commands {
         this.probSimilarOutputAsValue = probSimilarOutputAsValue;
     }
 
-    public Double getProbRandomOutputAsValue() {
+    public double getProbRandomOutputAsValue() {
         return probRandomOutputAsValue;
     }
 
@@ -83,16 +88,8 @@ public class Commands {
         return probSameValueEverywhere;
     }
 
-    public void setResetFunctionName(String resetFunctionName) {
-        this.resetFunctionName = resetFunctionName;
-    }
-
     public String getResetFunctionName() {
         return resetFunctionName;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
     }
 
     public String getRegion() {
