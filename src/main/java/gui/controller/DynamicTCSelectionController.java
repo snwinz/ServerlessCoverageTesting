@@ -11,6 +11,7 @@ import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
 import logic.model.TestSuite;
 import logic.model.Testcase;
+import logic.testcasegenerator.coveragetargets.CoverageTarget;
 
 import java.io.File;
 import java.util.List;
@@ -98,5 +99,10 @@ public class DynamicTCSelectionController {
         if (fileToSave != null) {
             PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
         }
+    }
+
+    public void coverAllTargets(List<CoverageTarget> testTargets, String region) {
+
+        //TODO
     }
 }

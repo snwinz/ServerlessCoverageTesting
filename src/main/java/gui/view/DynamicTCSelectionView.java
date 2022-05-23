@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -64,22 +65,23 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
 
         var startButton = new Button("Start");
         var cancelButton = new Button("Cancel");
+        var createCoverageForAllTargets = new Button("Cover all targets");
+
         startButton.setOnAction(getActionEventEventHandlerForStartButton());
         cancelButton.setOnAction(e -> controller.closeView());
-        grid.add(startButton, 1, 1);
-        grid.add(cancelButton, 2, 1);
+        createCoverageForAllTargets.setOnAction(e -> controller.coverAllTargets(testSuite.getTestTargets()));
+
 
         var resetLabel = new Label("Reset function:");
         HBox resetFunctionBox = new HBox();
         var startResetButton = new Button("Start reset application");
         startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
         resetFunctionBox.getChildren().addAll(resetLabel, resetFunctionName, startResetButton);
-        grid.add(resetFunctionBox, 3, 1);
 
         var regionLabel = new Label("AWS region:");
         HBox regionBox = new HBox();
         regionBox.getChildren().addAll(regionLabel, regionAWS);
-        grid.add(regionBox, 4, 1);
+        ViewHelper.addToGridInHBox(grid, startButton, cancelButton, createCoverageForAllTargets, resetFunctionBox, regionBox);
 
 
         Label infoOfTestCaseLabel = new Label("Summary of test case:");
@@ -222,6 +224,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
                     );
                 }
         );
+
         ViewHelper.addToGridInHBox(grid, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput,
                 exportAllTCsWithInputEachTarget, selectAllTestCases, unselectAllTestCases, selectAllUncoveredTestCases);
         return scrollpane;
@@ -236,40 +239,26 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         Label probRandomInputAsValueLabel = new Label("Probability use value of random input key:");
         Label probSimilarOutputAsValueLabel = new Label("Probability use value of similar output key:");
         Label probRandomOutputAsValueLabel = new Label("Probability use value of random output key:");
-
-        grid.add(numberOfTriesLabel, 1, 2);
         numberOfTries.setEditable(true);
-        grid.add(numberOfTries, 1, 3);
-
-
-        grid.add(probChangeGoodDataLabel, 2, 2);
         probChangeGoodData.setEditable(true);
-        grid.add(probChangeGoodData, 2, 3);
-
-        grid.add(probSameValueEverywhereLabel, 3, 2);
         probSameValueEverywhere.setEditable(true);
-        grid.add(probSameValueEverywhere, 3, 3);
-
-        grid.add(probEntryUndefinedLabel, 1, 4);
         probEntryUndefined.setEditable(true);
-        grid.add(probEntryUndefined, 1, 5);
-
-        grid.add(probSimilarInputAsValueLabel, 2, 4);
         probSimilarInputAsValue.setEditable(true);
-        grid.add(probSimilarInputAsValue, 2, 5);
-
-        grid.add(probRandomInputAsValueLabel, 3, 4);
         probRandomInputAsValue.setEditable(true);
-        grid.add(probRandomInputAsValue, 3, 5);
-
-        grid.add(probSimilarOutputAsValueLabel, 4, 4);
         probSimilarOutputAsValue.setEditable(true);
-        grid.add(probSimilarOutputAsValue, 4, 5);
-
-        grid.add(probRandomOutputAsValueLabel, 5, 4);
         probRandomOutputAsValue.setEditable(true);
-        grid.add(probRandomOutputAsValue, 5, 5);
 
+        VBox triesBox = new VBox(numberOfTriesLabel, numberOfTries);
+        VBox changeGoodDataBox = new VBox(probChangeGoodDataLabel, probChangeGoodData);
+        VBox sameValueEverywhereBox = new VBox(probSameValueEverywhereLabel, probSameValueEverywhere);
+        VBox probEntryUndefinedBox = new VBox(probEntryUndefinedLabel, probEntryUndefined);
+        VBox probSimilarInputAsValueBox = new VBox(probSimilarInputAsValueLabel, probSimilarInputAsValue);
+        VBox probRandomInputAsValueBox = new VBox(probRandomInputAsValueLabel, probRandomInputAsValue);
+        VBox probSimilarOutputAsValueBox = new VBox(probSimilarOutputAsValueLabel, probSimilarOutputAsValue);
+        VBox probRandomOutputAsValueBox = new VBox(probRandomOutputAsValueLabel, probRandomOutputAsValue);
+
+        ViewHelper.addToGridInHBox(grid, triesBox, changeGoodDataBox, probEntryUndefinedBox);
+        ViewHelper.addToGridInHBox(grid,sameValueEverywhereBox , probSimilarInputAsValueBox, probRandomInputAsValueBox, probSimilarOutputAsValueBox, probRandomOutputAsValueBox);
 
     }
 

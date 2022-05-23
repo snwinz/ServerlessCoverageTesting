@@ -12,7 +12,7 @@ public class ViewHelper {
             HBox.setMargin(node, new Insets(10, 10, 10, 10));
             box.getChildren().add(node);
         }
-        grid.add(box, 1, grid.getRowCount(), 5, 1);
+        grid.add(box, 1, grid.getRowCount(), 8, 1);
         return box;
     }
 }
