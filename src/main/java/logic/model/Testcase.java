@@ -1,6 +1,8 @@
 package logic.model;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import logic.dynamicdatageneration.testrun.TestData;
 import shared.model.AccessMode;
@@ -14,9 +16,9 @@ import java.util.Set;
 public class Testcase {
     private final List<ServerlessFunction> functionNames;
     private final String target;
-    private StringProperty testCaseOutput;
-    private BooleanProperty testCovered;
-    private BooleanProperty specificTargetCovered;
+    private final StringProperty testCaseOutput;
+    private final BooleanProperty testCovered;
+    private final BooleanProperty specificTargetCovered;
     private Set<NodeModel> nodesForOracle;
     private Set<NodeModel> nodesHoldingState;
 
@@ -34,6 +36,9 @@ public class Testcase {
         this.functionNames = new ArrayList<>(functionNames);
         this.target = target;
         this.logsToCover = logsToCover;
+        testCaseOutput = new SimpleStringProperty();
+        testCovered = new SimpleBooleanProperty();
+        specificTargetCovered = new SimpleBooleanProperty();
     }
 
     public String getCommandsForTestcase() {
@@ -86,30 +91,15 @@ public class Testcase {
         return new ArrayList<>(logsToCover);
     }
 
-    public void setTestCaseOutput(StringProperty testCaseOutput) {
-        this.testCaseOutput = testCaseOutput;
-    }
+
 
     public void writeToOutput(String text) {
-        if (testCaseOutput != null) {
-            testCaseOutput.set(text);
-        }
+        testCaseOutput.set(text);
     }
 
     public void addTextToWriteOutput(String text) {
-        if (testCaseOutput != null) {
-            text = testCaseOutput.get() + "\n" + text;
-            testCaseOutput.set(text);
-        }
-    }
-
-
-    public void setTestState(BooleanProperty testState) {
-        this.testCovered = testState;
-    }
-
-    public void setSpecificTargetState(BooleanProperty testState) {
-        this.specificTargetCovered = testState;
+        text = testCaseOutput.get() + "\n" + text;
+        testCaseOutput.set(text);
     }
 
     public void calculateNodesForOracle(LogicGraph logicGraph) {
@@ -201,6 +191,25 @@ public class Testcase {
 
     }
 
+    public String getTestCaseOutput() {
+        return testCaseOutput.get();
+    }
+
+    public StringProperty testCaseOutputProperty() {
+        return testCaseOutput;
+    }
+
+    public boolean isTestCovered() {
+        return testCovered.get();
+    }
+
+    public BooleanProperty testCoveredProperty() {
+        return testCovered;
+    }
+
+    public BooleanProperty specificTargetCoveredProperty() {
+        return specificTargetCovered;
+    }
 
     public String getInfos() {
         if (this.testData == null) {

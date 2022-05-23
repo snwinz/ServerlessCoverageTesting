@@ -1,7 +1,9 @@
 package logic.testcasegenerator.coveragetargets;
 
-import logic.testcasegenerator.coveragetargets.coverageelements.DefUsePair;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import logic.model.Testcase;
+import logic.testcasegenerator.coveragetargets.coverageelements.DefUsePair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +13,12 @@ public class CoverageTargetAllUses implements CoverageTarget {
     private final DefUsePair coverageElement;
 
     private final List<Testcase> testcases;
+    private final SimpleBooleanProperty specificTargetCoveredProperty;
 
     public CoverageTargetAllUses(DefUsePair coverageElement) {
         this.coverageElement = coverageElement;
         testcases = new ArrayList<>();
+        specificTargetCoveredProperty = new SimpleBooleanProperty();
     }
 
 
@@ -30,6 +34,10 @@ public class CoverageTargetAllUses implements CoverageTarget {
         this.testcases.addAll(testcases);
     }
 
+    @Override
+    public BooleanProperty specificTargetCoveredProperty() {
+        return specificTargetCoveredProperty;
+    }
 
     @Override
     public String getCoverageTargetDescription() {

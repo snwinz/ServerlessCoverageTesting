@@ -4,8 +4,6 @@ import gui.controller.DynamicTCSelectionController;
 import gui.view.wrapper.CheckboxWrapper;
 import gui.view.wrapper.Commands;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -14,6 +12,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import logic.model.ServerlessFunction;
 import logic.model.TestSuite;
@@ -94,7 +94,18 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         for (var testTarget : testSuite.getTestTargets()) {
             int lastRow = grid.getRowCount();
             Label testTargetLabel = new Label(testTarget.getCoverageTargetDescription());
-            grid.add(testTargetLabel, 1, lastRow);
+            Circle statusLightTarget = new Circle(100 / 3.0 / 2, 100 / 4.0, 10);
+            statusLightTarget.setFill(Color.RED);
+            testTarget.specificTargetCoveredProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    statusLightTarget.setFill(Color.GREEN);
+                } else {
+                    statusLightTarget.setFill(Color.RED);
+                }
+            });
+            HBox targetLabel = new HBox();
+            targetLabel.getChildren().addAll(testTargetLabel, statusLightTarget);
+            grid.add(targetLabel, 1, lastRow);
             for (Testcase testcase : testTarget.getTestcases()) {
                 lastRow = grid.getRowCount();
                 StringBuilder summaryOfTestCase = new StringBuilder();
@@ -136,20 +147,20 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
                 outputOfRunningTestCase.setEditable(false);
                 outputOfRunningTestCase.setPrefHeight(2);
                 grid.add(outputOfRunningTestCase, 4, lastRow);
-                StringProperty stringProperty = new SimpleStringProperty();
+                StringProperty stringProperty = testcase.testCaseOutputProperty();
                 outputOfRunningTestCase.textProperty().bind(stringProperty);
-                BooleanProperty testState = new SimpleBooleanProperty();
-                testState.addListener((observable, oldValue, newValue) -> {
+                BooleanProperty specificTestState = testcase.specificTargetCoveredProperty();
+                specificTestState.addListener((observable, oldValue, newValue) -> {
                     if (newValue) {
                         outputOfRunningTestCase.setStyle("-fx-control-inner-background:green;   -fx-text-fill: black; ");
+                        testTarget.specificTargetCoveredProperty().set(true);
                     } else {
                         outputOfRunningTestCase.setStyle("-fx-control-inner-background:white;   -fx-text-fill: black; ");
 
                     }
                 });
-                testcase.setSpecificTargetState(testState);
 
-                BooleanProperty testTargetState = new SimpleBooleanProperty();
+                BooleanProperty testTargetState = testcase.testCoveredProperty();
                 testTargetState.addListener((observable, oldValue, newValue) -> {
                     if (newValue) {
                         outputOfRunningTestCase.setStyle("-fx-control-inner-background:yellow;   -fx-text-fill: black; ");
@@ -158,8 +169,6 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
 
                     }
                 });
-                testcase.setTestState(testTargetState);
-                testcase.setTestCaseOutput(stringProperty);
 
                 Button replayButton = new Button("Reexecute");
                 replayButton.setOnAction(e -> controller.reexecuteTestcase(testcase, regionAWS.getText()));
@@ -206,18 +215,11 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         Button selectAllUncoveredTestCases = new Button("Select uncovered testing targets");
         selectAllUncoveredTestCases.setOnAction(e ->
                 {
-                    availableTestcases.forEach(cb -> cb.setSelected(true));
-                    var targets = testSuite.getTestTargets();
-                    var coveredTC = availableTestcases.stream().map(CheckboxWrapper::getEntry).filter(Testcase::isCovered).collect(Collectors.toSet());
-                    for (var target : targets) {
-                        if (target.getTestcases().stream().anyMatch(coveredTC::contains)) {
-                            for (var tc : availableTestcases) {
-                                if (target.getTestcases().contains(tc.getEntry())) {
-                                    tc.setSelected(false);
-                                }
-                            }
-                        }
-                    }
+                    var tcToBeSelected = testSuite.getTestTargets().stream().filter(target -> !target.specificTargetCoveredProperty().get())
+                            .flatMap(target -> target.getTestcases().stream()).collect(Collectors.toSet());
+                    availableTestcases.forEach(tc ->
+                            tc.setSelected(tcToBeSelected.contains(tc.getEntry()))
+                    );
                 }
         );
         ViewHelper.addToGridInHBox(grid, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput,
