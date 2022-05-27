@@ -3,7 +3,6 @@ package gui.view;
 import gui.controller.TestCaseExecutionController;
 import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
-import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -23,7 +22,10 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -242,14 +244,20 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
 
 
             Button selectAllTestCases = new Button("Select all test cases");
+            Button selectFailedTestCases = new Button("Select failed test cases");
 
             Button unselectAllTestCases = new Button("Unselect all test cases");
             Button showPassedTCs = new Button("Show passed TCs");
-            HBox adminButtons = ViewHelper.addToGridInHBox(grid, selectAllTestCases, unselectAllTestCases, showPassedTCs);
+            HBox adminButtons = ViewHelper.addToGridInHBox(grid, selectAllTestCases, unselectAllTestCases, selectFailedTestCases, showPassedTCs);
             selectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(true));
                 adminButtons.getChildren().remove(selectAllTestCases);
                 adminButtons.getChildren().add(0, unselectAllTestCases);
+            });
+            selectFailedTestCases.setOnAction(e -> {
+                selectedTestcases.forEach(cb -> cb.setSelected(false));
+                var testcasesFailed = selectedTestcases.stream().filter(cb -> !cb.getEntry().isPassed()).toList();
+                testcasesFailed.forEach(cb -> cb.setSelected(true));
             });
             unselectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(false));
