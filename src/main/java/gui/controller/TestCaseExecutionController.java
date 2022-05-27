@@ -53,6 +53,18 @@ public class TestCaseExecutionController {
         thread.start();
     }
 
+    public void recalibrateOutput(TestcaseWrapper testcase, String region, String resetFunction) {
+        TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
+        var thread = new Thread(() -> tcExecutor.recalibrate(testcase, resetFunction));
+        thread.start();
+    }
+
+    public void recalibrateTestcases(List<TestcaseWrapper> testcases, String region, String resetFunction) {
+        TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
+        var thread = new Thread(() -> tcExecutor.recalibrateTCs(testcases, resetFunction));
+        thread.start();
+    }
+
     public void executeTC(TestcaseWrapper testcase, String region) {
         TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
         var thread = new Thread(() -> tcExecutor.executeTC(testcase));
@@ -119,4 +131,6 @@ public class TestCaseExecutionController {
         controller.setup(allLogs);
 
     }
+
+
 }

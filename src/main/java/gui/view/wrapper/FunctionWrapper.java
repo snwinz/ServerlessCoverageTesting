@@ -52,7 +52,10 @@ public class FunctionWrapper {
 
     public void reset() {
         this.output.set("");
+        this.passed.set(true);
         this.passed.set(false);
+        this.executed.set(true);
         this.executed.set(false);
     }
+
 }

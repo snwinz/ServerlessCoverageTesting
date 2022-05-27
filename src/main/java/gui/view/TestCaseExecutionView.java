@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TestCaseExecutionView extends Stage implements PropertyChangeListener {
@@ -125,27 +126,32 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
 
                 Button executeTC = new Button("execute TC");
                 Button calibrateTC = new Button("calibrate TC");
+                Button recalibrateTC = new Button("recalibrate TC");
                 Button addFunction = new Button("add Function");
                 HBox.setMargin(executeTC, new Insets(10, 10, 10, 10));
                 HBox.setMargin(calibrateTC, new Insets(10, 10, 10, 10));
+                HBox.setMargin(recalibrateTC, new Insets(10, 10, 10, 10));
                 HBox.setMargin(addFunction, new Insets(10, 10, 10, 10));
 
                 executeTC.setOnAction(e -> {
                     testcase.setSaveLogs(keepLogsCheckbox.isSelected());
                     testcases.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
-                    testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
                     testcase.reset();
                     controller.executeTC(testcase, regionAWS.getText());
                 });
                 calibrateTC.setOnAction(e -> {
-                    testcase.getFunctionsWrapped().forEach(FunctionWrapper::reset);
                     testcase.reset();
                     controller.calibrateOutput(testcase, regionAWS.getText(), resetFunctionName.getText());
+                });
+
+                recalibrateTC.setOnAction(e -> {
+                    testcase.reset();
+                    controller.recalibrateOutput(testcase, regionAWS.getText(), resetFunctionName.getText());
                 });
                 addFunction.setOnAction(e -> controller.addFunctionToTestcase(testcase));
 
                 HBox buttons = new HBox();
-                buttons.getChildren().addAll(executeTC, calibrateTC, addFunction);
+                buttons.getChildren().addAll(executeTC, calibrateTC, recalibrateTC, addFunction);
                 grid.add(buttons, 3, rowOfTestcase);
 
                 var originalTestcase = testcase.getTestcase();
@@ -264,7 +270,6 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 saveConfigProperties();
                 var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
                 testcasesSelected.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
-                testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 testcasesSelected.forEach(TestcaseWrapper::reset);
                 controller.executeTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
             });
@@ -274,7 +279,6 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             executeAllTCs.setOnAction(e -> {
                 saveConfigProperties();
                 testcases.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
-                testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 testcases.forEach(TestcaseWrapper::reset);
                 controller.executeTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
@@ -288,7 +292,6 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             calibrateSelectedTestcases.setOnAction(e -> {
                 saveConfigProperties();
                 var testcasesSelected = selectedTestcases.stream().filter(CheckboxWrapper::isSelected).map(CheckboxWrapper::getEntry).toList();
-                testcasesSelected.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 testcasesSelected.forEach(TestcaseWrapper::reset);
                 controller.calibrateTestcases(testcasesSelected, regionAWS.getText(), resetFunctionName.getText());
             });
@@ -297,12 +300,19 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             Button calibrateAllTestcases = new Button("Calibrate all TCs");
             calibrateAllTestcases.setOnAction(e -> {
                 saveConfigProperties();
-                testcases.stream().map(TestcaseWrapper::getFunctionsWrapped).flatMap(Collection::stream).forEach(FunctionWrapper::reset);
                 testcases.forEach(TestcaseWrapper::reset);
                 controller.calibrateTestcases(testcases, regionAWS.getText(), resetFunctionName.getText());
             });
 
-            ViewHelper.addToGridInHBox(grid, calibrateSelectedTestcases, calibrateAllTestcases);
+            Button recalibrateAllTestcases = new Button("Recalibrate all failed TCs");
+            recalibrateAllTestcases.setOnAction(e -> {
+                saveConfigProperties();
+                var testcasesFailed = testcases.stream().filter(Predicate.not(TestcaseWrapper::isPassed)).toList();
+                testcasesFailed.forEach(TestcaseWrapper::reset);
+                controller.recalibrateTestcases(testcasesFailed, regionAWS.getText(), resetFunctionName.getText());
+            });
+
+            ViewHelper.addToGridInHBox(grid, calibrateSelectedTestcases, calibrateAllTestcases, recalibrateAllTestcases);
 
             Label logLabel = new Label("Logs:");
             grid.add(logLabel, 1, grid.getRowCount());

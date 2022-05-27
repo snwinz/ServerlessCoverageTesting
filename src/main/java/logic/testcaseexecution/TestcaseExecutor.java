@@ -4,6 +4,7 @@ import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.KeyValueJsonGenerator;
+import shared.model.Function;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -130,7 +131,7 @@ public class TestcaseExecutor {
         function.passedProperty().set(true);
         function.executedProperty().set(true);
         if (!passed) {
-            function.addTextToOutput("The following parts were not correct:\n" + String.join("\n", incorrectParts));
+            function.addTextToOutput("The following parts were not correct:\n\t\t" + String.join("\n\t\t", incorrectParts));
             function.passedProperty().set(false);
         }
     }
@@ -138,14 +139,18 @@ public class TestcaseExecutor {
     private void checkCorrectnessOfLogs(TestcaseWrapper testcase) {
         testcase.executedProperty().set(true);
         if (testcase.getTestcase().getLogsToBeCovered().size() == 0 && !testcase.isSaveLogs()) {
+            var functions = testcase.getFunctionsWrapped();
+            boolean allFunctionsSuccessful = functions.stream().allMatch(FunctionWrapper::isPassed);
+            testcase.passedProperty().set(false);
             testcase.passedProperty().set(true);
+            testcase.passedProperty().set(allFunctionsSuccessful);
             return;
         }
         var logs = executor.getAllNewLogs(0L);
         boolean passed = true;
         List<String> incorrectParts = new LinkedList<>();
         List<String> logsCompare = filterLogs(logs);
-        if(testcase.isSaveLogs()){
+        if (testcase.isSaveLogs()) {
             testcase.setLogsMeasured(List.copyOf(logsCompare));
         }
         for (var part : testcase.getTestcase().getLogsToBeCovered()) {
@@ -160,8 +165,8 @@ public class TestcaseExecutor {
             var lastFunction = functions.get(functions.size() - 1);
             if (passed) {
                 boolean allFunctionsSuccessful = functions.stream().allMatch(FunctionWrapper::isPassed);
-                testcase.passedProperty().set(true);
                 testcase.passedProperty().set(false);
+                testcase.passedProperty().set(true);
                 testcase.passedProperty().set(allFunctionsSuccessful);
             } else {
                 lastFunction.addTextToOutput("The following parts were not correct in log:\n" + String.join("\n", incorrectParts));
@@ -174,14 +179,24 @@ public class TestcaseExecutor {
 
     private void addResultToOutputValues(String result, Map<String, List<String>> outputValues) {
         KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(result);
-        var outputKeyValues = keyValueJsonGenerator.getKeyValues();
-        outputValues.putAll(outputKeyValues);
+        var generatedKeyValues = keyValueJsonGenerator.getKeyValues();
+        for (var entry : generatedKeyValues.entrySet()) {
+            var generatedKey = entry.getKey();
+            var generatedValue = entry.getValue();
+            List<String> existingValues = outputValues.containsKey(generatedKey) ? outputValues.get(generatedKey) : new ArrayList<>();
+            generatedValue.forEach(v -> existingValues.add(v));
+            outputValues.put(generatedKey, existingValues);
+        }
     }
-
 
     public void calibrate(List<TestcaseWrapper> testcases, String resetFunction) {
         for (var testcase : testcases) {
-            this.calibrate(testcase, resetFunction);
+            try {
+                this.calibrate(testcase, resetFunction);
+            } catch (Exception e) {
+                //brutal retry
+                this.calibrate(testcase, resetFunction);
+            }
         }
     }
 
@@ -193,31 +208,54 @@ public class TestcaseExecutor {
         executor.resetApplication(resetFunction);
         List<String> resultsSecondExecution = getResultOfExecution(functions);
         List<String> resultsSecondExecutionLogs = executor.getAllNewLogs(0L);
+        calibrateFunctions(functions, resultsFirstExecution, resultsSecondExecution);
+        resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
+        resultsSecondExecutionLogs = filterLogs(resultsSecondExecutionLogs);
+        calibrateLogsOnTestcase(testcase, resultsFirstExecutionLogs, resultsSecondExecutionLogs);
+    }
+
+
+    public void recalibrate(TestcaseWrapper testcase, String resetFunction) {
+        executor.resetApplication(resetFunction);
+        var functions = testcase.getFunctionsWrapped();
+        List<String> resultsFirstExecution = getResultOfExecution(functions);
+        List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
+        List<String> oldResults = functions.stream().map(FunctionWrapper::getFunction).map(Function::getExpectedOutputs)
+                .map(entry -> String.join("", entry)).toList();
+        List<String> oldLogs = testcase.getTestcase().getExpectedLogs();
+        calibrateFunctions(functions, resultsFirstExecution, oldResults);
+        resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
+        calibrateLogsOnTestcase(testcase, resultsFirstExecutionLogs, oldLogs);
+    }
+
+    private void calibrateFunctions(List<FunctionWrapper> functions, List<String> resultsFirstExecution, List<String> resultsSecondExecution) {
         var calibratedResults = calibrateResults(resultsFirstExecution, resultsSecondExecution);
-
         if (functions.size() == calibratedResults.size()) {
-
             for (int i = 0; i < functions.size(); i++) {
+                var expectedOutputList = calibratedResults.get(i);
                 var function = functions.get(i);
-                var expectedOutput = String.join("*", calibratedResults.get(i));
                 var originalFunction = function.getFunction();
-                originalFunction.setExpectedOutputs(expectedOutput);
-                function.expectedResultProperty().set(expectedOutput);
+                originalFunction.setExpectedOutputs(expectedOutputList);
+
+                var textExpectedOutput = expectedOutputList.stream().map(part -> part.replace("*", "\\*")).collect(Collectors.joining("*"));
+                function.expectedResultProperty().set(textExpectedOutput);
             }
         }
-        var calibratedLogs = calibrateLogs(resultsFirstExecutionLogs, resultsSecondExecutionLogs);
-        String expectedLog = String.join("*", calibratedLogs);
-        var originalTestcase = testcase.getTestcase();
-        originalTestcase.setExpectedLogOutput(expectedLog);
-        testcase.expectedLogsProperty().set(expectedLog);
     }
+
+    private void calibrateLogsOnTestcase(TestcaseWrapper testcase, List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
+        var calibratedLogs = calibrateLogs(resultsFirstExecutionLogs, resultsSecondExecutionLogs);
+        var originalTestcase = testcase.getTestcase();
+        originalTestcase.setExpectedLogOutput(calibratedLogs);
+        String expectedTextLog = String.join("*", calibratedLogs);
+        testcase.expectedLogsProperty().set(expectedTextLog);
+    }
+
 
     private List<String> calibrateLogs(List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
         List<String> result = new LinkedList<>();
-        var firstExecutionFiltered = filterLogs(resultsFirstExecutionLogs);
-        var secondExecutionFiltered = filterLogs(resultsSecondExecutionLogs);
-        for (var entry : firstExecutionFiltered) {
-            if (secondExecutionFiltered.contains(entry)) {
+        for (var entry : resultsFirstExecutionLogs) {
+            if (resultsSecondExecutionLogs.equals(entry)) {
                 result.add(entry);
             }
         }
@@ -234,7 +272,6 @@ public class TestcaseExecutor {
             var firstResult = resultsFirstExecution.get(i);
             var secondResult = resultsSecondExecution.get(i);
             var calibratedText = calibrateText(firstResult, secondResult);
-            calibratedText = calibratedText.stream().map(part -> part.replace("*", "\\*")).collect(Collectors.toList());
             result.add(calibratedText);
         }
 
@@ -289,12 +326,12 @@ public class TestcaseExecutor {
             function.addTextToOutput(invocation);
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
             System.out.println(result);
-            result = replaceResultsOfPreviousOutput(result, outputValues);
+            String resultWithParameters = replaceResultsOfPreviousOutput(result, outputValues);
             addResultToOutputValues(result, outputValues);
-            String resultInfoMessage = String.format("result: %s", result);
+            String resultInfoMessage = String.format("result: %s", resultWithParameters);
             function.addTextToOutput(resultInfoMessage);
             LOGGER.info(String.format(resultInfoMessage));
-            results.add(result);
+            results.add(resultWithParameters);
         }
         return results;
     }
@@ -312,4 +349,9 @@ public class TestcaseExecutor {
     }
 
 
+    public void recalibrateTCs(List<TestcaseWrapper> testcases, String resetFunction) {
+        for (var testcase : testcases) {
+            this.recalibrate(testcase, resetFunction);
+        }
+    }
 }

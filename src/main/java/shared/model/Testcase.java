@@ -23,6 +23,9 @@ public final class Testcase {
         return functions;
     }
 
+    public List<String> getExpectedLogs() {
+        return List.copyOf(expectedLogs);
+    }
 
     public String target() {
         return target;
@@ -72,5 +75,10 @@ public final class Testcase {
         }
         expectedLogs.clear();
         expectedLogs.addAll(Arrays.stream(parts).filter(Objects::nonNull).filter(entry -> !"".equals(entry.trim())).collect(Collectors.toList()));
+    }
+
+    public void setExpectedLogOutput(List<String> calibratedLogs) {
+        expectedLogs.clear();
+        expectedLogs.addAll(calibratedLogs);
     }
 }

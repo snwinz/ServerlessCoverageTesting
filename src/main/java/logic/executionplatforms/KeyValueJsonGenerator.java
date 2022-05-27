@@ -71,7 +71,7 @@ public class KeyValueJsonGenerator {
 
 
     private void addKeyValueToMap(String key, String value) {
-        List<String> values = keyValues.containsKey(key) ? keyValues.get(key) : new LinkedList<>();
+        List<String> values = keyValues.containsKey(key) ? keyValues.get(key) : new ArrayList<>();
         values.add(value);
         keyValues.put(key, values);
     }

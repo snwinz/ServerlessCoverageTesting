@@ -42,9 +42,14 @@ public class TestcaseWrapper {
         return passed;
     }
 
+    public boolean isPassed() {
+        return passed.get();
+    }
+
     public void reset() {
         this.passed.set(false);
         this.executed.set(false);
+        functionsWrapped.forEach(FunctionWrapper::reset);
     }
 
     public boolean isExecuted() {

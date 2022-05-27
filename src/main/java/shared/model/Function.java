@@ -44,6 +44,11 @@ public final class Function {
     }
 
 
+    public void setExpectedOutputs(List<String> outputs){
+        expectedOutputs.clear();
+        expectedOutputs.addAll(outputs);
+    }
+
     public void setFunctionName(String functionName) {
         this.name = functionName;
     }
