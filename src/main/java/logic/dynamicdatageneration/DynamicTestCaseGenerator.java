@@ -1,9 +1,12 @@
 package logic.dynamicdatageneration;
 
-import gui.view.wrapper.Commands;
+import gui.view.wrapper.ExecutionSettings;
 import logic.model.Testcase;
+import logic.testcasegenerator.coveragetargets.CoverageTarget;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 public class DynamicTestCaseGenerator {
@@ -12,11 +15,11 @@ public class DynamicTestCaseGenerator {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 
-    public void generateTestcases(List<Testcase> testcasesToBeCreated, Commands commands) {
-        TestcaseSimulator testcaseSimulator = new TestcaseSimulator(commands.getNumberOfRuns(), commands.getRegion());
-        testcaseSimulator.setResetFunction(commands.getResetFunctionName());
+    public void generateTestcases(List<Testcase> testcasesToBeCreated, ExecutionSettings executionSettings) {
+        TestcaseSimulator testcaseSimulator = new TestcaseSimulator(executionSettings.getNumberOfRuns(), executionSettings.getRegion());
+        testcaseSimulator.setResetFunction(executionSettings.getResetFunctionName());
         for (var testcase : testcasesToBeCreated) {
-            var res = testcaseSimulator.simulateTestcase(testcase, commands);
+            var res = testcaseSimulator.simulateTestcase(testcase, executionSettings);
             if (res.isPresent()) {
                 var testData = res.get();
                 System.out.println("Valid test case: ");
@@ -25,6 +28,57 @@ public class DynamicTestCaseGenerator {
         }
 
 
+    }
+
+    public void generateTestcasesForTarget(List<CoverageTarget> testTargets, ExecutionSettings executionSettings) {
+        TestcaseSimulator testcaseSimulator = new TestcaseSimulator(1, executionSettings.getRegion());
+        testcaseSimulator.setResetFunction(executionSettings.getResetFunctionName());
+        int runs = executionSettings.getNumberOfRuns();
+        List<ExecutionSettings> settings = getSettings(executionSettings);
+        for (int i = 0; i < runs; i++) {
+            for (var setting : settings) {
+                var targetsNotCovered = testTargets.stream().filter(Predicate.not(CoverageTarget::isCovered)).toList();
+                for (var target : targetsNotCovered) {
+                    for (var testcase : target.getTestcases()) {
+                        var res = testcaseSimulator.simulateTestcase(testcase, setting);
+                        if (res.isPresent()) {
+                            var testData = res.get();
+                            System.out.println("Valid test case: ");
+                            System.out.println(testData);
+                            target.specificTargetCoveredProperty().set(true);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("Target generation finished");
+    }
+
+    private List<ExecutionSettings> getSettings(ExecutionSettings executionSettings) {
+        List<ExecutionSettings> settings = new ArrayList<>();
+
+        ExecutionSettings allValuesSame = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        allValuesSame.setProbSameValueEverywhere(1.0);
+        settings.add(allValuesSame);
+
+        ExecutionSettings similarInputAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        similarInputAsValue.setProbSimilarInputAsValue(1.0);
+        settings.add(similarInputAsValue);
+
+        ExecutionSettings similarOutputAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        similarOutputAsValue.setProbSimilarOutputAsValue(1.0);
+        settings.add(similarOutputAsValue);
+
+        ExecutionSettings randomInputAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        randomInputAsValue.setProbRandomInputAsValue(1.0);
+        settings.add(randomInputAsValue);
+
+        ExecutionSettings randomOutAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        randomOutAsValue.setProbRandomOutputAsValue(1.0);
+        settings.add(randomOutAsValue);
+
+        return settings;
     }
 }
 

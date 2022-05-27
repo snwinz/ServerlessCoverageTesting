@@ -2,7 +2,7 @@ package gui.view;
 
 import gui.controller.DynamicTCSelectionController;
 import gui.view.wrapper.CheckboxWrapper;
-import gui.view.wrapper.Commands;
+import gui.view.wrapper.ExecutionSettings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -12,12 +12,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import logic.model.ServerlessFunction;
 import logic.model.TestSuite;
 import logic.model.Testcase;
+import logic.testcasegenerator.coveragetargets.CoverageTarget;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -27,6 +29,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class DynamicTCSelectionView extends Stage implements PropertyChangeListener {
@@ -64,22 +67,28 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
 
         var startButton = new Button("Start");
         var cancelButton = new Button("Cancel");
+        var createCoverageForAllTargets = new Button("Cover all targets");
+
         startButton.setOnAction(getActionEventEventHandlerForStartButton());
         cancelButton.setOnAction(e -> controller.closeView());
-        grid.add(startButton, 1, 1);
-        grid.add(cancelButton, 2, 1);
+        createCoverageForAllTargets.setOnAction(e -> {
+            var settings = new ExecutionSettings(regionAWS.getText(), resetFunctionName.getText());
+            settings.setNumberOfTries(numberOfTries.getValue());
+            controller.coverAllTargets(
+                    testSuite.getTestTargets(), settings);
+        });
+
 
         var resetLabel = new Label("Reset function:");
         HBox resetFunctionBox = new HBox();
         var startResetButton = new Button("Start reset application");
         startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
         resetFunctionBox.getChildren().addAll(resetLabel, resetFunctionName, startResetButton);
-        grid.add(resetFunctionBox, 3, 1);
 
         var regionLabel = new Label("AWS region:");
         HBox regionBox = new HBox();
         regionBox.getChildren().addAll(regionLabel, regionAWS);
-        grid.add(regionBox, 4, 1);
+        ViewHelper.addToGridInHBox(grid, startButton, cancelButton, createCoverageForAllTargets, resetFunctionBox, regionBox);
 
 
         Label infoOfTestCaseLabel = new Label("Summary of test case:");
@@ -215,13 +224,15 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         Button selectAllUncoveredTestCases = new Button("Select uncovered testing targets");
         selectAllUncoveredTestCases.setOnAction(e ->
                 {
-                    var tcToBeSelected = testSuite.getTestTargets().stream().filter(target -> !target.specificTargetCoveredProperty().get())
+                    var tcToBeSelected = testSuite.getTestTargets().stream()
+                            .filter(Predicate.not(CoverageTarget::isCovered))
                             .flatMap(target -> target.getTestcases().stream()).collect(Collectors.toSet());
                     availableTestcases.forEach(tc ->
                             tc.setSelected(tcToBeSelected.contains(tc.getEntry()))
                     );
                 }
         );
+
         ViewHelper.addToGridInHBox(grid, getAllDataButton, getAllTCsWithInput, exportAllTCsWithInput,
                 exportAllTCsWithInputEachTarget, selectAllTestCases, unselectAllTestCases, selectAllUncoveredTestCases);
         return scrollpane;
@@ -236,40 +247,26 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         Label probRandomInputAsValueLabel = new Label("Probability use value of random input key:");
         Label probSimilarOutputAsValueLabel = new Label("Probability use value of similar output key:");
         Label probRandomOutputAsValueLabel = new Label("Probability use value of random output key:");
-
-        grid.add(numberOfTriesLabel, 1, 2);
         numberOfTries.setEditable(true);
-        grid.add(numberOfTries, 1, 3);
-
-
-        grid.add(probChangeGoodDataLabel, 2, 2);
         probChangeGoodData.setEditable(true);
-        grid.add(probChangeGoodData, 2, 3);
-
-        grid.add(probSameValueEverywhereLabel, 3, 2);
         probSameValueEverywhere.setEditable(true);
-        grid.add(probSameValueEverywhere, 3, 3);
-
-        grid.add(probEntryUndefinedLabel, 1, 4);
         probEntryUndefined.setEditable(true);
-        grid.add(probEntryUndefined, 1, 5);
-
-        grid.add(probSimilarInputAsValueLabel, 2, 4);
         probSimilarInputAsValue.setEditable(true);
-        grid.add(probSimilarInputAsValue, 2, 5);
-
-        grid.add(probRandomInputAsValueLabel, 3, 4);
         probRandomInputAsValue.setEditable(true);
-        grid.add(probRandomInputAsValue, 3, 5);
-
-        grid.add(probSimilarOutputAsValueLabel, 4, 4);
         probSimilarOutputAsValue.setEditable(true);
-        grid.add(probSimilarOutputAsValue, 4, 5);
-
-        grid.add(probRandomOutputAsValueLabel, 5, 4);
         probRandomOutputAsValue.setEditable(true);
-        grid.add(probRandomOutputAsValue, 5, 5);
 
+        VBox triesBox = new VBox(numberOfTriesLabel, numberOfTries);
+        VBox changeGoodDataBox = new VBox(probChangeGoodDataLabel, probChangeGoodData);
+        VBox sameValueEverywhereBox = new VBox(probSameValueEverywhereLabel, probSameValueEverywhere);
+        VBox probEntryUndefinedBox = new VBox(probEntryUndefinedLabel, probEntryUndefined);
+        VBox probSimilarInputAsValueBox = new VBox(probSimilarInputAsValueLabel, probSimilarInputAsValue);
+        VBox probRandomInputAsValueBox = new VBox(probRandomInputAsValueLabel, probRandomInputAsValue);
+        VBox probSimilarOutputAsValueBox = new VBox(probSimilarOutputAsValueLabel, probSimilarOutputAsValue);
+        VBox probRandomOutputAsValueBox = new VBox(probRandomOutputAsValueLabel, probRandomOutputAsValue);
+
+        ViewHelper.addToGridInHBox(grid, triesBox, changeGoodDataBox, probEntryUndefinedBox);
+        ViewHelper.addToGridInHBox(grid, sameValueEverywhereBox, probSimilarInputAsValueBox, probRandomInputAsValueBox, probSimilarOutputAsValueBox, probRandomOutputAsValueBox);
 
     }
 
@@ -281,19 +278,17 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
                     testcasesToBeCreated.add(checkboxWrapper.getEntry());
                 }
             }
-            Commands commands = new Commands();
-            commands.setNumberOfTries(numberOfTries.getValue());
-            commands.setProbChangeGoodData(probChangeGoodData.getValue());
-            commands.setProbEntryUndefined(probEntryUndefined.getValue());
-            commands.setProbSimilarInputAsValue(probSimilarInputAsValue.getValue());
-            commands.setProbRandomInputAsValue(probRandomInputAsValue.getValue());
-            commands.setProbSimilarOutputAsValue(probSimilarOutputAsValue.getValue());
-            commands.setProbRandomOutputAsValue(probRandomOutputAsValue.getValue());
-            commands.setProbSameValueEverywhere(probSameValueEverywhere.getValue());
-            commands.setResetFunctionName(resetFunctionName.getText());
-            commands.setRegion(regionAWS.getText());
+            ExecutionSettings executionSettings = new ExecutionSettings(regionAWS.getText(), resetFunctionName.getText());
+            executionSettings.setNumberOfTries(numberOfTries.getValue());
+            executionSettings.setProbChangeGoodData(probChangeGoodData.getValue());
+            executionSettings.setProbEntryUndefined(probEntryUndefined.getValue());
+            executionSettings.setProbSimilarInputAsValue(probSimilarInputAsValue.getValue());
+            executionSettings.setProbRandomInputAsValue(probRandomInputAsValue.getValue());
+            executionSettings.setProbSimilarOutputAsValue(probSimilarOutputAsValue.getValue());
+            executionSettings.setProbRandomOutputAsValue(probRandomOutputAsValue.getValue());
+            executionSettings.setProbSameValueEverywhere(probSameValueEverywhere.getValue());
             saveConfigProperties();
-            controller.startDynamicTCCalculation(testcasesToBeCreated, commands);
+            controller.startDynamicTCCalculation(testcasesToBeCreated, executionSettings);
         };
     }
 

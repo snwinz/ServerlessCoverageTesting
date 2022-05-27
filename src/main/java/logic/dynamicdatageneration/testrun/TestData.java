@@ -1,6 +1,6 @@
 package logic.dynamicdatageneration.testrun;
 
-import gui.view.wrapper.Commands;
+import gui.view.wrapper.ExecutionSettings;
 import logic.executionplatforms.KeyValueJsonGenerator;
 import logic.model.ServerlessFunction;
 import shared.model.input.DynamicKeyValue;
@@ -29,14 +29,14 @@ public class TestData {
     private String sameInputInteger = null;
 
 
-    public TestData(List<ServerlessFunction> functions, Commands commands) {
-        this.probChangeGoodData = commands.getProbChangeGoodData();
-        this.probEntryUndefined = commands.getProbEntryUndefined();
-        this.probSimilarInputAsValue = commands.getProbSimilarInputAsValue();
-        this.probRandomInputAsValue = commands.getProbRandomInputAsValue();
-        this.probSimilarOutputAsValue = commands.getProbSimilarOutputAsValue();
-        this.probRandomOutputAsValue = commands.getProbRandomOutputAsValue();
-        this.probSameValueEverywhere = commands.getProbSameValueEverywhere();
+    public TestData(List<ServerlessFunction> functions, ExecutionSettings executionSettings) {
+        this.probChangeGoodData = executionSettings.getProbChangeGoodData();
+        this.probEntryUndefined = executionSettings.getProbEntryUndefined();
+        this.probSimilarInputAsValue = executionSettings.getProbSimilarInputAsValue();
+        this.probRandomInputAsValue = executionSettings.getProbRandomInputAsValue();
+        this.probSimilarOutputAsValue = executionSettings.getProbSimilarOutputAsValue();
+        this.probRandomOutputAsValue = executionSettings.getProbRandomOutputAsValue();
+        this.probSameValueEverywhere = executionSettings.getProbSameValueEverywhere();
         for (var function : functions) {
             this.addFunction(function);
         }

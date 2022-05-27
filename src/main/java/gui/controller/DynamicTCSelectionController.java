@@ -3,7 +3,7 @@ package gui.controller;
 import gui.model.Graph;
 import gui.view.DynamicTCSelectionView;
 import gui.view.StandardPresentationView;
-import gui.view.wrapper.Commands;
+import gui.view.wrapper.ExecutionSettings;
 import javafx.stage.FileChooser;
 import logic.dynamicdatageneration.DynamicTestCaseGenerator;
 import logic.dynamicdatageneration.TestcaseSimulator;
@@ -11,6 +11,7 @@ import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
 import logic.model.TestSuite;
 import logic.model.Testcase;
+import logic.testcasegenerator.coveragetargets.CoverageTarget;
 
 import java.io.File;
 import java.util.List;
@@ -36,9 +37,9 @@ public class DynamicTCSelectionController {
         }
     }
 
-    public void startDynamicTCCalculation(List<Testcase> testcasesToBeCreated, Commands commands) {
+    public void startDynamicTCCalculation(List<Testcase> testcasesToBeCreated, ExecutionSettings executionSettings) {
         DynamicTestCaseGenerator dynamicTestCaseGenerator = new DynamicTestCaseGenerator();
-        Thread thread = new Thread(() -> dynamicTestCaseGenerator.generateTestcases(testcasesToBeCreated, commands));
+        Thread thread = new Thread(() -> dynamicTestCaseGenerator.generateTestcases(testcasesToBeCreated, executionSettings));
         thread.start();
 
 
@@ -98,5 +99,11 @@ public class DynamicTCSelectionController {
         if (fileToSave != null) {
             PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
         }
+    }
+
+    public void coverAllTargets(List<CoverageTarget> testTargets, ExecutionSettings executionSettings) {
+        DynamicTestCaseGenerator dynamicTestCaseGenerator = new DynamicTestCaseGenerator();
+        Thread thread = new Thread(() -> dynamicTestCaseGenerator.generateTestcasesForTarget(testTargets, executionSettings));
+        thread.start();
     }
 }

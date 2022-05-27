@@ -10,5 +10,9 @@ public interface CoverageTarget {
 
     BooleanProperty specificTargetCoveredProperty();
 
+    default boolean isCovered() {
+        return specificTargetCoveredProperty().get();
+    }
+
     String getCoverageTargetDescription();
 }
