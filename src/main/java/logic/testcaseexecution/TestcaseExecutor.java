@@ -182,9 +182,9 @@ public class TestcaseExecutor {
         var generatedKeyValues = keyValueJsonGenerator.getKeyValues();
         for (var entry : generatedKeyValues.entrySet()) {
             var generatedKey = entry.getKey();
-            var generatedValue = entry.getValue();
+            var generatedValues = entry.getValue();
             List<String> existingValues = outputValues.containsKey(generatedKey) ? outputValues.get(generatedKey) : new ArrayList<>();
-            generatedValue.forEach(v -> existingValues.add(v));
+            existingValues.addAll(generatedValues);
             outputValues.put(generatedKey, existingValues);
         }
     }
@@ -255,7 +255,7 @@ public class TestcaseExecutor {
     private List<String> calibrateLogs(List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
         List<String> result = new LinkedList<>();
         for (var entry : resultsFirstExecutionLogs) {
-            if (resultsSecondExecutionLogs.equals(entry)) {
+            if (resultsSecondExecutionLogs.contains(entry)) {
                 result.add(entry);
             }
         }

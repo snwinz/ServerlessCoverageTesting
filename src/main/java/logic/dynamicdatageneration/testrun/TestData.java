@@ -23,6 +23,7 @@ public class TestData {
 
     private final Map<String, List<String>> outputValues = new HashMap<>();
     final List<FunctionWithInputData> testFunctions = new ArrayList<>();
+    private static final Random rn = new Random();
 
     private boolean useSameValues = false;
     private String sameInputString = null;
@@ -40,6 +41,7 @@ public class TestData {
         for (var function : functions) {
             this.addFunction(function);
         }
+
     }
 
     @Override
@@ -156,7 +158,6 @@ public class TestData {
     }
 
     public void checkToUseSameValues() {
-        Random rn = new Random();
         double randomValue = rn.nextDouble();
         this.useSameValues = probSameValueEverywhere > randomValue;
         if (!this.useSameValues) {
