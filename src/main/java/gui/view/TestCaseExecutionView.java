@@ -245,10 +245,12 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
 
             Button selectAllTestCases = new Button("Select all test cases");
             Button selectFailedTestCases = new Button("Select failed test cases");
+            Button selectTestCasesWithData = new Button("Select TCs with data");
+
 
             Button unselectAllTestCases = new Button("Unselect all test cases");
             Button showPassedTCs = new Button("Show passed TCs");
-            HBox adminButtons = ViewHelper.addToGridInHBox(grid, selectAllTestCases, unselectAllTestCases, selectFailedTestCases, showPassedTCs);
+            HBox adminButtons = ViewHelper.addToGridInHBox(grid, selectAllTestCases, unselectAllTestCases, selectFailedTestCases, showPassedTCs, selectTestCasesWithData);
             selectAllTestCases.setOnAction(e -> {
                 selectedTestcases.forEach(cb -> cb.setSelected(true));
                 adminButtons.getChildren().remove(selectAllTestCases);
@@ -263,6 +265,12 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 selectedTestcases.forEach(cb -> cb.setSelected(false));
                 adminButtons.getChildren().remove(unselectAllTestCases);
                 adminButtons.getChildren().add(0, selectAllTestCases);
+            });
+            selectTestCasesWithData.setOnAction(e -> {
+                selectedTestcases.forEach(cb -> cb.setSelected(true));
+                var testcasesWithoutData = selectedTestcases.stream()
+                        .filter(cb -> "parameters".equals(cb.getEntry().getTestcase().functions().get(0).getParameter())).toList();
+                testcasesWithoutData.forEach(cb -> cb.setSelected(false));
             });
 
 
@@ -352,13 +360,19 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
         var file = new Menu("File");
 
         var saveTCs = new MenuItem("Save TCs");
+        var saveSelectedTCs = new MenuItem("Save selected TCs");
 
         saveTCs.setOnAction(event -> {
             var testcasesOriginal = testcases.stream().map(TestcaseWrapper::getTestcase).toList();
             controller.saveTestcases(testcasesOriginal);
         });
+        saveSelectedTCs.setOnAction(event -> {
+            var selectedTestcasesToSave = selectedTestcases.stream().filter(CheckBox::isSelected)
+                    .map(CheckboxWrapper::getEntry).map(TestcaseWrapper::getTestcase).toList();
+            controller.saveTestcases(selectedTestcasesToSave);
+        });
 
-        file.getItems().addAll(saveTCs);
+        file.getItems().addAll(saveTCs, saveSelectedTCs);
         menuBar.getMenus().addAll(file);
         return menuBar;
     }
