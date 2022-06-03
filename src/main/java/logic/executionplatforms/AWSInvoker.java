@@ -2,8 +2,7 @@ package logic.executionplatforms;
 
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
-import com.amazonaws.services.lambda.model.InvokeRequest;
-import com.amazonaws.services.lambda.model.InvokeResult;
+import com.amazonaws.services.lambda.model.*;
 import com.amazonaws.services.logs.AWSLogs;
 import com.amazonaws.services.logs.AWSLogsClientBuilder;
 import com.amazonaws.services.logs.model.*;
@@ -48,13 +47,12 @@ public class AWSInvoker implements Executor {
         while (json.contains("##PREVIOUSOUTPUT__")) {
             String key = json.split("##PREVIOUSOUTPUT")[1].split("__")[1];
             var occurrence = Integer.parseInt(json.split("##PREVIOUSOUTPUT")[1].split("__")[2]);
-            if (outputValues.containsKey(key) && outputValues.get(key).size()>occurrence) {
-                    String value = outputValues.get(key).get(occurrence);
-               var jsonFirstPart= json.split("##PREVIOUSOUTPUT")[0];
-               var jsonSecondPart= json.split("PREVIOUSOUTPUT##",2)[1];
-               json = jsonFirstPart+value+jsonSecondPart;
-            }
-            else {
+            if (outputValues.containsKey(key) && outputValues.get(key).size() > occurrence) {
+                String value = outputValues.get(key).get(occurrence);
+                var jsonFirstPart = json.split("##PREVIOUSOUTPUT")[0];
+                var jsonSecondPart = json.split("PREVIOUSOUTPUT##", 2)[1];
+                json = jsonFirstPart + value + jsonSecondPart;
+            } else {
                 break;
             }
         }
@@ -113,4 +111,25 @@ public class AWSInvoker implements Executor {
             invokeFunction(resetFunctionName, "{}", new HashMap<>());
         }
     }
+
+    @Override
+    public void setEnvironmentVariables(List<String> functions, String key, String value) {
+        UpdateFunctionConfigurationRequest configuration = new UpdateFunctionConfigurationRequest();
+
+        for (var functionName : functions) {
+            configuration.setFunctionName(functionName);
+            GetFunctionConfigurationRequest request = new GetFunctionConfigurationRequest();
+            request.setFunctionName(functionName);
+            var res = amazonLambda.getFunctionConfiguration(request);
+            var environmentResponse = res.getEnvironment();
+            var variables = environmentResponse.getVariables();
+            variables.put(key, value);
+            Environment environment = new Environment();
+            environment.setVariables(variables);
+            configuration.setEnvironment(environment);
+            amazonLambda.updateFunctionConfiguration(configuration);
+        }
+    }
+
+
 }

@@ -13,4 +13,6 @@ public interface Executor {
     void resetApplication(String resetFunctionName);
 
     void callResetFunction(String resetFunctionName);
+
+    void setEnvironmentVariables(List<String> functions, String key, String value);
 }
