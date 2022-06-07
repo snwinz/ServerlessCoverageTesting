@@ -14,5 +14,5 @@ public interface Executor {
 
     void callResetFunction(String resetFunctionName);
 
-    void setEnvironmentVariables(List<String> functions, String key, String value);
+    void setEnvironmentVariables(List<String> functions, Map<String, String> envVariables);
 }

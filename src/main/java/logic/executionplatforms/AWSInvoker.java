@@ -113,7 +113,7 @@ public class AWSInvoker implements Executor {
     }
 
     @Override
-    public void setEnvironmentVariables(List<String> functions, String key, String value) {
+    public void setEnvironmentVariables(List<String> functions, Map<String, String> envVariables) {
         UpdateFunctionConfigurationRequest configuration = new UpdateFunctionConfigurationRequest();
 
         for (var functionName : functions) {
@@ -122,14 +122,13 @@ public class AWSInvoker implements Executor {
             request.setFunctionName(functionName);
             var res = amazonLambda.getFunctionConfiguration(request);
             var environmentResponse = res.getEnvironment();
-            var variables = environmentResponse.getVariables();
-            variables.put(key, value);
+            var currentVariables = environmentResponse.getVariables();
+            currentVariables.putAll(envVariables);
             Environment environment = new Environment();
-            environment.setVariables(variables);
+            environment.setVariables(currentVariables);
             configuration.setEnvironment(environment);
             amazonLambda.updateFunctionConfiguration(configuration);
         }
     }
-
 
 }
