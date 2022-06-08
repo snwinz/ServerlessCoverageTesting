@@ -107,6 +107,8 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             Label outputInfoLabel = new Label("Output info");
             grid.add(outputInfoLabel, 5, 2);
 
+            Label manualCreatedLabel = new Label("Manually created");
+            grid.add(manualCreatedLabel, 6, 2);
 
             for (var testcase : testcases) {
                 final int rowOfTestcase = grid.getRowCount();
@@ -179,6 +181,11 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
                 });
 
                 grid.add(expectedLogOutputTextArea, 4, rowOfTestcase);
+
+                CheckBox manualCreatedCheckbox = new CheckBox("Manual Created");
+                manualCreatedCheckbox.selectedProperty().bindBidirectional(testcase.manualCreatedProperty());
+                grid.add(manualCreatedCheckbox, 6, rowOfTestcase);
+
 
                 var functions = testcase.getFunctionsWrapped();
 

@@ -13,6 +13,7 @@ public class TestcaseWrapper {
     private final StringProperty expectedLogs = new SimpleStringProperty("");
     private final Testcase testcase;
     private final BooleanProperty passed = new SimpleBooleanProperty();
+    private final BooleanProperty manualCreated = new SimpleBooleanProperty();
     private final List<FunctionWrapper> functionsWrapped = new LinkedList<>();
     private final BooleanProperty executed = new SimpleBooleanProperty();
     private List<String> logsMeasured;
@@ -23,6 +24,10 @@ public class TestcaseWrapper {
         for (var function : testcase.functions()) {
             functionsWrapped.add(new FunctionWrapper(function));
         }
+        manualCreated.set(testcase.isManualCreated());
+        manualCreated.addListener((observable, oldValue, newValue) -> {
+            testcase.setManualCreated(newValue);
+        });
     }
 
     public Testcase getTestcase() {
@@ -61,7 +66,7 @@ public class TestcaseWrapper {
     }
 
     public void setLogsMeasured(List<String> logList) {
-    this.logsMeasured = logList;
+        this.logsMeasured = logList;
     }
 
     public List<String> getLogsMeasured() {
@@ -72,6 +77,10 @@ public class TestcaseWrapper {
         return saveLogs;
     }
 
+
+    public BooleanProperty manualCreatedProperty() {
+        return manualCreated;
+    }
 
     public void setSaveLogs(boolean saveLogs) {
         this.saveLogs = saveLogs;

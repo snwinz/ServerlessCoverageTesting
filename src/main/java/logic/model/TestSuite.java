@@ -131,7 +131,7 @@ public class TestSuite {
             var testcases = target.getTestcases();
             for (var testcase : testcases) {
                 if (testcase.isSpecificTargetCovered()) {
-                    addTestcaseToResult(result, target, testcase);
+                    addValidTestcaseToResult(result, target, testcase);
                 }
             }
         }
@@ -145,7 +145,7 @@ public class TestSuite {
             var testcases = target.getTestcases().stream().filter(logic.model.Testcase::isSpecificTargetCovered).toList();
             if (testcases.size() > 0) {
                 var testcase = testcases.get(0);
-                addTestcaseToResult(result, target, testcase);
+                addValidTestcaseToResult(result, target, testcase);
             } else {
                 var functions = new LinkedList<Function>();
                 var logs = new LinkedList<String>();
@@ -158,7 +158,7 @@ public class TestSuite {
 
     }
 
-    private void addTestcaseToResult(List<Testcase> result, CoverageTarget target, logic.model.Testcase testcase) {
+    private void addValidTestcaseToResult(List<Testcase> result, CoverageTarget target, logic.model.Testcase testcase) {
         var functionsForExecution = new LinkedList<Function>();
         var testData = testcase.getTestData();
         for (var function : testData.getTestFunctions()) {
@@ -169,6 +169,7 @@ public class TestSuite {
         var logsToCoverForExecution = testcase.getLogsToCover();
         String targetForExecution = target.getCoverageTargetDescription();
         var testcaseForExecution = new Testcase(functionsForExecution, logsToCoverForExecution, targetForExecution);
+        testcaseForExecution.setManualCreated(false);
         result.add(testcaseForExecution);
     }
 }

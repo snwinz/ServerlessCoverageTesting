@@ -12,6 +12,7 @@ public final class Testcase {
     private final List<String> coverageLogs;
     private final String target;
     private final List<String> expectedLogs = new ArrayList<>();
+    private boolean manualCreated = true;
 
     public Testcase(List<Function> functions, List<String> coverageLogs, String target) {
         this.functions = functions;
@@ -80,5 +81,13 @@ public final class Testcase {
     public void setExpectedLogOutput(List<String> calibratedLogs) {
         expectedLogs.clear();
         expectedLogs.addAll(calibratedLogs);
+    }
+
+    public void setManualCreated(Boolean manualCreated) {
+        this.manualCreated = manualCreated;
+    }
+
+    public boolean isManualCreated() {
+        return manualCreated;
     }
 }
