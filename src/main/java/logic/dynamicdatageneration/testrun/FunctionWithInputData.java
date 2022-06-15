@@ -8,7 +8,7 @@ import shared.model.input.IntegerInput;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static logic.testcaseexecution.TestcaseExecutor.*;
+import static logic.testcasegenerator.testcaseexecution.TestcaseExecutor.*;
 
 public class FunctionWithInputData {
 
@@ -26,7 +26,7 @@ public class FunctionWithInputData {
         if (inputFormats == null) {
             this.generalInputData = new ArrayList<>();
         } else {
-            this.generalInputData = inputFormats.copyWithUpdatedTypes();
+            this.generalInputData = inputFormats.getTypedGeneralInputs();
         }
     }
 

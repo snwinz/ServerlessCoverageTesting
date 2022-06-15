@@ -13,7 +13,7 @@ import java.util.*;
 
 public class GraphHelper {
 
-    List<FunctionWithUseSourceLine> getAllUsesOfGraph(LogicGraph logicGraph) {
+    static  List<FunctionWithUseSourceLine> getAllUsesOfGraph(LogicGraph logicGraph) {
         List<FunctionWithUseSourceLine> functionsWithUseSourceLine = new ArrayList<>();
         for (var node : logicGraph.getNodes()) {
             if (NodeType.FUNCTION.equals(node.getType())) {
@@ -29,7 +29,7 @@ public class GraphHelper {
         return functionsWithUseSourceLine;
     }
 
-    List<FunctionWithUseSourceLine> findAllUsesOfADefOnItsSuccessors(FunctionWithSourceLine def) {
+    static List<FunctionWithUseSourceLine> findAllUsesOfADefOnItsSuccessors(FunctionWithSourceLine def) {
         List<ArrowModel> arrows = getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
         for (var arrow : arrows) {
@@ -47,7 +47,7 @@ public class GraphHelper {
         return result;
     }
 
-    List<FunctionWithUseSourceLine> findAllUsesOfFunctionLinesOfADefCoupledByADataStorage(FunctionWithSourceLine def) {
+    static List<FunctionWithUseSourceLine> findAllUsesOfFunctionLinesOfADefCoupledByADataStorage(FunctionWithSourceLine def) {
         List<ArrowModel> arrows = getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
         for (var arrow : arrows) {
@@ -61,7 +61,7 @@ public class GraphHelper {
         return result;
     }
 
-    public List<ArrowModel> getSuccessorArrowsToBeConsidered(NodeModel node, List<Long> relationsInfluenced) {
+    public static List<ArrowModel> getSuccessorArrowsToBeConsidered(NodeModel node, List<Long> relationsInfluenced) {
         List<ArrowModel> result;
         if (relationsInfluenced.contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)) {
             result = node.getOutgoingArrows();
@@ -76,7 +76,7 @@ public class GraphHelper {
         return result;
     }
 
-    public List<FunctionWithUseSourceLine> getReadUsageOfDB(NodeModel dbNode) {
+    public static List<FunctionWithUseSourceLine> getReadUsageOfDB(NodeModel dbNode) {
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
         var arrows = dbNode.getIncomingArrows();
         for (var arrow : arrows) {
@@ -88,14 +88,14 @@ public class GraphHelper {
         return result;
     }
 
-    private List<FunctionWithUseSourceLine> getUsesInAFunction(NodeModel node, long idOfArrow) {
+    private static List<FunctionWithUseSourceLine> getUsesInAFunction(NodeModel node, long idOfArrow) {
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
         var uses = node.getSourceList().stream().filter(sourceCodeLine -> sourceCodeLine.getUse() != null && !sourceCodeLine.getUse().isBlank()).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse() != null).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencingUse().contains(idOfArrow) || sourceCodeLine.getRelationsInfluencingUse().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).toList();
         uses.forEach(use -> result.add(new FunctionWithUseSourceLine(node, use)));
         return result;
     }
 
-    private List<FunctionWithUseSourceLine> getUsagesAfterNode(NodeModel node) {
+    private static List<FunctionWithUseSourceLine> getUsagesAfterNode(NodeModel node) {
         List<FunctionWithUseSourceLine> result = new ArrayList<>();
         var arrows = node.getOutgoingArrows();
         Set<Long> visitedNodes = new HashSet<>();
@@ -113,5 +113,9 @@ public class GraphHelper {
             }
         }
         return result;
+    }
+
+    public static List<NodeModel> getAllFunctions(LogicGraph logicGraph) {
+        return logicGraph.getNodes().stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).toList();
     }
 }

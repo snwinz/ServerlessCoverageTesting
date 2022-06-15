@@ -5,6 +5,7 @@ import shared.model.NodeType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NodeModel {
 
@@ -78,6 +79,8 @@ public class NodeModel {
     public FunctionInputFormat getInputFormats() {
         return inputFormats;
     }
+
+
 
     public void setInputFormats(FunctionInputFormat inputFormats) {
         this.inputFormats = inputFormats;

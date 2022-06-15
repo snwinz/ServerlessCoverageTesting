@@ -4,6 +4,7 @@ import gui.model.Graph;
 import gui.view.LogEvaluationView;
 import javafx.stage.FileChooser;
 import logic.logevaluation.EvaluationLogic;
+import logic.model.LogicGraph;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class LogEvaluationController {
 
     public LogEvaluationController(Graph graph) {
         this.view = new LogEvaluationView();
-        this.model = new EvaluationLogic(graph);
+        this.model = new EvaluationLogic(new LogicGraph(graph.getJSON()));
     }
 
     public void setup(List<String> allLogs) {

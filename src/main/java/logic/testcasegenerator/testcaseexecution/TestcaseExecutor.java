@@ -1,4 +1,4 @@
-package logic.testcaseexecution;
+package logic.testcasegenerator.testcaseexecution;
 
 import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;

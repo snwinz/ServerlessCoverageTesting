@@ -17,7 +17,6 @@ import static logic.testcasegenerator.coveragetargets.LogNameConfiguration.*;
 public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     private final TargetGenerator targetGenerator = new TargetGenerator();
-    private final GraphHelper graphHelper = new GraphHelper();
 
     @Override
     public TestSuite getResourceCoverage(String graphJSON) {
@@ -284,7 +283,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
     private List<Testcase> getTestcasesCoveringUseOfDefinition(FunctionWithDefSourceLine def) {
 
-        List<FunctionWithUseSourceLine> usesForDefOnPath = graphHelper.findAllUsesOfADefOnItsSuccessors(def);
+        List<FunctionWithUseSourceLine> usesForDefOnPath = GraphHelper.findAllUsesOfADefOnItsSuccessors(def);
         boolean isUseFoundForDef = usesForDefOnPath.size() > 0;
         var usesForDefViaDB = findAllUsesOfADefCoupledByADataStorage(def);
         boolean isUseFoundForCoupled = usesForDefViaDB.size() > 0;
@@ -330,7 +329,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
 
     private List<DefViaDB> findAllDefsOfAUseCoupledByADataStorage(FunctionWithUseSourceLine use) {
-        List<ArrowModel> arrows = graphHelper.getSuccessorArrowsToBeConsidered(use.getFunction(), use.getSourceCodeLine().getRelationsInfluencingUse());
+        List<ArrowModel> arrows = GraphHelper.getSuccessorArrowsToBeConsidered(use.getFunction(), use.getSourceCodeLine().getRelationsInfluencingUse());
         List<DefViaDB> results = new LinkedList<>();
         for (var arrow : arrows) {
             if (arrow.hasAccessMode(AccessMode.READ)) {
@@ -349,13 +348,13 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     }
 
     private List<UseViaDB> findAllUsesOfADefCoupledByADataStorage(FunctionWithDefSourceLine def) {
-        List<ArrowModel> arrows = graphHelper.getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
+        List<ArrowModel> arrows = GraphHelper.getSuccessorArrowsToBeConsidered(def.getFunction(), def.getSourceCodeLine().getRelationsInfluencedByDef());
         List<UseViaDB> results = new LinkedList<>();
         for (var arrow : arrows) {
             if (arrow.hasAccessMode(AccessMode.DELETE) || arrow.hasAccessMode(AccessMode.UPDATE) || arrow.hasAccessMode(AccessMode.CREATE)) {
                 var potentialDB = arrow.getSuccessorNode();
                 if (NodeType.DATA_STORAGE.equals(potentialDB.getType())) {
-                    var readUsagesOfDb = graphHelper.getReadUsageOfDB(potentialDB);
+                    var readUsagesOfDb = GraphHelper.getReadUsageOfDB(potentialDB);
                     if (arrow.hasAccessMode(AccessMode.DELETE)) {
                         for (var readUse : readUsagesOfDb) {
                             results.add(new UseViaDBDelete(readUse, potentialDB));
@@ -516,7 +515,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             potentialTestcases.add(testcase);
         } else {
             String target = String.format("def %s should be covered by %s ", defOfTestTarget, useOfTestTarget);
-            List<FunctionWithUseSourceLine> usesForDefOnPath = graphHelper.findAllUsesOfADefOnItsSuccessors(defOfTestTarget);
+            List<FunctionWithUseSourceLine> usesForDefOnPath = GraphHelper.findAllUsesOfADefOnItsSuccessors(defOfTestTarget);
             for (var use : usesForDefOnPath) {
                 if (useOfTestTarget.equals(use)) {
                     var logStatements = List.of(defOfTestTarget.getLogMessage() + useOfTestTarget.getLogMessage());

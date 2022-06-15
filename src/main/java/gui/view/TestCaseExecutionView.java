@@ -352,10 +352,17 @@ public class TestCaseExecutionView extends Stage implements PropertyChangeListen
             Button evaluateLogs = new Button("Evaluate logs");
             evaluateLogs.setOnAction(e -> controller.evaluateLogs(testcases, graph));
 
-            HBox.setMargin(deleteLogs, new Insets(10, 10, 10, 10));
-            HBox.setMargin(getAllLogsOnPlatform, new Insets(10, 10, 10, 10));
-            HBox.setMargin(getLogsOfTestcases, new Insets(10, 10, 10, 10));
             ViewHelper.addToGridInHBox(grid, deleteLogs, getLogsOfTestcases, getAllLogsOnPlatform, evaluateLogs);
+
+
+            Label tcGenerationLabel = new Label("Testcase generation:");
+            grid.add(tcGenerationLabel, 1, grid.getRowCount());
+
+
+            Button generateTCs = new Button("Generate similar random test suite");
+            generateTCs.setOnAction(e -> controller.createTestSuite(this.graph, testcases.stream().map(tc -> tc.getTestcase()).toList()));
+
+            ViewHelper.addToGridInHBox(grid, generateTCs);
 
             return scrollpane;
         }

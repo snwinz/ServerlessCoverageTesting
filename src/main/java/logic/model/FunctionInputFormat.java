@@ -6,6 +6,7 @@ import shared.model.input.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class FunctionInputFormat {
     @Expose
@@ -14,7 +15,7 @@ public class FunctionInputFormat {
     public FunctionInputFormat(List<GeneralInput> generalInputs) {
         Objects.requireNonNull(generalInputs, "string input list must not null");
         this.generalInputs = generalInputs;
-        this.generalInputs = copyWithUpdatedTypes();
+        this.generalInputs = getTypedGeneralInputs();
     }
 
     public FunctionInputFormat() {
@@ -36,10 +37,10 @@ public class FunctionInputFormat {
     }
 
     public void updateTypesOfGeneralInputs() {
-        this.generalInputs = copyWithUpdatedTypes();
+        this.generalInputs = getTypedGeneralInputs();
     }
 
-    public List<GeneralInput> copyWithUpdatedTypes() {
+    public List<GeneralInput> getTypedGeneralInputs() {
         List<GeneralInput> typedInputs = new ArrayList<>();
         for (var generalInput : generalInputs) {
             if (generalInput.getParentNode() != null && generalInput.getParentNode() && generalInput.getJsonSavedAsString() != null) {
@@ -69,4 +70,19 @@ public class FunctionInputFormat {
         return typedInputs;
     }
 
+    public void recalculate() {
+        for (var inputData : generalInputs) {
+            inputData.calculateNewValues();
+        }
+    }
+
+    public String getInputAsJson() {
+        StringBuilder inputString = new StringBuilder();
+        inputString.append('{');
+        var rootEntry = generalInputs.stream().filter(item -> item.getParentId() == null && !item.isUndefined())
+                .map(item -> item.getJsonWithData(generalInputs)).collect(Collectors.joining(","));
+        inputString.append(rootEntry);
+        inputString.append('}');
+        return inputString.toString();
+    }
 }

@@ -9,7 +9,9 @@ import javafx.stage.FileChooser;
 import logic.evaluation.TestcaseEvaluator;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
-import logic.testcaseexecution.TestcaseExecutor;
+import logic.model.LogicGraph;
+import logic.testcasegenerator.RandomTestSuiteGenerator;
+import logic.testcasegenerator.testcaseexecution.TestcaseExecutor;
 import shared.model.Testcase;
 
 import java.io.File;
@@ -19,6 +21,7 @@ import java.util.Objects;
 public class TestCaseExecutionController {
     private final TestCaseExecutionView view;
     private final TestcasesContainer model;
+
 
     public TestCaseExecutionController(List<Testcase> testcases, Graph graph) {
         this.model = new TestcasesContainer(testcases);
@@ -133,4 +136,18 @@ public class TestCaseExecutionController {
     }
 
 
+    public void createTestSuite(Graph graph, List<Testcase> testSuite) {
+        if (graph != null) {
+
+            var fileChooser = new FileChooser();
+            var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+            var fileToSave = fileChooser.showSaveDialog(view);
+
+            var randomTestSuiteGenerator = new RandomTestSuiteGenerator( new LogicGraph(graph.getJSON()));
+            List<Testcase> randomTestcases = randomTestSuiteGenerator.generateTestcases(testSuite);
+            PersistenceUtilities.saveTestSuite(randomTestcases, fileToSave.getAbsolutePath());
+        }
+    }
 }

@@ -65,4 +65,4 @@ jar {
     }
 }
 
-mainClassName = 'gui.view.MainApp'
+mainClassName = 'gui.view.Main'

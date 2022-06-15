@@ -22,8 +22,10 @@ public class EvaluationLogic {
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private List<String> logs;
 
-    public EvaluationLogic(Graph graph) {
-        this.logicGraph = new LogicGraph(graph.getJSON());
+
+
+    public EvaluationLogic(LogicGraph logicGraph) {
+        this.logicGraph = logicGraph;
         logicGraph.addRelationsToElements();
     }
 
