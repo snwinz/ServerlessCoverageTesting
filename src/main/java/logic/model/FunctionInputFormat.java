@@ -93,17 +93,6 @@ public class FunctionInputFormat {
         this.generalInputs = typedInputs;
     }
 
-
-    public String getJSON() {
-        StringBuilder result = new StringBuilder();
-        result.append('{');
-        var rootEntry = generalInputs.stream().filter(item -> item.getParentId() == null)
-                .map(item -> item.getJsonFormat(generalInputs)).collect(Collectors.joining(","));
-        result.append(rootEntry);
-        result.append('}');
-        return result.toString();
-    }
-
     public String getJSONWithNewContent() {
         generalInputs.forEach(GeneralInput::calculateNewValues);
         StringBuilder result = new StringBuilder();
