@@ -62,28 +62,14 @@ public class DraggableNode extends Group {
 
     private void createSymbol(NodeType type) {
 
-        Node symbol;
-        switch (type) {
-            case DATA_STORAGE:
-                symbol = getSymbol("images/database.png");
-                break;
-            case FUNCTION:
-                symbol = getSymbol("images/lambda.png");
-                break;
-            case STREAM:
-                symbol = getSymbol("images/stream.png");
-                break;
-            case QUEUE:
-                symbol = getSymbol("images/queue.png");
-                break;
-            case MAIL:
-                symbol = getSymbol("images/mail.png");
-                break;
-            case STANDARD_NODE:
-                symbol = new Sphere(50);
-            default:
-                symbol = new Sphere(50);
-        }
+        Node symbol = switch (type) {
+            case DATA_STORAGE -> getSymbol("images/database.png");
+            case FUNCTION -> getSymbol("images/lambda.png");
+            case STREAM -> getSymbol("images/stream.png");
+            case QUEUE -> getSymbol("images/queue.png");
+            case MAIL -> getSymbol("images/mail.png");
+            default -> new Sphere(50);
+        };
         getChildren().add(symbol);
     }
 
