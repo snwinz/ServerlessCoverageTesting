@@ -1,8 +1,8 @@
 package gui.controller;
 
-import gui.model.FunctionInputFormat;
 import gui.view.FunctionInputFormatView;
 import gui.view.StandardPresentationView;
+import logic.model.FunctionInputFormat;
 
 public class FunctionInputFormatViewController {
     private FunctionInputFormatView view;
@@ -25,15 +25,8 @@ public class FunctionInputFormatViewController {
         }
     }
 
-    public void showPotentialInput(FunctionInputFormat functionInputFormat) {
-        String jsonText = functionInputFormat.getJSON();
-        StandardPresentationView view = new StandardPresentationView("Potential input");
-        view.setText(jsonText);
-        view.show();
-    }
-
     public void showPotentialInputWithContent(FunctionInputFormat functionInputFormat) {
-        String jsonText = functionInputFormat.getJSONWithContent();
+        String jsonText = functionInputFormat.getJSONWithNewContent();
         StandardPresentationView view = new StandardPresentationView("Potential input");
         view.setText(jsonText);
         view.show();

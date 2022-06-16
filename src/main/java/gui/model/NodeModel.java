@@ -1,6 +1,7 @@
 package gui.model;
 
 import com.google.gson.annotations.Expose;
+import logic.model.FunctionInputFormat;
 import shared.model.NodeType;
 
 import java.util.List;

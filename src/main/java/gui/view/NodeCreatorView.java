@@ -3,8 +3,6 @@ package gui.view;
 import gui.controller.FunctionInputFormatViewController;
 import gui.controller.NodeCreatorController;
 import gui.controller.dto.NodeInputData;
-import gui.model.FunctionInputFormat;
-import shared.model.NodeType;
 import gui.model.SourceCodeLine;
 import gui.view.wrapper.ComboBoxItemWrap;
 import gui.view.wrapper.SourceEntryWrapper;
@@ -19,6 +17,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import logic.model.FunctionInputFormat;
+import shared.model.NodeType;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,15 +34,12 @@ public class NodeCreatorView extends Stage {
     private final TextArea nodeNameArea = new TextArea();
     private final TextArea xArea = new TextArea();
     private final TextArea yArea = new TextArea();
-    private final ComboBox<NodeType> nodeTypeCombobox;
+    private final ComboBox<NodeType> nodeTypeComboBox;
     private final TableView<SourceEntryWrapper> tableView = new TableView<>();
-    private final TextArea inputVariablesField = new TextArea();
     private FunctionInputFormat functionInputFormat;
 
     public NodeCreatorView(NodeCreatorController controller, double x, double y) {
         this.controller = controller;
-        inputVariablesField.setEditable(false);
-
         tableView.setMinWidth(1000);
         this.setTitle("Create Node");
 
@@ -50,8 +47,8 @@ public class NodeCreatorView extends Stage {
                 FXCollections.observableArrayList(
                         NodeType.values()
                 );
-        nodeTypeCombobox = new ComboBox<>(options);
-        nodeTypeCombobox.getSelectionModel().selectFirst();
+        nodeTypeComboBox = new ComboBox<>(options);
+        nodeTypeComboBox.getSelectionModel().selectFirst();
         linkViewsForComboBox(x, y);
 
 
@@ -61,25 +58,22 @@ public class NodeCreatorView extends Stage {
     }
 
     private void linkViewsForComboBox(double x, double y) {
-        nodeTypeCombobox.valueProperty().addListener((ov, t, typeOfEnum) -> {
+        nodeTypeComboBox.valueProperty().addListener((ov, t, typeOfEnum) -> {
             switch (typeOfEnum) {
                 case FUNCTION -> {
                     var grid = getFunctionGrid(x, y);
                     var scene = new Scene(grid);
                     this.setScene(scene);
-                    break;
                 }
                 case DATA_STORAGE -> {
                     var grid = getDataStorageGrid(x, y);
                     var scene = new Scene(grid);
                     this.setScene(scene);
-                    break;
                 }
                 case STANDARD_NODE -> {
                     var grid = getStandardNode(x, y);
                     var scene = new Scene(grid);
                     this.setScene(scene);
-                    break;
                 }
                 default -> {
                 }
@@ -99,7 +93,7 @@ public class NodeCreatorView extends Stage {
         nodeNameArea.setPrefRowCount(1);
         var grid = new GridPane();
         grid.add(typeOfNode, 1, 1);
-        grid.add(nodeTypeCombobox, 2, 1);
+        grid.add(nodeTypeComboBox, 2, 1);
         grid.add(nameOfNode, 1, 2);
         grid.add(nodeNameArea, 2, 2);
         grid.add(xCoordinates, 1, 3);
@@ -124,13 +118,11 @@ public class NodeCreatorView extends Stage {
 
     private GridPane getFunctionGrid(double x, double y) {
         functionInputFormat = new FunctionInputFormat();
-        inputVariablesField.textProperty().bind(functionInputFormat.textProperty());
         var typeOfNode = new Label("Type of node: ");
         var nameOfNode = new Label("Name of Node");
         var xCoordinates = new Label("X coordinates:");
         var yCoordinates = new Label("Y coordinates:");
         var sourceLabel = new Label("Source code:");
-        var inputLabel = new Label("Input values:");
         var inputTooltip = new Tooltip();
         inputTooltip.setText("""
                 format of the values being processed by the function:
@@ -139,7 +131,6 @@ public class NodeCreatorView extends Stage {
                 event.myValue: [A-Z][0-9]*
                 """
         );
-        inputLabel.setTooltip(inputTooltip);
         xArea.setText(String.valueOf(x));
         xArea.setPrefRowCount(1);
         yArea.setText(String.valueOf(y));
@@ -148,7 +139,7 @@ public class NodeCreatorView extends Stage {
         var grid = new GridPane();
         grid.setMinSize(1000, 200);
         grid.add(typeOfNode, 1, 1);
-        grid.add(nodeTypeCombobox, 2, 1);
+        grid.add(nodeTypeComboBox, 2, 1);
         grid.add(nameOfNode, 1, 2);
         grid.add(nodeNameArea, 2, 2);
         grid.add(xCoordinates, 1, 3);
@@ -168,8 +159,6 @@ public class NodeCreatorView extends Stage {
         grid.add(tableView, 2, 5);
 
         grid.add(loadSourceButton, 3, 5);
-        grid.add(inputLabel, 1, 6);
-        grid.add(inputVariablesField, 2, 6);
         grid.add(editInputFormatButton, 3, 6);
         grid.add(createButton, 1, 7);
         grid.add(cancelButton, 2, 7);
@@ -199,9 +188,9 @@ public class NodeCreatorView extends Stage {
     private EventHandler<ActionEvent> getCreateButtonHandler() {
         return event -> {
             var info = new NodeInputData();
-            info.setNodeType(nodeTypeCombobox.getValue());
+            info.setNodeType(nodeTypeComboBox.getValue());
             info.setName(nodeNameArea.getText());
-            if(nodeTypeCombobox.getValue().equals(NodeType.FUNCTION)){
+            if(nodeTypeComboBox.getValue().equals(NodeType.FUNCTION)){
                 List<SourceEntryWrapper> sourceList = new ArrayList<>(tableView.getItems());
                 var sourceListUnwrapped = sourceList.stream().map(SourceEntryWrapper::getSourceEntry).collect(Collectors.toList());
                 info.setSourceData(sourceListUnwrapped);

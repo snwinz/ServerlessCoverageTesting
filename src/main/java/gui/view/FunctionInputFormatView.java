@@ -1,7 +1,6 @@
 package gui.view;
 
 import gui.controller.FunctionInputFormatViewController;
-import gui.model.FunctionInputFormat;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -14,6 +13,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import logic.model.FunctionInputFormat;
 import shared.model.input.*;
 
 import java.util.Arrays;
@@ -57,12 +57,10 @@ public class FunctionInputFormatView extends Stage {
             updateFunctionInputFormat();
             controller.closeView();
         });
-        Button showPotentialJson = new Button("Show potential input");
-        showPotentialJson.setOnAction(e -> controller.showPotentialInput(functionInputFormat));
         Button showPotentialJsonWithContent = new Button("Show potential input with content");
         showPotentialJsonWithContent.setOnAction(e -> controller.showPotentialInputWithContent(functionInputFormat));
         final HBox hbox = new HBox();
-        hbox.getChildren().addAll(showPotentialJson, showPotentialJsonWithContent, updateButton);
+        hbox.getChildren().addAll(showPotentialJsonWithContent, updateButton);
         return hbox;
     }
 
@@ -232,7 +230,6 @@ public class FunctionInputFormatView extends Stage {
             case KEY_DYNAMIC_VALUE -> new DynamicKeyValue(key, addStringInputJSON.getText(), asBase64.isSelected());
             case ARRAY_KEY -> new ArrayKeyInput(key);
             case PARENT_KEY -> new ParentKeyInput(key, valueInJson.isSelected(), asBase64.isSelected());
-            default -> new GeneralInput(key);
         };
 
         Integer freeEntryID = functionInputFormat.getGeneralInputs().stream().mapToInt(GeneralInput::getEntryID).max().orElse(0) + 1;

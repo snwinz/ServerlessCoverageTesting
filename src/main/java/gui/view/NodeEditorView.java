@@ -3,8 +3,8 @@ package gui.view;
 import gui.controller.FunctionInputFormatViewController;
 import gui.controller.NodeEditorController;
 import gui.controller.dto.NodeInputData;
-import gui.model.FunctionInputFormat;
 import gui.model.Graph;
+import logic.model.FunctionInputFormat;
 import shared.model.NodeType;
 import gui.model.SourceCodeLine;
 import gui.view.graphcomponents.DraggableNode;
@@ -40,7 +40,6 @@ public class NodeEditorView extends Stage {
     private final TextArea yArea = new TextArea();
     private final DraggableNode node;
     private final TableView<SourceEntryWrapper> tableView = new TableView<>();
-    private final TextArea inputVariablesField = new TextArea();
     private final Graph model;
     private final FunctionInputFormat functionInputFormat;
     private final CheckBox considerDeletesCheckbox = new CheckBox("consider deletes");
@@ -48,10 +47,9 @@ public class NodeEditorView extends Stage {
     public NodeEditorView(NodeEditorController controller, DraggableNode draggableNode, Graph model) {
         this.node = draggableNode;
         this.controller = controller;
-        inputVariablesField.setEditable(false);
         considerDeletesCheckbox.setSelected(false);
         if (draggableNode.getInputFormats() != null) {
-            functionInputFormat = draggableNode.getInputFormats().getCopy();
+            functionInputFormat = draggableNode.getInputFormats();
         } else {
             functionInputFormat = new FunctionInputFormat();
         }
@@ -80,7 +78,6 @@ public class NodeEditorView extends Stage {
         var nameOfNode = new Label("Name of Node");
         var xCoordinates = new Label("X coordinates:");
         var yCoordinates = new Label("Y coordinates:");
-        inputVariablesField.textProperty().bind(functionInputFormat.textProperty());
         xArea.setText(String.valueOf(node.layoutXProperty().doubleValue()));
         xArea.setPrefRowCount(1);
         yArea.setText(String.valueOf(node.layoutYProperty().doubleValue()));
@@ -109,14 +106,12 @@ public class NodeEditorView extends Stage {
     }
 
     private GridPane getFunctionGrid(DraggableNode node) {
-        inputVariablesField.textProperty().bind(functionInputFormat.textProperty());
         var typeOfNode = new Label("Type of node: ");
         var nodeTypeText = new Label(node.getType().toString());
         var nameOfNode = new Label("Name of Node");
         var xCoordinates = new Label("X coordinates:");
         var yCoordinates = new Label("Y coordinates:");
         var sourceLabel = new Label("Source code:");
-        var inputLabel = new Label("Input values:");
 
         xArea.setText(String.valueOf(node.layoutXProperty().doubleValue()));
         xArea.setPrefRowCount(1);
@@ -157,8 +152,6 @@ public class NodeEditorView extends Stage {
         grid.add(containerForSourceButtons, 3, 5);
 
 
-        grid.add(inputLabel, 1, 6);
-        grid.add(inputVariablesField, 2, 6);
         grid.add(editInputFormatButton, 3, 6);
 
         grid.add(updateButton, 1, 7);

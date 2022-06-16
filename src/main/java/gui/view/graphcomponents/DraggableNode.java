@@ -1,7 +1,7 @@
 package gui.view.graphcomponents;
 
 import gui.controller.GraphVisualisationController;
-import gui.model.FunctionInputFormat;
+import logic.model.FunctionInputFormat;
 import shared.model.NodeType;
 import gui.model.SourceCodeLine;
 import javafx.event.EventHandler;

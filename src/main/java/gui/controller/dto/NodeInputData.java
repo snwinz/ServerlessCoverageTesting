@@ -1,6 +1,6 @@
 package gui.controller.dto;
 
-import gui.model.FunctionInputFormat;
+import logic.model.FunctionInputFormat;
 import shared.model.NodeType;
 import gui.model.SourceCodeLine;
 

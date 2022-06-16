@@ -36,8 +36,7 @@ public class RandomTestSuiteGenerator {
             NodeModel node = getRandomFunction(allFunctionNodes);
             var functionName = node.getNameOfNode();
             var inputFormat = node.getInputFormats();
-            inputFormat.recalculate();
-            var inputString = inputFormat.getInputAsJson();
+            var inputString = inputFormat.getJSONWithNewContent();
             var randomFunction = new Function(functionName, inputString);
             randomFunctions.add(randomFunction);
         }
