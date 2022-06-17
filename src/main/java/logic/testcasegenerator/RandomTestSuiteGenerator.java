@@ -40,7 +40,9 @@ public class RandomTestSuiteGenerator {
             var randomFunction = new Function(functionName, inputString);
             randomFunctions.add(randomFunction);
         }
-        return new Testcase(randomFunctions, List.of(""), "random Testcase");
+        var randomTestcase = new Testcase(randomFunctions, List.of(""), "random Testcase");
+        randomTestcase.setManualCreated(testcase.isManualCreated());
+        return randomTestcase;
     }
 
     private NodeModel getRandomFunction(List<NodeModel> allFunctionNodes) {
