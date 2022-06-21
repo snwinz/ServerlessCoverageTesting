@@ -1,6 +1,5 @@
 package logic.logevaluation;
 
-import gui.model.Graph;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import logic.model.LogicGraph;
@@ -73,7 +72,7 @@ public class EvaluationLogic {
             List<String> targetsToCover = evaluator.getTargets(logicGraph);
             result.append(String.format("Targets to cover: %d%n", targetsToCover.size()));
             result.append(String.format("Targets covered in log: %d%n", unitsCovered.size()));
-            var targetsOfModelCovered = targetsToCover.stream().filter(target -> unitsCovered.containsKey(target)).toList();
+            var targetsOfModelCovered = targetsToCover.stream().filter(unitsCovered::containsKey).toList();
             result.append(String.format("Targets of graph covered: %d%n%n", targetsOfModelCovered.size()));
 
             result.append(String.format("Missing targets:%n"));

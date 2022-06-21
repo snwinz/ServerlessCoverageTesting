@@ -19,8 +19,7 @@ public interface DefViaDB {
                 filter(sourceCodeLine -> (sourceCodeLine.getDefContainer() != null
                         && !sourceCodeLine.getDefContainer().isBlank())).filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencedByDef() != null).
                 filter(sourceCodeLine -> sourceCodeLine.getRelationsInfluencedByDef().contains(idOfArrow) ||
-                        sourceCodeLine.getRelationsInfluencedByDef().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).
-                collect(Collectors.toList());
+                        sourceCodeLine.getRelationsInfluencedByDef().contains(SourceCodeLine.INFLUENCING_ALL_RELATIONS_CONSTANT)).toList();
         defs.forEach(def -> result.add(new FunctionWithDefSourceLine(node, def)));
         return result;
     }

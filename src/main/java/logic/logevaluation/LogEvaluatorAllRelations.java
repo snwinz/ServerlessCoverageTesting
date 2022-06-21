@@ -1,6 +1,5 @@
 package logic.logevaluation;
 
-import gui.model.Graph;
 import logic.model.LogicGraph;
 import logic.testcasegenerator.TargetGenerator;
 import logic.testcasegenerator.coveragetargets.CoverageTargetAllRelations;

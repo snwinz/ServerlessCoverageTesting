@@ -98,8 +98,7 @@ public class MutationExecutor {
     private Optional<Testcase> getTcKillingMutant(TestSuite testSuite, TestcaseExecutor tcExecutor, String resetFunction) {
         var executor = tcExecutor.getExecutor();
         var testcases = testSuite.getTestcases();
-        for (int i = 0; i < testcases.size(); i++) {
-            var testcase = testcases.get(i);
+        for (Testcase testcase : testcases) {
             executor.resetApplication(resetFunction);
             if (!tcExecutor.executeTC(testcase)) {
                 executor.resetApplication(resetFunction);

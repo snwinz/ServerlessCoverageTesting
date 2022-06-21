@@ -15,6 +15,7 @@ import logic.testcasegenerator.testcaseexecution.TestcaseExecutor;
 import shared.model.Testcase;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -121,7 +122,7 @@ public class TestCaseExecutionController {
 
     public void getLogsOfTestcases(List<TestcaseWrapper> testcases) {
         var allLogLists = testcases.stream().map(TestcaseWrapper::getLogsMeasured)
-                .filter(Objects::nonNull).flatMap(entry -> entry.stream()).toList();
+                .filter(Objects::nonNull).flatMap(Collection::stream).toList();
         var text = String.join("\n", allLogLists);
         var view = new StandardPresentationView("logs of testcases", text);
         view.show();
@@ -129,7 +130,7 @@ public class TestCaseExecutionController {
 
     public void evaluateLogs(List<TestcaseWrapper> testcases, Graph graph) {
         var allLogs = testcases.stream().map(TestcaseWrapper::getLogsMeasured)
-                .filter(Objects::nonNull).flatMap(entry -> entry.stream()).toList();
+                .filter(Objects::nonNull).flatMap(Collection::stream).toList();
         LogEvaluationController controller = new LogEvaluationController(graph);
         controller.setup(allLogs);
 

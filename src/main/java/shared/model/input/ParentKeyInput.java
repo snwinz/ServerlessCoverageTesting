@@ -31,7 +31,7 @@ public class ParentKeyInput extends GeneralInput {
     @Override
     public String getJsonFormat(List<GeneralInput> generalInputs) {
 
-        var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).collect(Collectors.toList());
+        var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).toList();
 
         var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue))
                 .map(child -> child.getJsonFormat(generalInputs)).collect(Collectors.joining(","));
@@ -50,7 +50,7 @@ public class ParentKeyInput extends GeneralInput {
         if (this.isUndefined()) {
             return "";
         } else {
-            var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).collect(Collectors.toList());
+            var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).toList();
             var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue))
                     .map(child -> child.getJsonWithData(generalInputs)).filter(entry -> !"".equals(entry)).collect(Collectors.joining(","));
             if (this.getJsonSavedAsString()) {

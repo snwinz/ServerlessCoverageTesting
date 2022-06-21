@@ -75,7 +75,7 @@ public final class Testcase {
             }
         }
         expectedLogs.clear();
-        expectedLogs.addAll(Arrays.stream(parts).filter(Objects::nonNull).filter(entry -> !"".equals(entry.trim())).collect(Collectors.toList()));
+        expectedLogs.addAll(Arrays.stream(parts).filter(Objects::nonNull).filter(entry -> !"".equals(entry.trim())).toList());
     }
 
     public void setExpectedLogOutput(List<String> calibratedLogs) {

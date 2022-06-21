@@ -36,7 +36,7 @@ public class ArrowCreatorView extends Stage {
     private GridPane getGridPane(Graph model) {
         var accessText = new Label("Access mode: ");
         accessText.setVisible(false);
-        setupComboboxes(model, accessText);
+        setupComboBoxes(model, accessText);
         var grid = new GridPane();
         var createButton = new Button("Add arrow");
         createButton.setOnAction(getCreateButtonHandler());
@@ -55,7 +55,7 @@ public class ArrowCreatorView extends Stage {
         return grid;
     }
 
-    private void setupComboboxes(Graph model, Label accessText) {
+    private void setupComboBoxes(Graph model, Label accessText) {
         for (var node : model.getNodes()) {
             comboBoxSuccessor.getItems().add(new NodeWrapper(node, node.getNameOfNode()));
             comboBoxPredecessor.getItems().add(new NodeWrapper(node, node.getNameOfNode()));

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -145,8 +144,7 @@ public class PersistenceUtilities {
     }
 
     public static List<Mutant> loadMutants(Path path) throws IOException {
-        List<String> allMutantsList = null;
-        allMutantsList = Files.readAllLines(path);
+        List<String> allMutantsList = Files.readAllLines(path);
         String allMutants = String.join("\n", allMutantsList);
         Gson gson = new Gson();
         Type mutationListType = new TypeToken<ArrayList<Mutant>>() {
@@ -163,7 +161,7 @@ public class PersistenceUtilities {
         var gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(mutationResult);
         String status = mutationResult.isKilled() ? "killed" : "survived";
-        Path file = Path.of(status+"_"+mutationResult.getTestSuiteName()+"_"+ mutationResult.getMutantNumber()+".txt");
+        Path file = Path.of(status + "_" + mutationResult.getTestSuiteName() + "_" + mutationResult.getMutantNumber() + ".txt");
         var destination = target.resolve(file);
         try {
             Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);

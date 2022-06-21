@@ -69,7 +69,7 @@ public class NodeInputData {
     }
 
     public void setInputFormats(FunctionInputFormat inputFormats) {
-        inputFormats.updateTypes();
+        inputFormats.updateTypesOfGeneralInputs();
         this.inputFormats = inputFormats;
     }
 

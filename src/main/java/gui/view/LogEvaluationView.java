@@ -77,12 +77,8 @@ public class LogEvaluationView extends Stage implements PropertyChangeListener {
         var openLogFile = new MenuItem("Open Log file");
         var close = new MenuItem("Close");
 
-        openLogFile.setOnAction(event -> {
-            controller.openLogFile();
-        });
-        close.setOnAction(event -> {
-            controller.exit();
-        });
+        openLogFile.setOnAction(event -> controller.openLogFile());
+        close.setOnAction(event -> controller.exit());
         file.getItems().addAll(openLogFile, close);
         menuBar.getMenus().addAll(file);
         return menuBar;

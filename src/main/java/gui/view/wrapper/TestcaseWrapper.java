@@ -25,9 +25,7 @@ public class TestcaseWrapper {
             functionsWrapped.add(new FunctionWrapper(function));
         }
         manualCreated.set(testcase.isManualCreated());
-        manualCreated.addListener((observable, oldValue, newValue) -> {
-            testcase.setManualCreated(newValue);
-        });
+        manualCreated.addListener((observable, oldValue, newValue) -> testcase.setManualCreated(newValue));
     }
 
     public Testcase getTestcase() {

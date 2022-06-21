@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import logic.model.LogicGraph;
+import logic.model.NodeModel;
 import logic.mutation.MutationExecutor;
 import shared.model.Mutant;
 import shared.model.NodeType;
@@ -168,7 +169,7 @@ public class MutationView extends Stage implements PropertyChangeListener {
             return;
         }
 
-        var allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(node -> node.getNameOfNode()).toList();
+        var allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(NodeModel::getNameOfNode).toList();
         applicationFunctions.setText(String.join(System.lineSeparator(), allFunctions));
     }
 

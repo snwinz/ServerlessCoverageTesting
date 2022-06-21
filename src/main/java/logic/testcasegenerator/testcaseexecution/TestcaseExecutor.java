@@ -168,7 +168,6 @@ public class TestcaseExecutor {
 
     private boolean checkCorrectnessOfOutput(String result, Function function, Map<String, List<String>> outputValues) {
         boolean passed = true;
-        List<String> incorrectParts = new LinkedList<>();
         for (var part : function.getExpectedOutputs()) {
             while (part.contains(PREVIOUSOUTPUT_PREFIX) && part.contains(PREVIOUSOUTPUT_SUFFIX)) {
                 int startPositionMarker = part.indexOf(PREVIOUSOUTPUT_PREFIX);
@@ -203,7 +202,6 @@ public class TestcaseExecutor {
             if (result.contains(part)) {
                 result = result.substring(result.indexOf(part) + part.length());
             } else {
-                incorrectParts.add(part);
                 passed = false;
                 break;
             }

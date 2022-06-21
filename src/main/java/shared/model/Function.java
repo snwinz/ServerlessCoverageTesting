@@ -40,7 +40,7 @@ public final class Function {
             }
         }
         expectedOutputs.clear();
-        expectedOutputs.addAll(Arrays.stream(parts).filter(Objects::nonNull).collect(Collectors.toList()));
+        expectedOutputs.addAll(Arrays.stream(parts).filter(Objects::nonNull).toList());
     }
 
 

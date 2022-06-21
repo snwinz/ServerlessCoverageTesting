@@ -353,7 +353,7 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
 
 
         Button generateTCs = new Button("Generate similar random test suite");
-        generateTCs.setOnAction(e -> controller.createTestSuite(this.graph, testcases.stream().map(tc -> tc.getTestcase()).toList()));
+        generateTCs.setOnAction(e -> controller.createTestSuite(this.graph, testcases.stream().map(TestcaseWrapper::getTestcase).toList()));
 
         ViewHelper.addToGridInHBox(grid, generateTCs);
 

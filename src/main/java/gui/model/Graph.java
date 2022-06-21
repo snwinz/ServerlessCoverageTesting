@@ -118,7 +118,7 @@ public class Graph {
         var node = findNodeByID(id);
         if (node.isPresent()) {
             var toBeRemoved = arrows.stream().
-                    filter(arrow -> Objects.equals(node.get().getIdentifier(), arrow.getPredecessor()) || Objects.equals(node.get().getIdentifier(), arrow.getSuccessor())).collect(Collectors.toList());
+                    filter(arrow -> Objects.equals(node.get().getIdentifier(), arrow.getPredecessor()) || Objects.equals(node.get().getIdentifier(), arrow.getSuccessor())).toList();
             arrows.removeAll(toBeRemoved);
             nodes.remove(node.get());
         }

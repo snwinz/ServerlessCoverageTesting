@@ -63,36 +63,6 @@ public class FunctionInputFormat {
         return typedInputs;
     }
 
-     public void updateTypes() {
-        List<GeneralInput> typedInputs = new ArrayList<>();
-
-        for (var generalInput : generalInputs) {
-            if (generalInput.getParentNode() != null && generalInput.getParentNode() && generalInput.getJsonSavedAsString() != null) {
-                typedInputs.add(new ParentKeyInput(generalInput));
-                continue;
-            }
-            if (generalInput.getArrayNode() != null && generalInput.getArrayNode()) {
-                typedInputs.add(new ArrayKeyInput(generalInput));
-                continue;
-            }
-            if (generalInput.getMaxValue() != null) {
-                typedInputs.add(new IntegerInput(generalInput));
-                continue;
-            }
-            if (generalInput.getDynamicValue() != null) {
-                typedInputs.add(new DynamicKeyValue(generalInput));
-            }
-            if (generalInput.getKey() == null) {
-                typedInputs.add(new ConstantValue(generalInput));
-                continue;
-            }
-            if (generalInput.getKey() != null && generalInput.getConstantValue() != null) {
-                typedInputs.add(new ConstantKeyValue(generalInput));
-            }
-        }
-        this.generalInputs = typedInputs;
-    }
-
     public String getJSONWithNewContent() {
         generalInputs.forEach(GeneralInput::calculateNewValues);
         StringBuilder result = new StringBuilder();
