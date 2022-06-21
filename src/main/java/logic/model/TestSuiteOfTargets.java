@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestSuite {
+public class TestSuiteOfTargets {
 
     final List<CoverageTarget> testTargets = new ArrayList<>();
 

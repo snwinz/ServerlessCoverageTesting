@@ -32,7 +32,7 @@ public class RandomTestSuiteGenerator {
 
         var allFunctionNodes = GraphHelper.getAllFunctions(logicGraph);
 
-        for (int i = 0; i < testcase.functions().size(); i++) {
+        for (int i = 0; i < testcase.getFunctions().size(); i++) {
             NodeModel node = getRandomFunction(allFunctionNodes);
             var functionName = node.getNameOfNode();
             var inputFormat = node.getInputFormats();

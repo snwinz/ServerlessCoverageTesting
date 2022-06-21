@@ -3,7 +3,7 @@ package gui.controller.criteriaSelection;
 import gui.model.Graph;
 import gui.view.StandardPresentationView;
 import gui.view.criteriaSelection.CriteriaSelectionView;
-import logic.model.TestSuite;
+import logic.model.TestSuiteOfTargets;
 import logic.testcasegenerator.TestCaseGenerator;
 import logic.testcasegenerator.TestCaseGeneratorImpl;
 
@@ -33,32 +33,32 @@ public class CriteriaSelectionTestCaseTemplateController implements CriteriaSele
         String modelAsJson = model.getJSON();
         if (isAllResources) {
 
-            TestSuite testSuite = tcGenerator.getResourceCoverage(modelAsJson);
-            StandardPresentationView tcView = new StandardPresentationView("All resources", testSuite.toString());
+            TestSuiteOfTargets testSuiteOfTargets = tcGenerator.getResourceCoverage(modelAsJson);
+            StandardPresentationView tcView = new StandardPresentationView("All resources", testSuiteOfTargets.toString());
             tcView.show();
         }
 
         if (isAllRelations) {
-            TestSuite testSuite = tcGenerator.getRelationCoverage(modelAsJson);
-            StandardPresentationView tcView = new StandardPresentationView("All relations", testSuite.toString());
+            TestSuiteOfTargets testSuiteOfTargets = tcGenerator.getRelationCoverage(modelAsJson);
+            StandardPresentationView tcView = new StandardPresentationView("All relations", testSuiteOfTargets.toString());
             tcView.show();
         }
 
         if (isAllDefs) {
-            TestSuite testSuite = tcGenerator.getAllDefsCoverage(modelAsJson);
-            StandardPresentationView tcView = new StandardPresentationView("All defs", testSuite.toString());
+            TestSuiteOfTargets testSuiteOfTargets = tcGenerator.getAllDefsCoverage(modelAsJson);
+            StandardPresentationView tcView = new StandardPresentationView("All defs", testSuiteOfTargets.toString());
             tcView.show();
         }
 
         if (isAllDefUse) {
-            TestSuite testSuite = tcGenerator.getDefUseCoverage(modelAsJson);
-            StandardPresentationView tcView = new StandardPresentationView("All defuse", testSuite.toString());
+            TestSuiteOfTargets testSuiteOfTargets = tcGenerator.getDefUseCoverage(modelAsJson);
+            StandardPresentationView tcView = new StandardPresentationView("All defuse", testSuiteOfTargets.toString());
             tcView.show();
         }
 
         if (isAllUses) {
-            TestSuite testSuite = tcGenerator.getAllUsesCoverage(modelAsJson);
-            StandardPresentationView tcView = new StandardPresentationView("All uses", testSuite.toString());
+            TestSuiteOfTargets testSuiteOfTargets = tcGenerator.getAllUsesCoverage(modelAsJson);
+            StandardPresentationView tcView = new StandardPresentationView("All uses", testSuiteOfTargets.toString());
             tcView.show();
         }
         view.close();

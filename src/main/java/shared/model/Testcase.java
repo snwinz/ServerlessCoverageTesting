@@ -20,7 +20,7 @@ public final class Testcase {
         this.target = target;
     }
 
-    public List<Function> functions() {
+    public List<Function> getFunctions() {
         return functions;
     }
 

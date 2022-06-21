@@ -21,7 +21,7 @@ public class TestcaseWrapper {
 
     public TestcaseWrapper(Testcase testcase) {
         this.testcase = testcase;
-        for (var function : testcase.functions()) {
+        for (var function : testcase.getFunctions()) {
             functionsWrapped.add(new FunctionWrapper(function));
         }
         manualCreated.set(testcase.isManualCreated());

@@ -3,7 +3,7 @@ package gui.controller;
 import gui.model.Graph;
 import gui.model.TestcasesContainer;
 import gui.view.StandardPresentationView;
-import gui.view.TestCaseExecutionView;
+import gui.view.ExecutionView;
 import gui.view.wrapper.TestcaseWrapper;
 import javafx.stage.FileChooser;
 import logic.evaluation.TestcaseEvaluator;
@@ -19,13 +19,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class TestCaseExecutionController {
-    private final TestCaseExecutionView view;
+    private final ExecutionView view;
     private final TestcasesContainer model;
 
 
     public TestCaseExecutionController(List<Testcase> testcases, Graph graph) {
         this.model = new TestcasesContainer(testcases);
-        this.view = new TestCaseExecutionView(this, testcases, graph);
+        this.view = new ExecutionView(this, testcases, graph);
 
     }
 

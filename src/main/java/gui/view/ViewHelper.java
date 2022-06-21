@@ -6,9 +6,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
 public class ViewHelper {
-    static HBox addToGridInHBox(GridPane grid, Node...buttons) {
+    static HBox addToGridInHBox(GridPane grid, Node...nodes) {
         HBox box = new HBox();
-        for(Node node : buttons){
+        for(Node node : nodes){
             HBox.setMargin(node, new Insets(10, 10, 10, 10));
             box.getChildren().add(node);
         }

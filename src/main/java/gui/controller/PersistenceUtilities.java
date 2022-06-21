@@ -1,18 +1,18 @@
 package gui.controller;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import gui.controller.dto.ArrowInputData;
 import gui.controller.dto.NodeInputData;
 import gui.model.Graph;
-import shared.model.Function;
-import shared.model.NodeType;
-import shared.model.Testcase;
+import shared.model.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -93,7 +93,7 @@ public class PersistenceUtilities {
                 Type tcListType = new TypeToken<LinkedList<Testcase>>() {
                 }.getType();
                 var gson = new GsonBuilder().setPrettyPrinting().create();
-                 testcasesRead = gson.fromJson(testcaseOneLine, tcListType);
+                testcasesRead = gson.fromJson(testcaseOneLine, tcListType);
             } else {
 
                 var testcases = testcaseOneLine.split("##Target ");
@@ -141,6 +141,34 @@ public class PersistenceUtilities {
             Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             System.err.printf("Could not write the following to %s:%n%s ", absolutePath, json);
+        }
+    }
+
+    public static List<Mutant> loadMutants(Path path) throws IOException {
+        List<String> allMutantsList = null;
+        allMutantsList = Files.readAllLines(path);
+        String allMutants = String.join("\n", allMutantsList);
+        Gson gson = new Gson();
+        Type mutationListType = new TypeToken<ArrayList<Mutant>>() {
+        }.getType();
+        return gson.fromJson(allMutants, mutationListType);
+
+    }
+
+    public static void saveMutationResult(MutationResult mutationResult, Path target) {
+        if (!Files.isDirectory(target)) {
+            System.err.println(target.toAbsolutePath() + " is not a directory");
+        }
+
+        var gson = new GsonBuilder().setPrettyPrinting().create();
+        String json = gson.toJson(mutationResult);
+        String status = mutationResult.isKilled() ? "killed" : "survived";
+        Path file = Path.of(status+"_"+mutationResult.getTestSuiteName()+"_"+ mutationResult.getMutantNumber()+".txt");
+        var destination = target.resolve(file);
+        try {
+            Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            System.err.printf("Could not write the following to %s:%n%s ", destination, json);
         }
     }
 }

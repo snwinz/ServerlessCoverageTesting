@@ -8,6 +8,7 @@ import gui.view.StandardPresentationView;
 import gui.view.graphcomponents.DraggableArrow;
 import gui.view.graphcomponents.DraggableNode;
 import javafx.stage.FileChooser;
+import logic.model.LogicGraph;
 
 import java.io.File;
 import java.io.IOException;
@@ -175,5 +176,10 @@ public class GraphVisualisationController {
                 System.err.println("Error while reading file " + file.getName());
             }
         }
+    }
+
+    public void runMutants() {
+        MutationController controller = new MutationController();
+        controller.setup(new LogicGraph(model.getJSON()));
     }
 }

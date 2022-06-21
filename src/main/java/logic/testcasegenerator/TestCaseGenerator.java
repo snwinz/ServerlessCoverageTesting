@@ -1,19 +1,19 @@
 package logic.testcasegenerator;
 
 
-import logic.model.TestSuite;
+import logic.model.TestSuiteOfTargets;
 
 /**
  * Interface expects graph as JSON since a separate web gui is planned
  */
 public interface TestCaseGenerator {
-    TestSuite getResourceCoverage(String graphJSON);
+    TestSuiteOfTargets getResourceCoverage(String graphJSON);
 
-    TestSuite getRelationCoverage(String graphJSON);
+    TestSuiteOfTargets getRelationCoverage(String graphJSON);
 
-    TestSuite getAllDefsCoverage(String graphJSON);
+    TestSuiteOfTargets getAllDefsCoverage(String graphJSON);
 
-    TestSuite getDefUseCoverage(String graphJSON);
+    TestSuiteOfTargets getDefUseCoverage(String graphJSON);
 
-    TestSuite getAllUsesCoverage(String graphJSON);
+    TestSuiteOfTargets getAllUsesCoverage(String graphJSON);
 }

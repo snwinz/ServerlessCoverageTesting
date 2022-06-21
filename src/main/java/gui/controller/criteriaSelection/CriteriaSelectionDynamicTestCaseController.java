@@ -3,7 +3,7 @@ package gui.controller.criteriaSelection;
 import gui.controller.DynamicTCSelectionController;
 import gui.model.Graph;
 import gui.view.criteriaSelection.CriteriaSelectionView;
-import logic.model.TestSuite;
+import logic.model.TestSuiteOfTargets;
 import logic.testcasegenerator.TestCaseGenerator;
 import logic.testcasegenerator.TestCaseGeneratorImpl;
 
@@ -32,33 +32,33 @@ public class CriteriaSelectionDynamicTestCaseController implements CriteriaSelec
     public void handleInput(boolean isAllResources, boolean isAllRelations, boolean isAllDefs, boolean isAllDefUse, boolean isAllUses) {
         TestCaseGenerator tcGenerator = new TestCaseGeneratorImpl();
         String modelAsJson = model.getJSON();
-        TestSuite testSuite = new TestSuite();
+        TestSuiteOfTargets testSuiteOfTargets = new TestSuiteOfTargets();
 
         if (isAllResources) {
-            TestSuite testSuiteAllResources = tcGenerator.getResourceCoverage(modelAsJson);
-            testSuite.add(testSuiteAllResources.getTestTargets());
+            TestSuiteOfTargets testSuiteOfTargetsAllResources = tcGenerator.getResourceCoverage(modelAsJson);
+            testSuiteOfTargets.add(testSuiteOfTargetsAllResources.getTestTargets());
         }
 
         if (isAllRelations) {
-            TestSuite testSuiteAllRelations = tcGenerator.getRelationCoverage(modelAsJson);
-            testSuite.add(testSuiteAllRelations.getTestTargets());
+            TestSuiteOfTargets testSuiteOfTargetsAllRelations = tcGenerator.getRelationCoverage(modelAsJson);
+            testSuiteOfTargets.add(testSuiteOfTargetsAllRelations.getTestTargets());
         }
         if (isAllDefs) {
-            TestSuite testSuiteAllDefs = tcGenerator.getAllDefsCoverage(modelAsJson);
-            testSuite.add(testSuiteAllDefs.getTestTargets());
+            TestSuiteOfTargets testSuiteOfTargetsAllDefs = tcGenerator.getAllDefsCoverage(modelAsJson);
+            testSuiteOfTargets.add(testSuiteOfTargetsAllDefs.getTestTargets());
         }
 
         if (isAllDefUse) {
-            TestSuite testSuiteAllDefUse = tcGenerator.getDefUseCoverage(modelAsJson);
-            testSuite.add(testSuiteAllDefUse.getTestTargets());
+            TestSuiteOfTargets testSuiteOfTargetsAllDefUse = tcGenerator.getDefUseCoverage(modelAsJson);
+            testSuiteOfTargets.add(testSuiteOfTargetsAllDefUse.getTestTargets());
         }
 
         if (isAllUses) {
-            TestSuite testSuiteAllUse = tcGenerator.getAllUsesCoverage(modelAsJson);
-            testSuite.add(testSuiteAllUse.getTestTargets());
+            TestSuiteOfTargets testSuiteOfTargetsAllUse = tcGenerator.getAllUsesCoverage(modelAsJson);
+            testSuiteOfTargets.add(testSuiteOfTargetsAllUse.getTestTargets());
         }
         DynamicTCSelectionController controller = new DynamicTCSelectionController();
-        controller.setup(testSuite,model);
+        controller.setup(testSuiteOfTargets,model);
         view.close();
     }
 }

@@ -9,7 +9,7 @@ import logic.dynamicdatageneration.DynamicTestCaseGenerator;
 import logic.dynamicdatageneration.TestcaseSimulator;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.Executor;
-import logic.model.TestSuite;
+import logic.model.TestSuiteOfTargets;
 import logic.model.Testcase;
 import logic.testcasegenerator.coveragetargets.CoverageTarget;
 
@@ -25,8 +25,8 @@ public class DynamicTCSelectionController {
 
     }
 
-    public void setup(TestSuite testSuite, Graph model) {
-        this.view = new DynamicTCSelectionView(testSuite, this);
+    public void setup(TestSuiteOfTargets testSuiteOfTargets, Graph model) {
+        this.view = new DynamicTCSelectionView(testSuiteOfTargets, this);
         view.setMaximized(true);
         view.show();
     }
@@ -64,21 +64,21 @@ public class DynamicTCSelectionController {
         tcView.show();
     }
 
-    public void showTestSuitData(TestSuite testSuite) {
-        String data = testSuite.getCoverageData();
+    public void showTestSuitData(TestSuiteOfTargets testSuiteOfTargets) {
+        String data = testSuiteOfTargets.getCoverageData();
         StandardPresentationView tcView = new StandardPresentationView("Test suite info", data);
         tcView.show();
     }
 
 
-    public void showTestSuiteForExecution(TestSuite testSuite) {
-        String data = testSuite.getTCsWithInput();
+    public void showTestSuiteForExecution(TestSuiteOfTargets testSuiteOfTargets) {
+        String data = testSuiteOfTargets.getTCsWithInput();
         StandardPresentationView tcView = new StandardPresentationView("Test suite info", data);
         tcView.show();
     }
 
-    public void exportTestSuitForExecution(TestSuite testSuite) {
-        var testSuiteExecution = testSuite.getTestSuiteForExecution();
+    public void exportTestSuitForExecution(TestSuiteOfTargets testSuiteOfTargets) {
+        var testSuiteExecution = testSuiteOfTargets.getTestSuiteForExecution();
         var fileChooser = new FileChooser();
         var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);
@@ -89,8 +89,8 @@ public class DynamicTCSelectionController {
         }
     }
 
-    public void exportTestSuitOfTargetsForExecution(TestSuite testSuite) {
-        var testSuiteExecution = testSuite.getTestSuiteForExecutionOfTargets();
+    public void exportTestSuitOfTargetsForExecution(TestSuiteOfTargets testSuiteOfTargets) {
+        var testSuiteExecution = testSuiteOfTargets.getTestSuiteForExecutionOfTargets();
         var fileChooser = new FileChooser();
         var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);

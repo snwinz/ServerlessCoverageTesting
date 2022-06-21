@@ -19,7 +19,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     private final TargetGenerator targetGenerator = new TargetGenerator();
 
     @Override
-    public TestSuite getResourceCoverage(String graphJSON) {
+    public TestSuiteOfTargets getResourceCoverage(String graphJSON) {
         LogicGraph logicGraph = new LogicGraph(graphJSON);
         logicGraph.addRelationsToElements();
 
@@ -38,7 +38,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             target.addTestcases(testcases);
         }
 
-        TestSuite testsuite = new TestSuite();
+        TestSuiteOfTargets testsuite = new TestSuiteOfTargets();
         testsuite.add(coverageTargets);
         testsuite.calculateOracleNodes(logicGraph);
         testsuite.calculateStateNodes(logicGraph);
@@ -101,7 +101,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     }
 
     @Override
-    public TestSuite getRelationCoverage(String graphJSON) {
+    public TestSuiteOfTargets getRelationCoverage(String graphJSON) {
         LogicGraph logicGraph = new LogicGraph(graphJSON);
         logicGraph.addRelationsToElements();
 
@@ -122,7 +122,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             target.addTestcases(testcases);
         }
 
-        TestSuite testsuite = new TestSuite();
+        TestSuiteOfTargets testsuite = new TestSuiteOfTargets();
         testsuite.add(coverageTargets);
         testsuite.calculateOracleNodes(logicGraph);
         testsuite.calculateStateNodes(logicGraph);
@@ -180,7 +180,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     }
 
     @Override
-    public TestSuite getAllDefsCoverage(String graphJSON) {
+    public TestSuiteOfTargets getAllDefsCoverage(String graphJSON) {
         LogicGraph logicGraph = new LogicGraph(graphJSON);
         logicGraph.addRelationsToElements();
 
@@ -194,7 +194,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             target.addTestcases(testcases);
         }
 
-        TestSuite testsuite = new TestSuite();
+        TestSuiteOfTargets testsuite = new TestSuiteOfTargets();
         testsuite.add(coverageTargets);
         testsuite.calculateOracleNodes(logicGraph);
         testsuite.calculateStateNodes(logicGraph);
@@ -202,7 +202,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
     }
 
     @Override
-    public TestSuite getDefUseCoverage(String graphJSON) {
+    public TestSuiteOfTargets getDefUseCoverage(String graphJSON) {
         LogicGraph logicGraph = new LogicGraph(graphJSON);
         logicGraph.addRelationsToElements();
 
@@ -211,7 +211,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             List<Testcase> testcases = getTestcaseForTarget(target);
             target.addTestcases(testcases);
         }
-        TestSuite testsuite = new TestSuite();
+        TestSuiteOfTargets testsuite = new TestSuiteOfTargets();
         testsuite.add(coverageTargets);
         testsuite.calculateOracleNodes(logicGraph);
         testsuite.calculateStateNodes(logicGraph);
@@ -475,7 +475,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
 
 
     @Override
-    public TestSuite getAllUsesCoverage(String graphJSON) {
+    public TestSuiteOfTargets getAllUsesCoverage(String graphJSON) {
         LogicGraph logicGraph = new LogicGraph(graphJSON);
         logicGraph.addRelationsToElements();
 
@@ -484,7 +484,7 @@ public class TestCaseGeneratorImpl implements TestCaseGenerator {
             List<Testcase> testcases = getTestcaseForTarget(target);
             target.addTestcases(testcases);
         }
-        TestSuite testsuite = new TestSuite();
+        TestSuiteOfTargets testsuite = new TestSuiteOfTargets();
         testsuite.add(coverageTargets);
         testsuite.calculateOracleNodes(logicGraph);
         testsuite.calculateStateNodes(logicGraph);

@@ -17,7 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import logic.model.ServerlessFunction;
-import logic.model.TestSuite;
+import logic.model.TestSuiteOfTargets;
 import logic.model.Testcase;
 import logic.testcasegenerator.coveragetargets.CoverageTarget;
 
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class DynamicTCSelectionView extends Stage implements PropertyChangeListener {
 
 
-    private final TestSuite testSuite;
+    private final TestSuiteOfTargets testSuiteOfTargets;
     private final List<CheckboxWrapper<Testcase>> availableTestcases = new ArrayList<>();
     private final DynamicTCSelectionController controller;
     private final Spinner<Integer> numberOfTries = new Spinner<>(1, 100, 2);
@@ -49,9 +49,9 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
     private final TextField resetFunctionName = new TextField();
     private final TextField regionAWS = new TextField();
 
-    public DynamicTCSelectionView(TestSuite testSuite, DynamicTCSelectionController controller) {
+    public DynamicTCSelectionView(TestSuiteOfTargets testSuiteOfTargets, DynamicTCSelectionController controller) {
         this.controller = controller;
-        this.testSuite = testSuite;
+        this.testSuiteOfTargets = testSuiteOfTargets;
         this.setTitle("Select test targets for dynamic test case generation");
         createView();
         getConfigProperties();
@@ -75,7 +75,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
             var settings = new ExecutionSettings(regionAWS.getText(), resetFunctionName.getText());
             settings.setNumberOfTries(numberOfTries.getValue());
             controller.coverAllTargets(
-                    testSuite.getTestTargets(), settings);
+                    testSuiteOfTargets.getTestTargets(), settings);
         });
 
 
@@ -100,7 +100,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
 
         Label checkboxDescription = new Label("Use testcase for \ndata generation");
         grid.add(checkboxDescription, 3, 7);
-        for (var testTarget : testSuite.getTestTargets()) {
+        for (var testTarget : testSuiteOfTargets.getTestTargets()) {
             int lastRow = grid.getRowCount();
             Label testTargetLabel = new Label(testTarget.getCoverageTargetDescription());
             Circle statusLightTarget = new Circle(100 / 3.0 / 2, 100 / 4.0, 10);
@@ -203,16 +203,16 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         }
 
         Button getAllDataButton = new Button("All tc data with run results");
-        getAllDataButton.setOnAction(e -> controller.showTestSuitData(testSuite));
+        getAllDataButton.setOnAction(e -> controller.showTestSuitData(testSuiteOfTargets));
 
         Button getAllTCsWithInput = new Button("All test cases with input");
-        getAllTCsWithInput.setOnAction(e -> controller.showTestSuiteForExecution(testSuite));
+        getAllTCsWithInput.setOnAction(e -> controller.showTestSuiteForExecution(testSuiteOfTargets));
 
         Button exportAllTCsWithInput = new Button("Export all test cases with input to JSON");
-        exportAllTCsWithInput.setOnAction(e -> controller.exportTestSuitForExecution(testSuite));
+        exportAllTCsWithInput.setOnAction(e -> controller.exportTestSuitForExecution(testSuiteOfTargets));
 
         Button exportAllTCsWithInputEachTarget = new Button("Export tc for each target with input to JSON");
-        exportAllTCsWithInputEachTarget.setOnAction(e -> controller.exportTestSuitOfTargetsForExecution(testSuite));
+        exportAllTCsWithInputEachTarget.setOnAction(e -> controller.exportTestSuitOfTargetsForExecution(testSuiteOfTargets));
 
         Button selectAllTestCases = new Button("Select all test cases");
         selectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(true)));
@@ -224,7 +224,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         Button selectAllUncoveredTestCases = new Button("Select uncovered testing targets");
         selectAllUncoveredTestCases.setOnAction(e ->
                 {
-                    var tcToBeSelected = testSuite.getTestTargets().stream()
+                    var tcToBeSelected = testSuiteOfTargets.getTestTargets().stream()
                             .filter(Predicate.not(CoverageTarget::isCovered))
                             .flatMap(target -> target.getTestcases().stream()).collect(Collectors.toSet());
                     availableTestcases.forEach(tc ->

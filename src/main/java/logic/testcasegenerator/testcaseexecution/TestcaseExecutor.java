@@ -5,6 +5,7 @@ import gui.view.wrapper.TestcaseWrapper;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.KeyValueJsonGenerator;
 import shared.model.Function;
+import shared.model.Testcase;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -47,6 +48,34 @@ public class TestcaseExecutor {
             function.addTextToOutput(resultFormatted);
         }
         checkCorrectnessOfLogs(testcase);
+    }
+
+
+    public boolean executeTC(Testcase testcase) {
+        boolean validExecution = true;
+        var functions = testcase.getFunctions();
+        final Map<String, List<String>> outputValues = new HashMap<>();
+        for (var function : functions) {
+            String functionName = function.getName();
+            String jsonData = function.getParameter();
+            String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
+            LOGGER.info(invocation);
+
+            String result = executor.invokeFunction(functionName, jsonData, outputValues);
+
+
+            validExecution &= checkCorrectnessOfOutput(result, function, outputValues);
+
+            addResultToOutputValues(result, outputValues);
+
+            String resultFormatted = String.format("result: %s", result);
+
+            LOGGER.info(resultFormatted);
+        }
+        if (validExecution) {
+            validExecution = checkCorrectnessOfLogs(testcase);
+        }
+        return validExecution;
     }
 
     private boolean removePartFromList(List<String> logsCompare, String part) {
@@ -136,6 +165,53 @@ public class TestcaseExecutor {
         }
     }
 
+
+    private boolean checkCorrectnessOfOutput(String result, Function function, Map<String, List<String>> outputValues) {
+        boolean passed = true;
+        List<String> incorrectParts = new LinkedList<>();
+        for (var part : function.getExpectedOutputs()) {
+            while (part.contains(PREVIOUSOUTPUT_PREFIX) && part.contains(PREVIOUSOUTPUT_SUFFIX)) {
+                int startPositionMarker = part.indexOf(PREVIOUSOUTPUT_PREFIX);
+                var splitPart = part.substring(startPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
+                int endPositionMarker = splitPart.indexOf(PREVIOUSOUTPUT_SUFFIX);
+                if (endPositionMarker == -1) {
+                    passed = false;
+                    break;
+                }
+                splitPart = splitPart.substring(0, endPositionMarker);
+                var valueArray = splitPart.split(Pattern.quote(SEPARATOR));
+                var partsOfKey = Arrays.copyOfRange(valueArray, 0, valueArray.length - 1);
+                String key = String.join(SEPARATOR, partsOfKey);
+                int number;
+                if (partsOfKey.length == 0 || !outputValues.containsKey(key)) {
+                    passed = false;
+                    break;
+                }
+                try {
+                    number = Integer.parseInt(valueArray[valueArray.length - 1]);
+                } catch (NumberFormatException e) {
+                    passed = false;
+                    break;
+                }
+
+                String partBeforeOutputValue = part.substring(0, startPositionMarker);
+                var outputValue = outputValues.get(key).get(number);
+                var potentialPartAfterOutputValue = part.substring(endPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
+                potentialPartAfterOutputValue = potentialPartAfterOutputValue.substring(potentialPartAfterOutputValue.indexOf(PREVIOUSOUTPUT_SUFFIX) + PREVIOUSOUTPUT_SUFFIX.length());
+                part = partBeforeOutputValue + outputValue + potentialPartAfterOutputValue;
+            }
+            if (result.contains(part)) {
+                result = result.substring(result.indexOf(part) + part.length());
+            } else {
+                incorrectParts.add(part);
+                passed = false;
+                break;
+            }
+        }
+        return passed;
+    }
+
+
     private void checkCorrectnessOfLogs(TestcaseWrapper testcase) {
         testcase.executedProperty().set(true);
         if (testcase.getTestcase().getLogsToBeCovered().size() == 0 && !testcase.isSaveLogs()) {
@@ -175,6 +251,21 @@ public class TestcaseExecutor {
             }
         }
 
+    }
+
+
+    private boolean checkCorrectnessOfLogs(Testcase testcase) {
+        if (testcase.getLogsToBeCovered().size() == 0) {
+            return true;
+        }
+        var logs = executor.getAllNewLogs(0L);
+        List<String> logsCompare = filterLogs(logs);
+        for (var part : testcase.getLogsToBeCovered()) {
+            if (!removePartFromList(logsCompare, part)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void addResultToOutputValues(String result, Map<String, List<String>> outputValues) {
@@ -353,5 +444,9 @@ public class TestcaseExecutor {
         for (var testcase : testcases) {
             this.recalibrate(testcase, resetFunction);
         }
+    }
+
+    public AWSInvoker getExecutor() {
+        return executor;
     }
 }
