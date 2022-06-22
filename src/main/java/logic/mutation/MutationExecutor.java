@@ -93,9 +93,9 @@ public class MutationExecutor {
             executor.resetApplication(resetFunction);
             if (tcExecutor.executeTC(testcase).isPresent()) {
                 executor.resetApplication(resetFunction);
-                var partNotCovered = tcExecutor.executeTC(testcase);
-                if (partNotCovered.isPresent()) {
-                    missingPart = partNotCovered.get();
+                var partNotCoveredInformation = tcExecutor.executeTC(testcase);
+                if (partNotCoveredInformation.isPresent()) {
+                    missingPart = partNotCoveredInformation.get();
                     killingTestcase = Optional.of(testcase);
                     break;
                 }
