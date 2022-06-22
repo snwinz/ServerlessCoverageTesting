@@ -113,7 +113,7 @@ public class MutationExecutor {
         Map<String, String> envVariables = new HashMap<>();
 
         if (mutant.getMutationType() != null) {
-            envVariables.put("processType", mutant.getMutationType().toString());
+            envVariables.put("mutationType", mutant.getMutationType().toString());
         }
         if (mutant.getVariable() != null) {
             envVariables.put("variableName", mutant.getVariable());
