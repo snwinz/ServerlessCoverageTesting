@@ -32,6 +32,10 @@ public class Mutant {
         this.value = value;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
     public void setIsInputValue(boolean isInputValue) {
         this.isInputValue = isInputValue;
     }

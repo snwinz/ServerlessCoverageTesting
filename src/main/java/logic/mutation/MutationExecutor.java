@@ -105,8 +105,7 @@ public class MutationExecutor {
         if (killingTestcase.isPresent()) {
             tcNumber = testSuite.getTestcases().indexOf(killingTestcase.get());
         }
-        MutationResult result = new MutationResult(killingTestcase.isPresent(), tcNumber, mutant, killingTestcase.orElse(null), testSuite.getName(), missingPart);
-        return result;
+        return new MutationResult(killingTestcase.isPresent(), tcNumber, mutant, killingTestcase.orElse(null), testSuite.getName(), missingPart);
     }
 
 
@@ -121,6 +120,9 @@ public class MutationExecutor {
         }
         if (mutant.getValue() != null) {
             envVariables.put("variableValue", mutant.getValue());
+        }
+        if (mutant.getLocation() != null) {
+            envVariables.put("locationIdentifier", mutant.getLocation());
         }
 
         executor.setEnvironmentVariables(allFunctions, envVariables);
