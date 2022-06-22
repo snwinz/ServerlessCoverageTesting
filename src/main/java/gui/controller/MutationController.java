@@ -3,8 +3,6 @@ package gui.controller;
 import gui.view.MutationView;
 import logic.model.LogicGraph;
 import logic.mutation.MutationExecutor;
-import shared.model.Mutant;
-import shared.model.TestSuite;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -35,7 +33,7 @@ public class MutationController {
     }
 
 
-    public void startMutations(List<Mutant> mutants, List<TestSuite> testSuites, List<String> allFunctions, int minValue, int maxValue, String region, String resetFunction, String targetDirectory) {
-        mutationExecutor.startMutations(mutants, testSuites,allFunctions, minValue, maxValue, region, resetFunction, targetDirectory);
+    public void startMutations(List<String> allFunctions, int minValue, int maxValue, String region, String resetFunction, String targetDirectory) {
+        mutationExecutor.startMutations(allFunctions, minValue, maxValue, region, resetFunction, targetDirectory);
     }
 }

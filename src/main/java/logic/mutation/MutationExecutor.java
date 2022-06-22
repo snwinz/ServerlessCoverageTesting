@@ -70,45 +70,45 @@ public class MutationExecutor {
         return testSuites;
     }
 
-    public void startMutations(List<Mutant> mutants, List<TestSuite> testSuites, List<String> allFunctions, int minValue, int maxValue, String region, String resetFunction, String targetDirectory) {
+    public void startMutations(List<String> allFunctions, int minValue, int maxValue, String region, String resetFunction, String targetDirectory) {
         TestcaseExecutor testcaseExecutor = new TestcaseExecutor(region);
         for (int i = minValue; i <= maxValue; i++) {
             var mutation = mutants.get(i);
             for (var testSuite : testSuites) {
+                System.out.println("Start Mutation " + i + " with test suite " + testSuite.getName());
                 var mutationResult = checkMutationForTestSuite(mutation, testSuite, allFunctions, testcaseExecutor, resetFunction);
                 mutationResult.setMutantNumber(i);
                 PersistenceUtilities.saveMutationResult(mutationResult, Path.of(targetDirectory));
             }
-
         }
-
     }
 
     private MutationResult checkMutationForTestSuite(Mutant mutant, TestSuite testSuite, List<String> allFunctions, TestcaseExecutor tcExecutor, String resetFunction) {
         setEnvironmentVariables(mutant, allFunctions, tcExecutor.getExecutor());
-        var killingTestcase = getTcKillingMutant(testSuite, tcExecutor, resetFunction);
-        var tcNumber = -1;
-        if (killingTestcase.isPresent()) {
-            tcNumber = testSuite.getTestcases().indexOf(killingTestcase.get());
-        }
-        MutationResult result = new MutationResult(killingTestcase.isPresent(), tcNumber, mutant, killingTestcase.orElse(null), testSuite.getName());
-        return result;
-    }
-
-    private Optional<Testcase> getTcKillingMutant(TestSuite testSuite, TestcaseExecutor tcExecutor, String resetFunction) {
+        Optional<Testcase> killingTestcase = Optional.empty();
+        String missingPart = "";
         var executor = tcExecutor.getExecutor();
         var testcases = testSuite.getTestcases();
         for (Testcase testcase : testcases) {
             executor.resetApplication(resetFunction);
-            if (!tcExecutor.executeTC(testcase)) {
+            if (tcExecutor.executeTC(testcase).isPresent()) {
                 executor.resetApplication(resetFunction);
-                if (!tcExecutor.executeTC(testcase)) {
-                    return Optional.of(testcase);
+                var partNotCovered = tcExecutor.executeTC(testcase);
+                if (partNotCovered.isPresent()) {
+                    missingPart = partNotCovered.get();
+                    killingTestcase = Optional.of(testcase);
+                    break;
                 }
             }
         }
-        return Optional.empty();
+        var tcNumber = -1;
+        if (killingTestcase.isPresent()) {
+            tcNumber = testSuite.getTestcases().indexOf(killingTestcase.get());
+        }
+        MutationResult result = new MutationResult(killingTestcase.isPresent(), tcNumber, mutant, killingTestcase.orElse(null), testSuite.getName(), missingPart);
+        return result;
     }
+
 
     private void setEnvironmentVariables(Mutant mutant, List<String> allFunctions, Executor executor) {
         Map<String, String> envVariables = new HashMap<>();

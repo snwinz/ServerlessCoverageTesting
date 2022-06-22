@@ -8,7 +8,6 @@ import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithUseS
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public interface DefViaDB {
     FunctionWithDefSourceLine def();

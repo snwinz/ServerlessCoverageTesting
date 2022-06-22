@@ -7,13 +7,15 @@ public class MutationResult {
     private final Mutant mutant;
     private final Testcase testcase;
     private final String testSuiteName;
+    private final String notCovered;
 
-    public MutationResult(boolean killed, int tcNumber, Mutant mutant, Testcase testcase, String testSuiteName) {
+    public MutationResult(boolean killed, int tcNumber, Mutant mutant, Testcase testcase, String testSuiteName, String notCovered) {
         this.killed = killed;
         this.tcNumber = tcNumber;
         this.mutant = mutant;
         this.testcase = testcase;
         this.testSuiteName = testSuiteName;
+        this.notCovered = notCovered;
     }
 
     public boolean isKilled() {

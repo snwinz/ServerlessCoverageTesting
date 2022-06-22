@@ -122,14 +122,12 @@ public class AWSInvoker implements Executor {
             request.setFunctionName(functionName);
             var res = amazonLambda.getFunctionConfiguration(request);
             var environmentResponse = res.getEnvironment();
-            if (environmentResponse != null) {
-                var currentVariables = environmentResponse.getVariables();
-                currentVariables.putAll(envVariables);
-                Environment environment = new Environment();
-                environment.setVariables(currentVariables);
-                configuration.setEnvironment(environment);
-                amazonLambda.updateFunctionConfiguration(configuration);
-            }
+            Map<String, String> currentVariables = (environmentResponse == null) ? new HashMap<>() : environmentResponse.getVariables();
+            currentVariables.putAll(envVariables);
+            Environment environment = new Environment();
+            environment.setVariables(currentVariables);
+            configuration.setEnvironment(environment);
+            amazonLambda.updateFunctionConfiguration(configuration);
         }
     }
 

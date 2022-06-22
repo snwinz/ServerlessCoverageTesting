@@ -152,7 +152,7 @@ public class MutationView extends Stage implements PropertyChangeListener {
             startMutations.setOnAction(event -> {
                 saveConfigProperties();
                 var allFunctions = Arrays.asList(applicationFunctions.getText().split(Pattern.quote("\n")));
-                controller.startMutations(mutants, testSuites, allFunctions, mutantsNumberMin.getValue(),
+                controller.startMutations(allFunctions, mutantsNumberMin.getValue(),
                         mutantsNumberMax.getValue(), regionAWS.getText(), resetFunctionName.getText(), resultFolder.getText());
             });
             ViewHelper.addToGridInHBox(grid, startMutations);
@@ -168,7 +168,6 @@ public class MutationView extends Stage implements PropertyChangeListener {
         if (nodes == null || nodes.size() == 0) {
             return;
         }
-
         var allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(NodeModel::getNameOfNode).toList();
         applicationFunctions.setText(String.join(System.lineSeparator(), allFunctions));
     }

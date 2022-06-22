@@ -51,8 +51,7 @@ public class TestcaseExecutor {
     }
 
 
-    public boolean executeTC(Testcase testcase) {
-        boolean validExecution = true;
+    public Optional<String> executeTC(Testcase testcase) {
         var functions = testcase.getFunctions();
         final Map<String, List<String>> outputValues = new HashMap<>();
         for (var function : functions) {
@@ -63,8 +62,10 @@ public class TestcaseExecutor {
 
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
 
-
-            validExecution &= checkCorrectnessOfOutput(result, function, outputValues);
+            var partNotCovered = getExecutionResultNotCovered(result, function, outputValues);
+            if(partNotCovered.isPresent()){
+                return partNotCovered;
+            }
 
             addResultToOutputValues(result, outputValues);
 
@@ -72,14 +73,11 @@ public class TestcaseExecutor {
 
             LOGGER.info(resultFormatted);
         }
-        if (validExecution) {
-            validExecution = checkCorrectnessOfLogs(testcase);
-        }
-        return validExecution;
+        return getLogPartNotCovered(testcase);
     }
 
-    private boolean removePartFromList(List<String> logsCompare, String part) {
-        boolean removed = false;
+    private boolean notRemovedFromList(List<String> logsCompare, String part) {
+        boolean removed = true;
         for (int i = 0; i < logsCompare.size(); i++) {
             var log = logsCompare.get(i);
             if (log.contains(part)) {
@@ -87,7 +85,7 @@ public class TestcaseExecutor {
                 log = log.substring(0, position) + log.substring(position + part.length());
                 logsCompare.remove(i);
                 logsCompare.add(i, log);
-                removed = true;
+                removed = false;
                 break;
             }
         }
@@ -166,16 +164,14 @@ public class TestcaseExecutor {
     }
 
 
-    private boolean checkCorrectnessOfOutput(String result, Function function, Map<String, List<String>> outputValues) {
-        boolean passed = true;
+    private Optional<String> getExecutionResultNotCovered(String result, Function function, Map<String, List<String>> outputValues) {
         for (var part : function.getExpectedOutputs()) {
             while (part.contains(PREVIOUSOUTPUT_PREFIX) && part.contains(PREVIOUSOUTPUT_SUFFIX)) {
                 int startPositionMarker = part.indexOf(PREVIOUSOUTPUT_PREFIX);
                 var splitPart = part.substring(startPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
                 int endPositionMarker = splitPart.indexOf(PREVIOUSOUTPUT_SUFFIX);
                 if (endPositionMarker == -1) {
-                    passed = false;
-                    break;
+                    return Optional.of("PREVIOUSOUTPUT_SUFFIX not found");
                 }
                 splitPart = splitPart.substring(0, endPositionMarker);
                 var valueArray = splitPart.split(Pattern.quote(SEPARATOR));
@@ -183,16 +179,13 @@ public class TestcaseExecutor {
                 String key = String.join(SEPARATOR, partsOfKey);
                 int number;
                 if (partsOfKey.length == 0 || !outputValues.containsKey(key)) {
-                    passed = false;
-                    break;
+                    return Optional.of("key not found in output values");
                 }
                 try {
                     number = Integer.parseInt(valueArray[valueArray.length - 1]);
                 } catch (NumberFormatException e) {
-                    passed = false;
-                    break;
+                    return Optional.of("number could not be parsed");
                 }
-
                 String partBeforeOutputValue = part.substring(0, startPositionMarker);
                 var outputValue = outputValues.get(key).get(number);
                 var potentialPartAfterOutputValue = part.substring(endPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
@@ -202,11 +195,10 @@ public class TestcaseExecutor {
             if (result.contains(part)) {
                 result = result.substring(result.indexOf(part) + part.length());
             } else {
-                passed = false;
-                break;
+                return Optional.of(part);
             }
         }
-        return passed;
+        return Optional.empty();
     }
 
 
@@ -228,7 +220,7 @@ public class TestcaseExecutor {
             testcase.setLogsMeasured(List.copyOf(logsCompare));
         }
         for (var part : testcase.getTestcase().getLogsToBeCovered()) {
-            if (!removePartFromList(logsCompare, part)) {
+            if (notRemovedFromList(logsCompare, part)) {
                 incorrectParts.add(part);
                 passed = false;
                 break;
@@ -252,18 +244,18 @@ public class TestcaseExecutor {
     }
 
 
-    private boolean checkCorrectnessOfLogs(Testcase testcase) {
+    private Optional<String> getLogPartNotCovered(Testcase testcase) {
         if (testcase.getLogsToBeCovered().size() == 0) {
-            return true;
+            return Optional.empty();
         }
         var logs = executor.getAllNewLogs(0L);
         List<String> logsCompare = filterLogs(logs);
         for (var part : testcase.getLogsToBeCovered()) {
-            if (!removePartFromList(logsCompare, part)) {
-                return false;
+            if (notRemovedFromList(logsCompare, part)) {
+                return Optional.of(part);
             }
         }
-        return true;
+        return Optional.empty();
     }
 
     private void addResultToOutputValues(String result, Map<String, List<String>> outputValues) {

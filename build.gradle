@@ -31,8 +31,7 @@ dependencies {
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-logs', version: '1.12.30'
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch', version: '1.12.30'
     implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
-
-
+    implementation 'commons-cli:commons-cli:1.5.0'
     antlr "org.antlr:antlr4:4.5"
 }
 /*

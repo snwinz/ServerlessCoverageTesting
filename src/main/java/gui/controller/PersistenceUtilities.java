@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import gui.controller.dto.ArrowInputData;
 import gui.controller.dto.NodeInputData;
 import gui.model.Graph;
+import logic.model.LogicGraph;
 import shared.model.*;
 
 import java.io.IOException;
@@ -31,6 +32,14 @@ public class PersistenceUtilities {
         } catch (IOException e) {
             System.err.printf("Could not write the following to %s:%n%s ", absolutePath, json);
         }
+    }
+
+
+    public static Optional<LogicGraph> loadLogicGraph(String absolutePath){
+        Graph graph = new Graph();
+        loadGraph(absolutePath,graph);
+        LogicGraph logicGraph = new LogicGraph(graph.getJSON());
+        return Optional.ofNullable(logicGraph);
     }
 
     public static Optional<Graph> loadGraph(String absolutePath, Graph model) {
@@ -161,7 +170,7 @@ public class PersistenceUtilities {
         var gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(mutationResult);
         String status = mutationResult.isKilled() ? "killed" : "survived";
-        Path file = Path.of(status + "_" + mutationResult.getTestSuiteName() + "_" + mutationResult.getMutantNumber() + ".txt");
+        Path file = Path.of(mutationResult.getTestSuiteName()+    "_" + mutationResult.getMutantNumber() + "_"+status+".txt");
         var destination = target.resolve(file);
         try {
             Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
