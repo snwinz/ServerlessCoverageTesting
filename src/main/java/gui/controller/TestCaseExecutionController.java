@@ -2,8 +2,8 @@ package gui.controller;
 
 import gui.model.Graph;
 import gui.model.TestcasesContainer;
-import gui.view.StandardPresentationView;
 import gui.view.ExecutionView;
+import gui.view.StandardPresentationView;
 import gui.view.wrapper.TestcaseWrapper;
 import javafx.stage.FileChooser;
 import logic.evaluation.TestcaseEvaluator;
@@ -30,8 +30,9 @@ public class TestCaseExecutionController {
 
     }
 
-    public void setup() {
+    public void setup(String name) {
         model.addPropertyChangeListener(view);
+        view.setTitle(name);
         view.setMaximized(true);
         view.show();
     }
@@ -49,6 +50,7 @@ public class TestCaseExecutionController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         var fileToSave = fileChooser.showSaveDialog(view);
         PersistenceUtilities.saveTestSuite(testcasesOriginal, fileToSave.getAbsolutePath());
+        view.setTitle(fileToSave.getName());
     }
 
     public void calibrateOutput(TestcaseWrapper testcase, String region, String resetFunction) {
@@ -146,7 +148,7 @@ public class TestCaseExecutionController {
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
             var fileToSave = fileChooser.showSaveDialog(view);
 
-            var randomTestSuiteGenerator = new RandomTestSuiteGenerator( new LogicGraph(graph.getJSON()));
+            var randomTestSuiteGenerator = new RandomTestSuiteGenerator(new LogicGraph(graph.getJSON()));
             List<Testcase> randomTestcases = randomTestSuiteGenerator.generateTestcases(testSuite);
             PersistenceUtilities.saveTestSuite(randomTestcases, fileToSave.getAbsolutePath());
         }

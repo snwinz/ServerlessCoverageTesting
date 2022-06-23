@@ -171,7 +171,7 @@ public class TestcaseExecutor {
                 var splitPart = part.substring(startPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
                 int endPositionMarker = splitPart.indexOf(PREVIOUSOUTPUT_SUFFIX);
                 if (endPositionMarker == -1) {
-                    return Optional.of("PREVIOUSOUTPUT_SUFFIX not found in" + function.getName() + ": " + result);
+                    return Optional.of("PREVIOUSOUTPUT_SUFFIX not found in " + function.getName() + ": " + result);
                 }
                 splitPart = splitPart.substring(0, endPositionMarker);
                 var valueArray = splitPart.split(Pattern.quote(SEPARATOR));
@@ -179,12 +179,12 @@ public class TestcaseExecutor {
                 String key = String.join(SEPARATOR, partsOfKey);
                 int number;
                 if (partsOfKey.length == 0 || !outputValues.containsKey(key)) {
-                    return Optional.of("key not found in output values in" + function.getName() + ": " + result);
+                    return Optional.of("key not found in output values in " + function.getName() + ": " + result);
                 }
                 try {
                     number = Integer.parseInt(valueArray[valueArray.length - 1]);
                 } catch (NumberFormatException e) {
-                    return Optional.of("number could not be parsed in" + function.getName() + ": " + result);
+                    return Optional.of("number could not be parsed in " + function.getName() + ": " + result);
                 }
                 String partBeforeOutputValue = part.substring(0, startPositionMarker);
                 var outputValue = outputValues.get(key).get(number);
@@ -195,7 +195,7 @@ public class TestcaseExecutor {
             if (result.contains(part)) {
                 result = result.substring(result.indexOf(part) + part.length());
             } else {
-                return Optional.of(part + " not covered in" + function.getName() + ": " + result);
+                return Optional.of(part + " not covered in " + function.getName() + ": " + result);
             }
         }
         return Optional.empty();

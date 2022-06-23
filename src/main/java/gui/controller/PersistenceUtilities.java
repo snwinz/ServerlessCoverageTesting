@@ -17,7 +17,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public class PersistenceUtilities {
     public static void saveGraph(Graph model, String absolutePath) {
@@ -35,14 +34,13 @@ public class PersistenceUtilities {
     }
 
 
-    public static Optional<LogicGraph> loadLogicGraph(String absolutePath){
+    public static LogicGraph loadLogicGraph(String absolutePath){
         Graph graph = new Graph();
         loadGraph(absolutePath,graph);
-        LogicGraph logicGraph = new LogicGraph(graph.getJSON());
-        return Optional.ofNullable(logicGraph);
+        return new LogicGraph(graph.getJSON());
     }
 
-    public static Optional<Graph> loadGraph(String absolutePath, Graph model) {
+    public static Graph loadGraph(String absolutePath, Graph graph) {
         var gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         var source = Path.of(absolutePath);
         try {
@@ -61,7 +59,7 @@ public class PersistenceUtilities {
                 if (inputNode.getNodeType().equals(NodeType.FUNCTION)) {
                     inputNode.setInputFormats(node.getInputFormats());
                 }
-                model.addNode(inputNode);
+                graph.addNode(inputNode);
             }
             for (var arrow : arrows) {
                 var inputArrow = new ArrowInputData();
@@ -72,22 +70,22 @@ public class PersistenceUtilities {
                 inputArrow.setOriginalStartOffsetPositionY(arrow.getOriginalStartOffsetPositionY());
                 inputArrow.setAccessMode(arrow.getAccessMode());
                 inputArrow.setId(arrow.getIdentifier());
-                var pre = model.getNode(arrow.getPredecessor());
-                var suc = model.getNode(arrow.getSuccessor());
+                var pre = graph.getNode(arrow.getPredecessor());
+                var suc = graph.getNode(arrow.getSuccessor());
                 inputArrow.setPredecessor(pre.orElseThrow(() -> {
                     throw new IllegalStateException("pre not available");
                 }).getIdentifier());
                 inputArrow.setSuccessor(suc.orElseThrow(() -> {
                     throw new IllegalStateException("suc not available");
                 }).getIdentifier());
-                model.addArrow(inputArrow);
+                graph.addArrow(inputArrow);
             }
 
 
         } catch (IOException e) {
             System.err.printf("Could not read file '%s'", absolutePath);
         }
-        return Optional.ofNullable(model);
+        return graph;
     }
 
 

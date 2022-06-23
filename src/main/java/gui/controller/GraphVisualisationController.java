@@ -68,7 +68,7 @@ public class GraphVisualisationController {
         if (file != null) {
             model.clearGraph();
             var result = PersistenceUtilities.loadGraph(file.getAbsolutePath(), model);
-            result.ifPresent(view::setModel);
+            view.setModel(result);
             fileAliasOfView = file;
         }
     }
@@ -157,7 +157,7 @@ public class GraphVisualisationController {
         if (tcFile != null) {
             var testcases = PersistenceUtilities.loadTCs(tcFile.getAbsolutePath());
             TestCaseExecutionController controller = new TestCaseExecutionController(testcases, model);
-            controller.setup();
+            controller.setup(tcFile.getName());
 
         }
     }

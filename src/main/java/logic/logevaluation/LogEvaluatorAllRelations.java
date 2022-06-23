@@ -44,9 +44,8 @@ public class LogEvaluatorAllRelations extends LogEvaluator {
     public List<String> getTargets(LogicGraph logicGraph) {
         TargetGenerator testcaseGenerator = new TargetGenerator();
         var targets = testcaseGenerator.getAllTargetsToBeCoveredByAllRelations(logicGraph);
-        var result = targets.stream()
+        return targets.stream()
                 .map(CoverageTargetAllRelations::getCoverageElement)
                 .map(element -> String.valueOf(element.getIdentifier())).toList();
-        return result;
     }
 }

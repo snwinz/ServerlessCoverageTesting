@@ -49,23 +49,18 @@ public class Console {
                 String region = cmd.getOptionValue(REGION_OPTION);
                 Number startMutant = (Number) cmd.getParsedOptionValue(START_NUMBER_OPTION);
                 Number endMutant = (Number) cmd.getParsedOptionValue(END_NUMBER_OPTION);
-                MutationExecutor executor = new MutationExecutor();
 
-                executor.setMutants(Path.of(mutationPath));
-                executor.setTestSuits(Path.of(testsuitePath));
+                controller.setMutants(Path.of(mutationPath));
+                controller.setTestSuits(Path.of(testsuitePath));
+
                 List<String> allFunctions;
-                var graph = PersistenceUtilities.loadLogicGraph(graphPath);
-                if (graph.isPresent()) {
-                    var logicGraph = graph.get();
-                    var nodes = logicGraph.getNodes();
-                    if (nodes == null || nodes.size() == 0) {
-                        throw new IllegalStateException("no nodes available");
-                    }
-                    allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(NodeModel::getNameOfNode).toList();
-                } else {
-                    throw new IllegalStateException("functions available");
+                var logicGraph = PersistenceUtilities.loadLogicGraph(graphPath);
+                var nodes = logicGraph.getNodes();
+                if (nodes == null || nodes.size() == 0) {
+                    throw new IllegalStateException("no nodes available");
                 }
-                executor.startMutations(allFunctions, startMutant.intValue()
+                allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(NodeModel::getNameOfNode).toList();
+                controller.startMutations(allFunctions, startMutant.intValue()
                         , endMutant.intValue(), region, resetFunction, outputPath);
             }
         } catch (ParseException pe) {
