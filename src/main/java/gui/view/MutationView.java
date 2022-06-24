@@ -251,7 +251,6 @@ public class MutationView extends Stage implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        var value = evt.getNewValue();
         if ("mutationsUpdated".equals(evt.getPropertyName())) {
             this.mutants = mutationExecutor.getMutants();
             createView();

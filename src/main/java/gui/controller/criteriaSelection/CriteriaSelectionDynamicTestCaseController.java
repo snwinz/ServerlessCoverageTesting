@@ -58,7 +58,7 @@ public class CriteriaSelectionDynamicTestCaseController implements CriteriaSelec
             testSuiteOfTargets.add(testSuiteOfTargetsAllUse.getTestTargets());
         }
         DynamicTCSelectionController controller = new DynamicTCSelectionController();
-        controller.setup(testSuiteOfTargets,model);
+        controller.setup(testSuiteOfTargets);
         view.close();
     }
 }

@@ -37,10 +37,13 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
     private final List<TestcaseWrapper> testcases;
     private final List<CheckboxWrapper<TestcaseWrapper>> selectedTestcases = new ArrayList<>();
     private final CheckBox keepLogsCheckbox = new CheckBox("save logs");
+    private Path path;
 
-    public ExecutionView(TestCaseExecutionController controller, List<Testcase> testcases, Graph graph) {
+    public ExecutionView(TestCaseExecutionController controller, List<Testcase> testcases, Graph graph, Path path) {
         this.controller = controller;
         this.graph = graph;
+        this.path = path;
+        this.setTitle(path.getFileName().toString());
         addFunctionToEmptyTCs(testcases);
         this.testcases = testcases.stream().map(TestcaseWrapper::new).collect(Collectors.toCollection(LinkedList::new));
         getConfigProperties();
@@ -366,19 +369,23 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
         var file = new Menu("File");
 
         var saveTCs = new MenuItem("Save TCs");
-        var saveSelectedTCs = new MenuItem("Save selected TCs");
+        var saveTCsAs = new MenuItem("Save TCs as");
+        var saveSelectedTCsAs = new MenuItem("Save selected TCs as");
 
         saveTCs.setOnAction(event -> {
             var testcasesOriginal = testcases.stream().map(TestcaseWrapper::getTestcase).toList();
-            controller.saveTestcases(testcasesOriginal);
+            controller.saveTestcases(testcasesOriginal, this.path);
+        });saveTCsAs.setOnAction(event -> {
+            var testcasesOriginal = testcases.stream().map(TestcaseWrapper::getTestcase).toList();
+            controller.saveTestcasesAs(testcasesOriginal);
         });
-        saveSelectedTCs.setOnAction(event -> {
+        saveSelectedTCsAs.setOnAction(event -> {
             var selectedTestcasesToSave = selectedTestcases.stream().filter(CheckBox::isSelected)
                     .map(CheckboxWrapper::getEntry).map(TestcaseWrapper::getTestcase).toList();
-            controller.saveTestcases(selectedTestcasesToSave);
+            controller.saveTestcasesAs(selectedTestcasesToSave);
         });
 
-        file.getItems().addAll(saveTCs, saveSelectedTCs);
+        file.getItems().addAll(saveTCs,saveTCsAs, saveSelectedTCsAs);
         menuBar.getMenus().addAll(file);
         return menuBar;
     }
@@ -442,5 +449,10 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
             }
             createView();
         }
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
+        this.setTitle(path.getFileName().toString());
     }
 }

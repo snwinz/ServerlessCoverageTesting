@@ -209,10 +209,10 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         getAllTCsWithInput.setOnAction(e -> controller.showTestSuiteForExecution(testSuiteOfTargets));
 
         Button exportAllTCsWithInput = new Button("Export all test cases with input to JSON");
-        exportAllTCsWithInput.setOnAction(e -> controller.exportTestSuitForExecution(testSuiteOfTargets));
+        exportAllTCsWithInput.setOnAction(e -> controller.exportTestSuitForExecution(testSuiteOfTargets.getTestSuiteForExecution()));
 
         Button exportAllTCsWithInputEachTarget = new Button("Export tc for each target with input to JSON");
-        exportAllTCsWithInputEachTarget.setOnAction(e -> controller.exportTestSuitOfTargetsForExecution(testSuiteOfTargets));
+        exportAllTCsWithInputEachTarget.setOnAction(e -> controller.exportTestSuitForExecution(testSuiteOfTargets.getTestSuiteForExecutionOfTargets()));
 
         Button selectAllTestCases = new Button("Select all test cases");
         selectAllTestCases.setOnAction(e -> availableTestcases.forEach(cb -> cb.setSelected(true)));

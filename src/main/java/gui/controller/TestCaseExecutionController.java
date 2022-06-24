@@ -15,6 +15,7 @@ import logic.testcasegenerator.testcaseexecution.TestcaseExecutor;
 import shared.model.Testcase;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -24,15 +25,13 @@ public class TestCaseExecutionController {
     private final TestcasesContainer model;
 
 
-    public TestCaseExecutionController(List<Testcase> testcases, Graph graph) {
+    public TestCaseExecutionController(List<Testcase> testcases, Graph graph, Path path) {
         this.model = new TestcasesContainer(testcases);
-        this.view = new ExecutionView(this, testcases, graph);
-
+        this.view = new ExecutionView(this, testcases, graph, path);
     }
 
-    public void setup(String name) {
+    public void setup() {
         model.addPropertyChangeListener(view);
-        view.setTitle(name);
         view.setMaximized(true);
         view.show();
     }
@@ -43,14 +42,18 @@ public class TestCaseExecutionController {
         thread.start();
     }
 
-    public void saveTestcases(List<Testcase> testcasesOriginal) {
+    public void saveTestcasesAs(List<Testcase> testcasesOriginal) {
         var fileChooser = new FileChooser();
         var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         var fileToSave = fileChooser.showSaveDialog(view);
-        PersistenceUtilities.saveTestSuite(testcasesOriginal, fileToSave.getAbsolutePath());
-        view.setTitle(fileToSave.getName());
+        PersistenceUtilities.saveTestSuite(testcasesOriginal, fileToSave.toPath());
+        view.setPath(fileToSave.toPath());
+    }
+
+    public void saveTestcases(List<Testcase> testcasesOriginal, Path path) {
+        PersistenceUtilities.saveTestSuite(testcasesOriginal, path.toAbsolutePath());
     }
 
     public void calibrateOutput(TestcaseWrapper testcase, String region, String resetFunction) {
@@ -150,7 +153,7 @@ public class TestCaseExecutionController {
 
             var randomTestSuiteGenerator = new RandomTestSuiteGenerator(new LogicGraph(graph.getJSON()));
             List<Testcase> randomTestcases = randomTestSuiteGenerator.generateTestcases(testSuite);
-            PersistenceUtilities.saveTestSuite(randomTestcases, fileToSave.getAbsolutePath());
+            PersistenceUtilities.saveTestSuite(randomTestcases, fileToSave.toPath());
         }
     }
 }

@@ -139,14 +139,14 @@ public class PersistenceUtilities {
         return line.split(" with logs ")[0];
     }
 
-    public static void saveTestSuite(List<Testcase> testSuite, String absolutePath) {
+    public static void saveTestSuite(List<Testcase> testSuite, Path destination) {
         var gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(testSuite);
-        var destination = Path.of(absolutePath);
+
         try {
             Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            System.err.printf("Could not write the following to %s:%n%s ", absolutePath, json);
+            System.err.printf("Could not write the following to %s:%n%s ", destination.toAbsolutePath(), json);
         }
     }
 

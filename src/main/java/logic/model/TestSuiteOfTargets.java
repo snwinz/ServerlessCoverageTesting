@@ -155,7 +155,6 @@ public class TestSuiteOfTargets {
             }
         }
         return result;
-
     }
 
     private void addValidTestcaseToResult(List<Testcase> result, CoverageTarget target, logic.model.Testcase testcase) {

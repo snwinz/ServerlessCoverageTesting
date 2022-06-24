@@ -1,6 +1,5 @@
 package gui.controller;
 
-import gui.model.Graph;
 import gui.view.DynamicTCSelectionView;
 import gui.view.StandardPresentationView;
 import gui.view.wrapper.ExecutionSettings;
@@ -25,7 +24,7 @@ public class DynamicTCSelectionController {
 
     }
 
-    public void setup(TestSuiteOfTargets testSuiteOfTargets, Graph model) {
+    public void setup(TestSuiteOfTargets testSuiteOfTargets) {
         this.view = new DynamicTCSelectionView(testSuiteOfTargets, this);
         view.setMaximized(true);
         view.show();
@@ -77,27 +76,14 @@ public class DynamicTCSelectionController {
         tcView.show();
     }
 
-    public void exportTestSuitForExecution(TestSuiteOfTargets testSuiteOfTargets) {
-        var testSuiteExecution = testSuiteOfTargets.getTestSuiteForExecution();
+    public void exportTestSuitForExecution(List<shared.model.Testcase> testSuiteExecution) {
         var fileChooser = new FileChooser();
         var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         var fileToSave = fileChooser.showSaveDialog(view);
         if (fileToSave != null) {
-            PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
-        }
-    }
-
-    public void exportTestSuitOfTargetsForExecution(TestSuiteOfTargets testSuiteOfTargets) {
-        var testSuiteExecution = testSuiteOfTargets.getTestSuiteForExecutionOfTargets();
-        var fileChooser = new FileChooser();
-        var extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
-        fileChooser.getExtensionFilters().add(extFilter);
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        var fileToSave = fileChooser.showSaveDialog(view);
-        if (fileToSave != null) {
-            PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.getAbsolutePath());
+            PersistenceUtilities.saveTestSuite(testSuiteExecution, fileToSave.toPath());
         }
     }
 
