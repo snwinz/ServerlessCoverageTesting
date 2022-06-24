@@ -4,7 +4,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class KeyValueJsonGenerator {
     private final String input;
@@ -39,25 +42,36 @@ public class KeyValueJsonGenerator {
                         findAndAddValues(value);
                     } else if (value.startsWith("\"") && value.endsWith("\"")) {
                         value = value.substring(1, value.length() - 1);
+                        value = removeSquareBrackets(value);
                         if (isValueInJsonFormat(value)) {
                             findAndAddValues(value);
                         }
-                        value = value.replaceAll("\\\\\"", "\"").replaceAll("\\\\n", " ").replaceAll("\\\\", " ");
+                        value = makeStringToJson(value);
                         if (isValueInJsonFormat(value)) {
                             findAndAddValues(value);
                         } else {
                             addKeyValueToMap(key, value);
                         }
-
                     } else {
                         addKeyValueToMap(key, value);
                     }
-
                 }
             }
         } catch (JsonParseException e) {
             System.err.println("Input: " + input + "  could not be parsed");
         }
+    }
+
+    private String makeStringToJson(String value) {
+        return value.replaceAll("\\\\\"", "\"").replaceAll("\\\\n", " ").replaceAll("\\\\", " ");
+    }
+
+    private String removeSquareBrackets(String value) {
+        if (value.startsWith("[") && value.endsWith("]")) {
+            value = value.substring(1, value.length() - 1);
+            value = value.replace("},{", ",");
+        }
+        return value;
     }
 
     private boolean isValueInJsonFormat(String value) {
