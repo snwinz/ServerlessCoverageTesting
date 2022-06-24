@@ -9,6 +9,6 @@
 <entry key="probSameValueEverywhere">0.0</entry>
 <entry key="regionAWS">eu-central-1</entry>
 <entry key="probSimilarOutputAsValue">1.0</entry>
-<entry key="numberOfTries">2</entry>
+<entry key="numberOfTries">1</entry>
 <entry key="probEntryUndefined">0.0</entry>
 </properties>

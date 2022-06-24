@@ -153,11 +153,13 @@ public class GraphVisualisationController {
     public void executeTestcases() {
         var fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        var tcFile = fileChooser.showOpenDialog(view);
-        if (tcFile != null) {
-            var testcases = PersistenceUtilities.loadTCs(tcFile.getAbsolutePath());
-            TestCaseExecutionController controller = new TestCaseExecutionController(testcases, model, tcFile.toPath());
-            controller.setup();
+        var tcFiles = fileChooser.showOpenMultipleDialog(view);
+        if (tcFiles != null) {
+            for (var tcFile : tcFiles) {
+                var testcases = PersistenceUtilities.loadTCs(tcFile.getAbsolutePath());
+                TestCaseExecutionController controller = new TestCaseExecutionController(testcases, model, tcFile.toPath());
+                controller.setup();
+            }
         }
     }
 
