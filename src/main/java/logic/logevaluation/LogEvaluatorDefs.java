@@ -25,7 +25,7 @@ public class LogEvaluatorDefs extends LogEvaluator {
     }
 
     private static boolean isStatement(String statement) {
-        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER) && !statement.contains("undefined");
+        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER);
     }
 
     public Map<String, Integer> getUnitsCovered() {
