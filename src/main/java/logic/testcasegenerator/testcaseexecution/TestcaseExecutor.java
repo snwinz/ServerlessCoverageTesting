@@ -284,10 +284,24 @@ public class TestcaseExecutor {
     public void calibrate(TestcaseWrapper testcase, String resetFunction) {
         executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
-        List<String> resultsFirstExecution = getResultOfExecution(functions);
+        List<String> resultsFirstExecution = executeWrappedFunctions(functions);
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
         executor.resetApplication(resetFunction);
-        List<String> resultsSecondExecution = getResultOfExecution(functions);
+        List<String> resultsSecondExecution = executeWrappedFunctions(functions);
+        List<String> resultsSecondExecutionLogs = executor.getAllNewLogs(0L);
+        calibrateWrappedFunctions(functions, resultsFirstExecution, resultsSecondExecution);
+        resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
+        resultsSecondExecutionLogs = filterLogs(resultsSecondExecutionLogs);
+        calibrateLogsOnWrappedTestcase(testcase, resultsFirstExecutionLogs, resultsSecondExecutionLogs);
+    }
+
+    public void calibrate(Testcase testcase, String resetFunction) {
+        executor.resetApplication(resetFunction);
+        var functions = testcase.getFunctions();
+        List<String> resultsFirstExecution = executeFunctions(functions);
+        List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
+        executor.resetApplication(resetFunction);
+        List<String> resultsSecondExecution = executeFunctions(functions);
         List<String> resultsSecondExecutionLogs = executor.getAllNewLogs(0L);
         calibrateFunctions(functions, resultsFirstExecution, resultsSecondExecution);
         resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
@@ -299,17 +313,17 @@ public class TestcaseExecutor {
     public void recalibrate(TestcaseWrapper testcase, String resetFunction) {
         executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
-        List<String> resultsFirstExecution = getResultOfExecution(functions);
+        List<String> resultsFirstExecution = executeWrappedFunctions(functions);
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
         List<String> oldResults = functions.stream().map(FunctionWrapper::getFunction).map(Function::getExpectedOutputs)
                 .map(entry -> String.join("", entry)).toList();
         List<String> oldLogs = testcase.getTestcase().getExpectedLogs();
-        calibrateFunctions(functions, resultsFirstExecution, oldResults);
+        calibrateWrappedFunctions(functions, resultsFirstExecution, oldResults);
         resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
-        calibrateLogsOnTestcase(testcase, resultsFirstExecutionLogs, oldLogs);
+        calibrateLogsOnWrappedTestcase(testcase, resultsFirstExecutionLogs, oldLogs);
     }
 
-    private void calibrateFunctions(List<FunctionWrapper> functions, List<String> resultsFirstExecution, List<String> resultsSecondExecution) {
+    private void calibrateWrappedFunctions(List<FunctionWrapper> functions, List<String> resultsFirstExecution, List<String> resultsSecondExecution) {
         var calibratedResults = calibrateResults(resultsFirstExecution, resultsSecondExecution);
         if (functions.size() == calibratedResults.size()) {
             for (int i = 0; i < functions.size(); i++) {
@@ -324,13 +338,31 @@ public class TestcaseExecutor {
         }
     }
 
-    private void calibrateLogsOnTestcase(TestcaseWrapper testcase, List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
+    private void calibrateFunctions(List<Function> functions, List<String> resultsFirstExecution, List<String> resultsSecondExecution) {
+        var calibratedResults = calibrateResults(resultsFirstExecution, resultsSecondExecution);
+        if (functions.size() == calibratedResults.size()) {
+            for (int i = 0; i < functions.size(); i++) {
+                var expectedOutputList = calibratedResults.get(i);
+                var function = functions.get(i);
+                var textExpectedOutput = String.join("*", expectedOutputList);
+                function.setExpectedOutputs(textExpectedOutput);
+            }
+        }
+    }
+
+    private void calibrateLogsOnWrappedTestcase(TestcaseWrapper testcase, List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
         var calibratedLogs = calibrateLogs(resultsFirstExecutionLogs, resultsSecondExecutionLogs);
         var originalTestcase = testcase.getTestcase();
         originalTestcase.setExpectedLogOutput(calibratedLogs);
         String expectedTextLog = String.join("*", calibratedLogs);
         testcase.expectedLogsProperty().set(expectedTextLog);
     }
+
+    private void calibrateLogsOnTestcase(Testcase testcase, List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
+        var calibratedLogs = calibrateLogs(resultsFirstExecutionLogs, resultsSecondExecutionLogs);
+        testcase.setExpectedLogOutput(calibratedLogs);
+    }
+
 
 
     private List<String> calibrateLogs(List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
@@ -395,7 +427,7 @@ public class TestcaseExecutor {
         return result;
     }
 
-    private List<String> getResultOfExecution(List<FunctionWrapper> functions) {
+    private List<String> executeWrappedFunctions(List<FunctionWrapper> functions) {
         var results = new ArrayList<String>();
         final Map<String, List<String>> outputValues = new HashMap<>();
         for (var function : functions) {
@@ -416,6 +448,26 @@ public class TestcaseExecutor {
         }
         return results;
     }
+
+    private List<String> executeFunctions(List<Function> functions) {
+        var results = new ArrayList<String>();
+        final Map<String, List<String>> outputValues = new HashMap<>();
+        for (var function : functions) {
+            String functionName = function.getName();
+            String jsonData = function.getParameter();
+            String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
+            LOGGER.info(invocation);
+            String result = executor.invokeFunction(functionName, jsonData, outputValues);
+            System.out.println(result);
+            String resultWithParameters = replaceResultsOfPreviousOutput(result, outputValues);
+            addResultToOutputValues(result, outputValues);
+            String resultInfoMessage = String.format("result: %s", resultWithParameters);
+            LOGGER.info(String.format(resultInfoMessage));
+            results.add(resultWithParameters);
+        }
+        return results;
+    }
+
 
     private String replaceResultsOfPreviousOutput(String result, Map<String, List<String>> outputValues) {
         for (var entry : outputValues.entrySet()) {
