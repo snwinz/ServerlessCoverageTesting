@@ -23,22 +23,23 @@ public class LogEvaluatorUses extends LogEvaluator {
     }
 
     private static boolean isStatement(String statement) {
-        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER);
+        return statement.contains(LogNameConfiguration.DEFLOG_MARKER)
+                && statement.contains(LogNameConfiguration.USELOG_MARKER);
     }
 
     public Map<String, Integer> getUnitsCovered() {
         List<String> coveredUnits =
-                logs.stream().filter(LogEvaluatorUses::isStatement)
-                        .map(LogEvaluatorUses::cutDef)
+                logs.stream().map(LogEvaluatorUses::cutDef)
                         .collect(Collectors.toList());
         return countNumberOfOccurrences(coveredUnits);
     }
 
     private static String cutDef(String logStatement) {
-        String shortenedLogStatement = logStatement.substring(
-                logStatement.indexOf(LogNameConfiguration.LOGDELIMITER + LogNameConfiguration.LOGDELIMITER)
-                        + LogNameConfiguration.LOGDELIMITER.length());
-        return shortenedLogStatement.contains(LogNameConfiguration.DEFLOG_MARKER) ? shortenedLogStatement : logStatement;
+        if (logStatement.contains(LogNameConfiguration.DEFLOG_MARKER)) {
+            String shortenedStatement = logStatement.substring(logStatement.indexOf(LogNameConfiguration.DEFLOG_MARKER) + LogNameConfiguration.DEFLOG_MARKER.length());
+            return shortenedStatement.contains(LogNameConfiguration.DEFLOG_MARKER) ? cutDef(shortenedStatement) : LogNameConfiguration.DEFLOG_MARKER + shortenedStatement;
+        }
+        return logStatement;
     }
 
     @Override

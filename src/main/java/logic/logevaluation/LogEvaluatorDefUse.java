@@ -9,7 +9,6 @@ import logic.testcasegenerator.coveragetargets.coverageelements.FunctionWithSour
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class LogEvaluatorDefUse extends LogEvaluator {
 
@@ -24,18 +23,19 @@ public class LogEvaluatorDefUse extends LogEvaluator {
     }
 
     private static boolean isStatement(String statement) {
-        return statement.startsWith(LogNameConfiguration.DEFLOG_MARKER) ;
+        return statement.contains(LogNameConfiguration.DEFLOG_MARKER)
+                && statement.contains(LogNameConfiguration.USELOG_MARKER);
     }
 
     public Map<String, Integer> getUnitsCovered() {
         List<String> coveredDefs =
-                logs.stream().filter(LogEvaluatorDefUse::isStatement)
+                logs.stream()
                         .map(LogEvaluatorDefUse::cutDef)
                         .map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[0])
-                        .collect(Collectors.toList());
+                        .toList();
         List<String> coveredUses =
-                logs.stream().filter(LogEvaluatorDefUse::isStatement).filter(entry -> entry.contains(LogNameConfiguration.USELOG_MARKER)).
-                        map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[1]).map(entry -> LogNameConfiguration.USELOG_MARKER + entry).collect(Collectors.toList());
+                logs.stream().filter(entry -> entry.contains(LogNameConfiguration.USELOG_MARKER)).
+                        map(entry -> entry.substring(entry.indexOf(LogNameConfiguration.USELOG_MARKER))).toList();
 
         Map<String, Integer> unitsCovered = countNumberOfOccurrences(coveredDefs);
         Map<String, Integer> unitsCoveredUses = countNumberOfOccurrences(coveredUses);
@@ -44,10 +44,11 @@ public class LogEvaluatorDefUse extends LogEvaluator {
     }
 
     private static String cutDef(String logStatement) {
-        String shortenedLogStatement = logStatement.substring(
-                logStatement.indexOf(LogNameConfiguration.LOGDELIMITER + LogNameConfiguration.LOGDELIMITER)
-                        + LogNameConfiguration.LOGDELIMITER.length());
-        return shortenedLogStatement.contains(LogNameConfiguration.DEFLOG_MARKER) ? shortenedLogStatement : logStatement;
+        if (logStatement.contains(LogNameConfiguration.DEFLOG_MARKER)) {
+            String shortenedStatement = logStatement.substring(logStatement.indexOf(LogNameConfiguration.DEFLOG_MARKER) + LogNameConfiguration.DEFLOG_MARKER.length());
+            return shortenedStatement.contains(LogNameConfiguration.DEFLOG_MARKER) ? cutDef(shortenedStatement) : LogNameConfiguration.DEFLOG_MARKER + shortenedStatement;
+        }
+        return logStatement;
     }
 
     @Override
