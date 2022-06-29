@@ -42,4 +42,10 @@ public class MutationResult {
     public void setMutantNumber(int mutantNumber) {
         this.mutantNumber = mutantNumber;
     }
+
+    public String getNotCovered() {
+        return notCovered;
+    }
+
+    
 }
