@@ -5,11 +5,11 @@ import logic.mutation.MutationExecutor;
 
 public class Main {
     public static void main(String[] args) {
-        if(args.length>0){
+        if (args.length > 0) {
             MutationExecutor executor = new MutationExecutor();
             ConsoleController controller = new ConsoleController(executor);
             controller.setup(args);
-        }else{
+        } else {
             MainApp.main(args);
         }
     }

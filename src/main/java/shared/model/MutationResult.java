@@ -1,19 +1,19 @@
 package shared.model;
 
+import java.util.List;
+
 public class MutationResult {
     private final boolean killed;
-    private final int tcNumber;
+    private final List<Integer> tcNumber;
     private  int mutantNumber;
     private final Mutant mutant;
-    private final Testcase testcase;
     private final String testSuiteName;
     private final String notCovered;
 
-    public MutationResult(boolean killed, int tcNumber, Mutant mutant, Testcase testcase, String testSuiteName, String notCovered) {
+    public MutationResult(boolean killed, List<Integer> testCases, Mutant mutant, String testSuiteName, String notCovered) {
         this.killed = killed;
-        this.tcNumber = tcNumber;
+        this.tcNumber = testCases;
         this.mutant = mutant;
-        this.testcase = testcase;
         this.testSuiteName = testSuiteName;
         this.notCovered = notCovered;
     }
@@ -22,7 +22,7 @@ public class MutationResult {
         return killed;
     }
 
-    public int getTcNumber() {
+    public List<Integer> getTcNumber() {
         return tcNumber;
     }
 
@@ -30,9 +30,6 @@ public class MutationResult {
         return mutant;
     }
 
-    public Testcase getTestcase() {
-        return testcase;
-    }
 
     public int getMutantNumber() {
         return mutantNumber;

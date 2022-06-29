@@ -39,7 +39,7 @@ public class MutationExecutor {
         this.testSuites.clear();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderOfTestSuits, "*.json")) {
             for (Path entry : stream) {
-                var testcases = PersistenceUtilities.loadTCs(entry.toAbsolutePath().toString());
+                var testcases = PersistenceUtilities.loadTCs(entry);
                 String nameOfTestSuite = getNameOfTestSuite(entry);
                 var testSuite = new TestSuite(nameOfTestSuite, testcases);
                 testSuites.add(testSuite);
@@ -86,7 +86,9 @@ public class MutationExecutor {
     private MutationResult checkMutationForTestSuite(Mutant mutant, TestSuite testSuite, List<String> allFunctions, TestcaseExecutor tcExecutor, String resetFunction) {
         setEnvironmentVariables(mutant, allFunctions, tcExecutor.getExecutor());
         Optional<Testcase> killingTestcase = Optional.empty();
-        String missingPart = "";
+        String missingParts = "";
+        int killCounter = 0;
+        List<Integer> killingTestcases = new ArrayList<>();
         var executor = tcExecutor.getExecutor();
         var testcases = testSuite.getTestcases();
         for (Testcase testcase : testcases) {
@@ -95,17 +97,15 @@ public class MutationExecutor {
                 executor.resetApplication(resetFunction);
                 var partNotCoveredInformation = tcExecutor.executeTC(testcase);
                 if (partNotCoveredInformation.isPresent()) {
-                    missingPart = partNotCoveredInformation.get();
-                    killingTestcase = Optional.of(testcase);
-                    break;
+                    missingParts += killCounter++ + ":\n" + partNotCoveredInformation.get() + "\n";
+                    var tcNumber = testSuite.getTestcases().indexOf(killingTestcase.get());
+                    killingTestcases.add(tcNumber);
                 }
             }
         }
-        var tcNumber = -1;
-        if (killingTestcase.isPresent()) {
-            tcNumber = testSuite.getTestcases().indexOf(killingTestcase.get());
-        }
-        return new MutationResult(killingTestcase.isPresent(), tcNumber, mutant, killingTestcase.orElse(null), testSuite.getName(), missingPart);
+
+        return new
+               MutationResult(killingTestcases.size()>0, killingTestcases, mutant, testSuite.getName(), missingParts);
     }
 
 

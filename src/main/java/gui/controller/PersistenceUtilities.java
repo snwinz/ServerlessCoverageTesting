@@ -89,12 +89,11 @@ public class PersistenceUtilities {
     }
 
 
-    public static List<Testcase> loadTCs(String absolutePath) {
+    public static List<Testcase> loadTCs(Path path) {
         List<Testcase> testcasesRead = new ArrayList<>();
-        var source = Path.of(absolutePath);
-
+        String absolutePath = path.toAbsolutePath().toString();
         try {
-            var testcaseOneLine = Files.readString(source);
+            var testcaseOneLine = Files.readString(path);
             if (absolutePath.endsWith("json")) {
                 Type tcListType = new TypeToken<LinkedList<Testcase>>() {
                 }.getType();

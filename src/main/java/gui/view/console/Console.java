@@ -3,7 +3,6 @@ package gui.view.console;
 import gui.controller.PersistenceUtilities;
 import gui.view.console.controller.ConsoleController;
 import logic.model.NodeModel;
-import logic.mutation.MutationExecutor;
 import org.apache.commons.cli.*;
 import shared.model.NodeType;
 
@@ -12,16 +11,16 @@ import java.util.List;
 
 public class Console {
 
-    private final MutationExecutor executor;
 
-    public Console(MutationExecutor executor, ConsoleController controller) {
-        this.executor = executor;
+    public Console(ConsoleController controller) {
         this.controller = controller;
     }
 
 
     private final ConsoleController controller;
 
+
+    private final String MODE = "mode";
 
     private final String TESTSUITE_OPTION = "t";
     private final String MUTATION_OPTION = "m";
@@ -30,8 +29,8 @@ public class Console {
     private final String RESET_FUNCTION_OPTION = "rf";
     private final String REGION_OPTION = "re";
     private final String START_NUMBER_OPTION = "s";
-
     private final String END_NUMBER_OPTION = "e";
+
 
     public void handleInput(String[] args) {
         Options options = getOptions();
@@ -40,7 +39,7 @@ public class Console {
         CommandLineParser parser = new DefaultParser();
         try {
             CommandLine cmd = parser.parse(options, args);
-            if (areAllArgumentsAvailable(cmd)) {
+            if (areAllArgumentsAvailableForMutation(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String mutationPath = cmd.getOptionValue(MUTATION_OPTION);
                 String outputPath = cmd.getOptionValue(OUTPUT_OPTION);
@@ -62,6 +61,11 @@ public class Console {
                 allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(NodeModel::getNameOfNode).toList();
                 controller.startMutations(allFunctions, startMutant.intValue()
                         , endMutant.intValue(), region, resetFunction, outputPath);
+            } else if (areAllArgumentsAvailableForCalibration(cmd)) {
+                String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
+                String region = cmd.getOptionValue(REGION_OPTION);
+                String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
+                controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction);
             }
         } catch (ParseException pe) {
             HelpFormatter formatter = new HelpFormatter();
@@ -69,14 +73,27 @@ public class Console {
         }
     }
 
-    private boolean areAllArgumentsAvailable(CommandLine cmd) {
-        return cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(MUTATION_OPTION) && cmd.hasOption(OUTPUT_OPTION)
+    private boolean areAllArgumentsAvailableForMutation(CommandLine cmd) {
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(MUTATION_OPTION) && cmd.hasOption(OUTPUT_OPTION)
                 && cmd.hasOption(GRAPH_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION) && cmd.hasOption(REGION_OPTION)
-                && cmd.hasOption(START_NUMBER_OPTION) && cmd.hasOption(END_NUMBER_OPTION);
+                && cmd.hasOption(START_NUMBER_OPTION) && cmd.hasOption(END_NUMBER_OPTION) && "mutate".equals(cmd.getOptionValue(MODE));
+    }
+
+    private boolean areAllArgumentsAvailableForCalibration(CommandLine cmd) {
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
+                && "calibrate".equals(cmd.getOptionValue(MODE));
     }
 
     private Options getOptions() {
         Options options = new Options();
+
+
+        options.addOption(Option.builder(MODE)
+                .longOpt("mode")
+                .hasArg(true)
+                .desc("calibrate testcases or mutate testcases")
+                .required(false)
+                .build());
 
         options.addOption(Option.builder(TESTSUITE_OPTION)
                 .longOpt("testcaseFolder")
@@ -118,14 +135,14 @@ public class Console {
                 .longOpt("startMutant")
                 .hasArg(true)
                 .desc("number of first mutant")
-                .required(true)
+                .required(false)
                 .type(Number.class)
                 .build());
         options.addOption(Option.builder(END_NUMBER_OPTION)
                 .longOpt("endMutant")
                 .hasArg(true)
                 .desc("number of last mutant")
-                .required(true)
+                .required(false)
                 .type(Number.class)
                 .build());
         return options;
