@@ -57,7 +57,7 @@ public class DynamicKeyValue extends GeneralInput {
     @Override
     public void calculateNewValues() {
         RgxGen rgxGen = new RgxGen(this.getDynamicValue());
-        Random rnd = new Random(System.currentTimeMillis());
+        Random rnd = new Random();
         String result = rgxGen.generate(rnd);
         this.setGeneratedValue(result);
     }
