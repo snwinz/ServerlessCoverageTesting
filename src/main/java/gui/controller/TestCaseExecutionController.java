@@ -150,10 +150,12 @@ public class TestCaseExecutionController {
             fileChooser.getExtensionFilters().add(extFilter);
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
             var fileToSave = fileChooser.showSaveDialog(view);
-
-            var randomTestSuiteGenerator = new RandomTestSuiteGenerator(new LogicGraph(graph.getJSON()));
-            List<Testcase> randomTestcases = randomTestSuiteGenerator.generateTestcases(testSuite);
-            PersistenceUtilities.saveTestSuite(randomTestcases, fileToSave.toPath());
+            for (int i = 0; i < 10; i++) {
+                var randomTestSuiteGenerator = new RandomTestSuiteGenerator(new LogicGraph(graph.getJSON()));
+                List<Testcase> randomTestcases = randomTestSuiteGenerator.generateTestcases(testSuite);
+                String modifiedFileToSave = fileToSave.toPath().toString().replace(".json", String.valueOf(i)) + ".json";
+                PersistenceUtilities.saveTestSuite(randomTestcases, Path.of(modifiedFileToSave));
+            }
         }
     }
 }
