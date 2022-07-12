@@ -2,6 +2,7 @@ package gui.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import gui.controller.dto.ArrowInputData;
 import gui.controller.dto.NodeInputData;
@@ -34,9 +35,9 @@ public class PersistenceUtilities {
     }
 
 
-    public static LogicGraph loadLogicGraph(String absolutePath){
+    public static LogicGraph loadLogicGraph(String absolutePath) {
         Graph graph = new Graph();
-        loadGraph(absolutePath,graph);
+        loadGraph(absolutePath, graph);
         return new LogicGraph(graph.getJSON());
     }
 
@@ -118,6 +119,10 @@ public class PersistenceUtilities {
                 }
             }
 
+        } catch (JsonSyntaxException e) {
+            String errorMessage = String.format("Could not read file '%s'", absolutePath);
+            System.err.printf(errorMessage);
+            throw new IllegalStateException(errorMessage, e);
         } catch (IOException e) {
             System.err.printf("Could not read file '%s'", absolutePath);
         }
@@ -167,7 +172,7 @@ public class PersistenceUtilities {
         var gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(mutationResult);
         String status = mutationResult.isKilled() ? "killed" : "survived";
-        Path file = Path.of(mutationResult.getTestSuiteName()+    "_" + mutationResult.getMutantNumber() + "_"+status+".txt");
+        Path file = Path.of(mutationResult.getTestSuiteName() + "_" + mutationResult.getMutantNumber() + "_" + status + ".txt");
         var destination = target.resolve(file);
         try {
             Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
