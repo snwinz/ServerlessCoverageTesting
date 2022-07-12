@@ -47,5 +47,5 @@ public class MutationResult {
         return notCovered;
     }
 
-    
+
 }

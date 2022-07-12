@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class Testcase {
     private final List<Function> functions;
@@ -48,12 +49,14 @@ public final class Testcase {
 
     @Override
     public String toString() {
-        return "Testcase[" +
-                "functions=" + functions + ", " +
-                "coverageLogs=" + coverageLogs + ", " +
-                "target=" + target + ']';
+        return "Testcase{" +
+                "functions=\n" + functions.stream().map(f -> (f.getName() + String.join("+++", f.getExpectedOutputs()))).collect(Collectors.joining("\n")) +
+                "\n, coverageLogs=" + coverageLogs +
+                ", target='" + target + '\'' +
+                ", expectedLogs=" + expectedLogs +
+                ", manualCreated=" + manualCreated +
+                '}';
     }
-
 
     public void addFunction(Function function) {
         this.functions.add(function);

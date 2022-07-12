@@ -66,11 +66,26 @@ public class Console {
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
                 controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction);
+            }else if (areAllArgumentsAvailableForReCalibration(cmd)) {
+                String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
+                String region = cmd.getOptionValue(REGION_OPTION);
+                String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
+                controller.reCalibrateFolder(Path.of(testsuitePath), region, resetFunction);
+            }else if(areAllArgumentsAvailableForExecution(cmd)){
+                String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
+                String region = cmd.getOptionValue(REGION_OPTION);
+                String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
+                controller.executeTestcases(testsuitePath,region,resetFunction);
             }
         } catch (ParseException pe) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("parameters needed for mutation run", options);
         }
+    }
+
+    private boolean areAllArgumentsAvailableForReCalibration(CommandLine cmd) {
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
+                && "recalibrate".equals(cmd.getOptionValue(MODE));
     }
 
     private boolean areAllArgumentsAvailableForMutation(CommandLine cmd) {
@@ -82,6 +97,11 @@ public class Console {
     private boolean areAllArgumentsAvailableForCalibration(CommandLine cmd) {
         return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
                 && "calibrate".equals(cmd.getOptionValue(MODE));
+    }
+
+    private boolean areAllArgumentsAvailableForExecution(CommandLine cmd) {
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
+                && "execute".equals(cmd.getOptionValue(MODE));
     }
 
     private Options getOptions() {

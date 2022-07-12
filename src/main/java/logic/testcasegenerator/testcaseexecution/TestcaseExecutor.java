@@ -57,21 +57,12 @@ public class TestcaseExecutor {
         for (var function : functions) {
             String functionName = function.getName();
             String jsonData = function.getParameter();
-            String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
-            LOGGER.info(invocation);
-
             String result = executor.invokeFunction(functionName, jsonData, outputValues);
-
             var partNotCovered = getExecutionResultNotCovered(result, function, outputValues);
             if (partNotCovered.isPresent()) {
                 return partNotCovered;
             }
-
             addResultToOutputValues(result, outputValues);
-
-            String resultFormatted = String.format("result: %s", result);
-
-            LOGGER.info(resultFormatted);
         }
         return getLogPartNotCovered(testcase);
     }
@@ -106,10 +97,14 @@ public class TestcaseExecutor {
 
     public void executeTCs(List<TestcaseWrapper> testcases, String resetFunction) {
         for (var testcase : testcases) {
-            executor.deleteOldLogs();
-            executor.callResetFunction(resetFunction);
+            resetApplication(resetFunction);
             this.executeTC(testcase);
         }
+    }
+
+    public void resetApplication(String resetFunction) {
+        executor.deleteOldLogs();
+        executor.callResetFunction(resetFunction);
     }
 
 
@@ -165,6 +160,7 @@ public class TestcaseExecutor {
 
 
     private Optional<String> getExecutionResultNotCovered(String result, Function function, Map<String, List<String>> outputValues) {
+        String unchangedResult = result;
         for (var part : function.getExpectedOutputs()) {
             while (part.contains(PREVIOUSOUTPUT_PREFIX) && part.contains(PREVIOUSOUTPUT_SUFFIX)) {
                 int startPositionMarker = part.indexOf(PREVIOUSOUTPUT_PREFIX);
@@ -195,7 +191,7 @@ public class TestcaseExecutor {
             if (result.contains(part)) {
                 result = result.substring(result.indexOf(part) + part.length());
             } else {
-                return Optional.of(part + " not covered in " + function.getName() + ": " + result);
+                return Optional.of(part + " not covered in " + function.getName() + "\nuncovered:" + result + "\nresult of function:" + unchangedResult);
             }
         }
         return Optional.empty();
@@ -252,7 +248,7 @@ public class TestcaseExecutor {
         List<String> logsCompare = filterLogs(logs);
         for (var part : testcase.getLogsToBeCovered()) {
             if (notRemovedFromList(logsCompare, part)) {
-                return Optional.of("Log " + part +"could not be covered in");
+                return Optional.of("Log '" + part + "' could not be covered");
             }
         }
         return Optional.empty();
@@ -310,6 +306,20 @@ public class TestcaseExecutor {
     }
 
 
+    public void recalibrate(Testcase testcase, String resetFunction) {
+        executor.resetApplication(resetFunction);
+        var functions = testcase.getFunctions();
+        List<String> resultsFirstExecution = executeFunctions(functions);
+        List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
+        List<String> oldResults = functions.stream().map(Function::getExpectedOutputs)
+                .map(entry -> String.join("", entry)).toList();
+        List<String> oldLogs = testcase.getExpectedLogs();
+        calibrateFunctions(functions, resultsFirstExecution, oldResults);
+        resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
+        calibrateLogsOnTestcase(testcase, resultsFirstExecutionLogs, oldLogs);
+    }
+
+
     public void recalibrate(TestcaseWrapper testcase, String resetFunction) {
         executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
@@ -362,7 +372,6 @@ public class TestcaseExecutor {
         var calibratedLogs = calibrateLogs(resultsFirstExecutionLogs, resultsSecondExecutionLogs);
         testcase.setExpectedLogOutput(calibratedLogs);
     }
-
 
 
     private List<String> calibrateLogs(List<String> resultsFirstExecutionLogs, List<String> resultsSecondExecutionLogs) {
