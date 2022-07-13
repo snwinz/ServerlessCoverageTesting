@@ -4,6 +4,7 @@ import gui.controller.PersistenceUtilities;
 import gui.view.console.Console;
 import logic.mutation.MutationExecutor;
 import logic.testcasegenerator.testcaseexecution.TestcaseExecutor;
+import shared.model.Mutant;
 import shared.model.Testcase;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ConsoleController {
@@ -37,31 +39,37 @@ public class ConsoleController {
     }
 
     public void startMutations(List<String> allFunctions, int mutantStartNumber, int mutantEndNumber, String region, String resetFunction, String outputPath) {
-        mutationExecutor.startMutations(allFunctions, mutantStartNumber, mutantEndNumber, region, resetFunction, outputPath);
+
+        String[] regions = getRegions(region);
+
+
+        List<Mutant> mutantList = mutationExecutor.getMutants();
+        BlockingQueue<Mutant> mutants = new LinkedBlockingQueue<>(mutationExecutor.getMutants());
+
+        for (var regionForExecutor : regions) {
+            Runnable runnable = () -> {
+                while (!mutants.isEmpty()) {
+                    var mutant = mutants.poll();
+                    if (mutant != null) {
+                        int mutantNumber = mutantList.indexOf(mutant);
+                        if (mutantNumber >= mutantStartNumber && mutantNumber <= mutantEndNumber) {
+                            mutationExecutor.startMutations(allFunctions, mutantNumber, mutantNumber, regionForExecutor, resetFunction, outputPath);
+                        }
+                    }
+                }
+            };
+            var thread = new Thread(runnable);
+            thread.start();
+        }
+
     }
 
+    record TestSuiteInfo(List<Testcase> testcase, Path path) {
+    }
 
     public void calibrateFolder(Path pathOfTestSuites, String region, String resetFunction) {
-        record TestSuiteInfo(List<Testcase> testcase, Path path) {
-        }
-
-        if (!Files.isDirectory(pathOfTestSuites) || Files.notExists(pathOfTestSuites)) {
-            throw new IllegalArgumentException("Invalid path to folder");
-        }
-        var testSuitesToExecute = new LinkedBlockingQueue<TestSuiteInfo>();
-        try (var walk = Files.walk(pathOfTestSuites)) {
-            var files = walk
-                    .filter(Files::isRegularFile)   // is a file
-                    .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
-            for (var path : files) {
-                var testcases = PersistenceUtilities.loadTCs(path);
-                testSuitesToExecute.put(new TestSuiteInfo(testcases, path));
-            }
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Could not read : " + pathOfTestSuites);
-        }
-        String[] regions =
-                region.split(",");
+        BlockingQueue<TestSuiteInfo> testSuitesToExecute = getTestSuites(pathOfTestSuites);
+        String[] regions = getRegions(region);
         for (var regionForExecutor : regions) {
             Runnable runnable = () -> {
                 TestcaseExecutor tcExecutor = new TestcaseExecutor(regionForExecutor);
@@ -87,11 +95,7 @@ public class ConsoleController {
 
     }
 
-
-    public void reCalibrateFolder(Path pathOfTestSuites, String region, String resetFunction) {
-        record TestSuiteInfo(List<Testcase> testcase, Path path) {
-        }
-
+    private BlockingQueue<TestSuiteInfo> getTestSuites(Path pathOfTestSuites) {
         if (!Files.isDirectory(pathOfTestSuites) || Files.notExists(pathOfTestSuites)) {
             throw new IllegalArgumentException("Invalid path to folder");
         }
@@ -107,8 +111,17 @@ public class ConsoleController {
         } catch (IOException | InterruptedException e) {
             System.err.println("Could not read : " + pathOfTestSuites);
         }
-        String[] regions =
-                region.split(",");
+        return testSuitesToExecute;
+    }
+
+    private String[] getRegions(String region) {
+        return region.split(",");
+    }
+
+
+    public void reCalibrateFolder(Path pathOfTestSuites, String region, String resetFunction) {
+        BlockingQueue<TestSuiteInfo> testSuitesToExecute = getTestSuites(pathOfTestSuites);
+        String[] regions = getRegions(region);
         for (var regionForExecutor : regions) {
             Runnable runnable = () -> {
                 TestcaseExecutor tcExecutor = new TestcaseExecutor(regionForExecutor);
@@ -158,8 +171,7 @@ public class ConsoleController {
         } catch (IOException | InterruptedException e) {
             System.err.println("Could not read : " + pathOfTestSuites);
         }
-        String[] regions =
-                region.split(",");
+        String[] regions = getRegions(region);
         for (var regionForExecutor : regions) {
             Runnable runnable = () -> {
                 TestcaseExecutor tcExecutor = new TestcaseExecutor(regionForExecutor);

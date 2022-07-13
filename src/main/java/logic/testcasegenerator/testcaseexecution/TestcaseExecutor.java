@@ -191,7 +191,7 @@ public class TestcaseExecutor {
             if (result.contains(part)) {
                 result = result.substring(result.indexOf(part) + part.length());
             } else {
-                return Optional.of(part + " not covered in " + function.getName() + "\nuncovered:" + result + "\nresult of function:" + unchangedResult);
+                return Optional.of(part + " not covered in " + function.getName() + "   \n   uncovered:" + result + "    \n    result of function:" + unchangedResult);
             }
         }
         return Optional.empty();

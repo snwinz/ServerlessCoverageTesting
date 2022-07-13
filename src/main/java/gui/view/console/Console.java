@@ -45,7 +45,7 @@ public class Console {
                 String outputPath = cmd.getOptionValue(OUTPUT_OPTION);
                 String graphPath = cmd.getOptionValue(GRAPH_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
-                String region = cmd.getOptionValue(REGION_OPTION);
+                String regions = cmd.getOptionValue(REGION_OPTION);
                 Number startMutant = (Number) cmd.getParsedOptionValue(START_NUMBER_OPTION);
                 Number endMutant = (Number) cmd.getParsedOptionValue(END_NUMBER_OPTION);
 
@@ -60,7 +60,7 @@ public class Console {
                 }
                 allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(NodeModel::getNameOfNode).toList();
                 controller.startMutations(allFunctions, startMutant.intValue()
-                        , endMutant.intValue(), region, resetFunction, outputPath);
+                        , endMutant.intValue(), regions, resetFunction, outputPath);
             } else if (areAllArgumentsAvailableForCalibration(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);

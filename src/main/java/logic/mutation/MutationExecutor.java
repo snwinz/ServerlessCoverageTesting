@@ -11,10 +11,12 @@ import shared.model.Testcase;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MutationExecutor {
 
@@ -24,8 +26,11 @@ public class MutationExecutor {
 
     public void setMutants(Path mutantFolder) {
         this.mutants.clear();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(mutantFolder, "*.json")) {
-            for (Path entry : stream) {
+        try (var walk = Files.walk(mutantFolder)) {
+            var files = walk
+                    .filter(Files::isRegularFile)   // is a file
+                    .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
+            for (Path entry : files) {
                 var mutantsOfFile = PersistenceUtilities.loadMutants(entry);
                 mutants.addAll(mutantsOfFile);
             }
@@ -37,8 +42,12 @@ public class MutationExecutor {
 
     public void setTestSuits(Path folderOfTestSuits) {
         this.testSuites.clear();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderOfTestSuits, "*.json")) {
-            for (Path entry : stream) {
+
+        try (var walk = Files.walk(folderOfTestSuits)) {
+            var files = walk
+                    .filter(Files::isRegularFile)   // is a file
+                    .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
+            for (var entry : files) {
                 var testcases = PersistenceUtilities.loadTCs(entry);
                 String nameOfTestSuite = getNameOfTestSuite(entry);
                 var testSuite = new TestSuite(nameOfTestSuite, testcases);
@@ -85,8 +94,7 @@ public class MutationExecutor {
 
     private MutationResult checkMutationForTestSuite(Mutant mutant, TestSuite testSuite, List<String> allFunctions, TestcaseExecutor tcExecutor, String resetFunction) {
         setEnvironmentVariables(mutant, allFunctions, tcExecutor.getExecutor());
-        Optional<Testcase> killingTestcase = Optional.empty();
-        String missingParts = "";
+        StringBuilder missingParts = new StringBuilder();
         int killCounter = 0;
         List<Integer> killingTestcases = new ArrayList<>();
         var executor = tcExecutor.getExecutor();
@@ -97,15 +105,15 @@ public class MutationExecutor {
                 executor.resetApplication(resetFunction);
                 var partNotCoveredInformation = tcExecutor.executeTC(testcase);
                 if (partNotCoveredInformation.isPresent()) {
-                    missingParts += killCounter++ + ":\n" + partNotCoveredInformation.get() + "\n";
-                    var tcNumber = testSuite.getTestcases().indexOf(killingTestcase.get());
+                    missingParts.append(killCounter++).append(":\n").append(partNotCoveredInformation.get()).append("\n");
+                    var tcNumber = testSuite.getTestcases().indexOf(testcase);
                     killingTestcases.add(tcNumber);
                 }
             }
         }
 
         return new
-               MutationResult(killingTestcases.size()>0, killingTestcases, mutant, testSuite.getName(), missingParts);
+                MutationResult(killingTestcases.size() > 0, killingTestcases, mutant, testSuite.getName(), missingParts.toString());
     }
 
 
