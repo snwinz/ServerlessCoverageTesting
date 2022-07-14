@@ -128,7 +128,7 @@ public class MutationView extends Stage implements PropertyChangeListener {
             final Label startLabelMutant = new Label("Start mutants at:");
             final Label endLabelMutant = new Label("End mutants at:");
             final Spinner<Integer> mutantsNumberMin = new Spinner<>(0, mutants.size()-1, 0, 1);
-            final Spinner<Integer> mutantsNumberMax = new Spinner<>(1, mutants.size()-1, 0, 1);
+            final Spinner<Integer> mutantsNumberMax = new Spinner<>(0, mutants.size()-1, 0, 1);
             mutantsNumberMin.setEditable(true);
             mutantsNumberMax.setEditable(true);
             ViewHelper.addToGridInHBox(grid, startLabelMutant, mutantsNumberMin, endLabelMutant, mutantsNumberMax);
