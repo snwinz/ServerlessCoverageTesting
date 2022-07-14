@@ -52,7 +52,7 @@ public class ConsoleController {
                     var mutant = mutants.poll();
                     if (mutant != null) {
                         int mutantNumber = mutantList.indexOf(mutant);
-                        if (mutantNumber >= mutantStartNumber && mutantNumber <= mutantEndNumber) {
+                        if (mutantNumber >= mutantStartNumber && mutantNumber <= mutantEndNumber && mutantNumber < mutantList.size()) {
                             mutationExecutor.startMutations(allFunctions, mutantNumber, mutantNumber, regionForExecutor, resetFunction, outputPath);
                         }
                     }
