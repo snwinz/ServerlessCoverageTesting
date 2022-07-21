@@ -3,7 +3,6 @@ package shared.model.input;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 
@@ -40,7 +39,7 @@ public class DynamicKeyValue extends GeneralInput {
             String value = this.getGeneratedValue();
 
             if (this.getJsonSavedAsBase64() != null && this.getJsonSavedAsBase64()) {
-                value = Base64.getEncoder().encodeToString(value.getBytes());
+                value = "##BASE64__" + value + "__BASE64##";
             }
             return String.format("\"%s\" : \"%s\"", this.getKey(), value);
         }
@@ -55,7 +54,7 @@ public class DynamicKeyValue extends GeneralInput {
     }
 
     @Override
-    public void calculateNewValues() {
+    public void calculateNewValues () {
         RgxGen rgxGen = new RgxGen(this.getDynamicValue());
         Random rnd = new Random();
         String result = rgxGen.generate(rnd);

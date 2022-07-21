@@ -1,7 +1,6 @@
 package shared.model.input;
 
 
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +59,9 @@ public class ParentKeyInput extends GeneralInput {
             } else {
                 if (this.getJsonSavedAsBase64() != null && this.getJsonSavedAsBase64()) {
                     allKeyValueChildren = "{" + allKeyValueChildren + "}";
-                    return String.format("\"%s\" : \" %s \"", this.getKey(), Base64.getEncoder().encodeToString(allKeyValueChildren.getBytes()));
+                    return String.format("\"%s\" : \" %s \"", this.getKey(),
+                            "##BASE64__" + allKeyValueChildren + "__BASE64##"
+                    );
                 }
 
                 return String.format("\"%s\" : { %s }", this.getKey(), allKeyValueChildren);

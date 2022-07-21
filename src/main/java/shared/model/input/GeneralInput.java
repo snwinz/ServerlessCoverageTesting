@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Stream;
 
 public class GeneralInput {
@@ -32,7 +33,6 @@ public class GeneralInput {
 
     private String generatedValue;
     private boolean undefined;
-
 
 
     public GeneralInput(String key) {

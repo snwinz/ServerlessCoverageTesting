@@ -8,10 +8,7 @@ import com.amazonaws.services.logs.AWSLogsClientBuilder;
 import com.amazonaws.services.logs.model.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AWSInvoker implements Executor {
     protected AWSLambda amazonLambda;
@@ -30,7 +27,7 @@ public class AWSInvoker implements Executor {
         json = json.replaceAll("'", "\"");
 
         json = setOutputsOfPreviousFunctions(json, outputValues);
-
+        json = applyBase64(json);
 
         invokeRequest.setPayload(json);
 
@@ -41,6 +38,21 @@ public class AWSInvoker implements Executor {
             Thread.currentThread().interrupt();
         }
         return new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
+    }
+
+    private String applyBase64(String json) {
+        int indexStart = json.indexOf("##BASE64__");
+        int indexEnd = json.indexOf("__BASE64##");
+        while (indexStart > 0 && indexEnd > 0 && indexEnd > indexStart) {
+            String value = json.substring("##BASE64__".length() + indexStart, indexEnd);
+
+            value = Base64.getEncoder().encodeToString(value.getBytes());
+
+            json = json.substring(0, indexStart) + value + json.substring(indexEnd);
+            indexStart = json.indexOf("##BASE64__");
+            indexEnd = json.indexOf("__BASE64##");
+        }
+        return json;
     }
 
     private String setOutputsOfPreviousFunctions(String json, Map<String, List<String>> outputValues) {

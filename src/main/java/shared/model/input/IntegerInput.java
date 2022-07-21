@@ -44,8 +44,8 @@ public class IntegerInput extends GeneralInput {
         int max = this.getMaxValue();
         int result = 0;
         if (min <= max) {
-            Random random = new Random();
-            result = random.nextInt(max + 1 - min) + min;
+            Random rnd = new Random();
+            result = rnd.nextInt(max + 1 - min) + min;
         }
         this.setGeneratedValue(String.valueOf(result));
     }
