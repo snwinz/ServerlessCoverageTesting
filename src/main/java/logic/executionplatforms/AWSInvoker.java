@@ -48,7 +48,7 @@ public class AWSInvoker implements Executor {
 
             value = Base64.getEncoder().encodeToString(value.getBytes());
 
-            json = json.substring(0, indexStart) + value + json.substring(indexEnd);
+            json = json.substring(0, indexStart) + value + json.substring(indexEnd + "__BASE64##".length());
             indexStart = json.indexOf("##BASE64__");
             indexEnd = json.indexOf("__BASE64##");
         }
