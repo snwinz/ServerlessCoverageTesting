@@ -12,10 +12,9 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static shared.model.StringSeparators.*;
+
 public class TestcaseExecutor {
-    public static final String PREVIOUSOUTPUT_PREFIX = "##PREVIOUSOUTPUT__";
-    public static final String PREVIOUSOUTPUT_SUFFIX = "__PREVIOUSOUTPUT##";
-    public static final String SEPARATOR = "__";
     private final AWSInvoker executor;
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 

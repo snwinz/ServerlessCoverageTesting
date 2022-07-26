@@ -10,7 +10,10 @@ import com.amazonaws.services.logs.model.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static shared.model.StringSeparators.*;
+
 public class AWSInvoker implements Executor {
+
     protected AWSLambda amazonLambda;
     protected AWSLogs amazonLogs;
 
@@ -41,34 +44,70 @@ public class AWSInvoker implements Executor {
     }
 
     private String applyBase64(String json) {
-        int indexStart = json.indexOf("##BASE64__");
-        int indexEnd = json.indexOf("__BASE64##");
+        int indexStart = json.indexOf(BASE_64_PREFIX);
+        int indexEnd = json.indexOf(BASE_64_SUFFIX);
         while (indexStart > 0 && indexEnd > 0 && indexEnd > indexStart) {
-            String value = json.substring("##BASE64__".length() + indexStart, indexEnd);
+            String value = json.substring(BASE_64_PREFIX.length() + indexStart, indexEnd);
 
             value = Base64.getEncoder().encodeToString(value.getBytes());
 
-            json = json.substring(0, indexStart) + value + json.substring(indexEnd + "__BASE64##".length());
-            indexStart = json.indexOf("##BASE64__");
-            indexEnd = json.indexOf("__BASE64##");
+            json = json.substring(0, indexStart) + value + json.substring(indexEnd + BASE_64_SUFFIX.length());
+            indexStart = json.indexOf(BASE_64_PREFIX);
+            indexEnd = json.indexOf(BASE_64_SUFFIX);
         }
         return json;
     }
 
     private String setOutputsOfPreviousFunctions(String json, Map<String, List<String>> outputValues) {
-        while (json.contains("##PREVIOUSOUTPUT__")) {
-            String key = json.split("##PREVIOUSOUTPUT")[1].split("__")[1];
-            var occurrence = Integer.parseInt(json.split("##PREVIOUSOUTPUT")[1].split("__")[2]);
+        while (isValidReferenceToPreviousContent(json)) {
+            String key = getKeyOfPreviousContent(json);
+            int occurrence = getOccurrencesOfPreviousContent(json);
             if (outputValues.containsKey(key) && outputValues.get(key).size() > occurrence) {
                 String value = outputValues.get(key).get(occurrence);
-                var jsonFirstPart = json.split("##PREVIOUSOUTPUT")[0];
-                var jsonSecondPart = json.split("PREVIOUSOUTPUT##", 2)[1];
+                var jsonFirstPart = getPartBeforeSeparators(json);
+                var jsonSecondPart = getPartAfterSeparators(json);
                 json = jsonFirstPart + value + jsonSecondPart;
             } else {
                 break;
             }
         }
         return json;
+    }
+
+    private int getOccurrencesOfPreviousContent(String json) {
+        int indexStart = json.indexOf(PREVIOUSOUTPUT_PREFIX);
+        String content = json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length());
+        int indexSeparator = content.indexOf(SEPARATOR)+indexStart+ PREVIOUSOUTPUT_PREFIX.length();
+        int indexEnd = json.indexOf(PREVIOUSOUTPUT_SUFFIX);
+        return Integer.parseInt(json.substring(indexSeparator + SEPARATOR.length(), indexEnd));
+    }
+
+    private String getKeyOfPreviousContent(String json) {
+        int indexStart = json.indexOf(PREVIOUSOUTPUT_PREFIX);
+        String content = json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length());
+        int indexSeparator = content.indexOf(SEPARATOR)+indexStart+ PREVIOUSOUTPUT_PREFIX.length();
+        return json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length(), indexSeparator);
+    }
+
+    private boolean isValidReferenceToPreviousContent(String json) {
+        int indexStart = json.indexOf(PREVIOUSOUTPUT_PREFIX);
+        if (indexStart == -1) {
+            return false;
+        }
+        String content = json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length());
+        int indexSeparator = content.indexOf(SEPARATOR)+indexStart+ PREVIOUSOUTPUT_PREFIX.length();
+        int indexEnd = json.indexOf(PREVIOUSOUTPUT_SUFFIX);
+        return indexStart < indexSeparator && indexSeparator < indexEnd;
+    }
+
+    private String getPartBeforeSeparators(String json) {
+        int indexStart = json.indexOf(PREVIOUSOUTPUT_PREFIX);
+        return json.substring(0, indexStart);
+    }
+
+    private String getPartAfterSeparators(String json) {
+        int indexEnd = json.indexOf(PREVIOUSOUTPUT_SUFFIX) + PREVIOUSOUTPUT_SUFFIX.length();
+        return json.substring(indexEnd);
     }
 
 

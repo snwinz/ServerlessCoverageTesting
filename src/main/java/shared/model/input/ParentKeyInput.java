@@ -4,6 +4,9 @@ package shared.model.input;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static shared.model.StringSeparators.BASE_64_PREFIX;
+import static shared.model.StringSeparators.BASE_64_SUFFIX;
+
 public class ParentKeyInput extends GeneralInput {
     public ParentKeyInput(String key, boolean selected, boolean selected64) {
         super(key);
@@ -60,10 +63,9 @@ public class ParentKeyInput extends GeneralInput {
                 if (this.getJsonSavedAsBase64() != null && this.getJsonSavedAsBase64()) {
                     allKeyValueChildren = "{" + allKeyValueChildren + "}";
                     return String.format("\"%s\" : \" %s \"", this.getKey(),
-                            "##BASE64__" + allKeyValueChildren + "__BASE64##"
+                            BASE_64_PREFIX + allKeyValueChildren + BASE_64_SUFFIX
                     );
                 }
-
                 return String.format("\"%s\" : { %s }", this.getKey(), allKeyValueChildren);
             }
         }

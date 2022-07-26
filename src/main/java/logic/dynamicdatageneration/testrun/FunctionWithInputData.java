@@ -8,7 +8,7 @@ import shared.model.input.IntegerInput;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static logic.testcasegenerator.testcaseexecution.TestcaseExecutor.*;
+import static shared.model.StringSeparators.*;
 
 public class FunctionWithInputData {
 
@@ -109,35 +109,30 @@ public class FunctionWithInputData {
                     var inputValues = testData.getInputValues().get(inputData.getKey());
                     setRandomEntryOfListAsValue(inputData, inputValues);
                 } else if (decisionRandomOutputAsValue < testData.getProbRandomOutputAsValue()) {
-                    var inputValues = testData.getOutputValues().entrySet().stream().map(entry -> {
-                        var key = entry.getKey();
-                        var values = entry.getValue();
-                        List<Pair> result = new ArrayList<>();
-                        for (int i = 0; i < values.size(); i++) {
-                            var value = values.get(i);
-                            result.add(new Pair(key, value, i));
-                        }
-                        return result;
-                    }).flatMap(List::stream).collect(Collectors.toList());
+                    var inputValues = testData.getOutputValues().entrySet().stream().map(
+                            this::createPairs).flatMap(List::stream).collect(Collectors.toList());
                     setRandomEntryOfOutputAsValue(inputData, inputValues);
                 } else if (decisionSimilarOutputAsValue < testData.getProbSimilarOutputAsValue()) {
                     var inputValues = testData.getOutputValues().entrySet().stream()
                             .filter(entry -> entry.getKey().equals(inputData.getKey()))
-                            .map(entry -> {
-                                var key = entry.getKey();
-                                var values = entry.getValue();
-                                List<Pair> result = new ArrayList<>();
-                                for (int i = 0; i < values.size(); i++) {
-                                    var value = values.get(i);
-                                    result.add(new Pair(key, value, i));
-                                }
-                                return result;
-                            }).flatMap(List::stream).collect(Collectors.toList());
+                            .map(this::createPairs).flatMap(List::stream).collect(Collectors.toList());
                     setRandomEntryOfOutputAsValue(inputData, inputValues);
                 }
             }
         }
 
+    }
+
+
+    private List<Pair> createPairs(Map.Entry<String, List<String>> entry) {
+        var key = entry.getKey();
+        var values = entry.getValue();
+        List<Pair> result = new ArrayList<>();
+        for (int i = 0; i < values.size(); i++) {
+            var value = values.get(i);
+            result.add(new Pair(key, value, i));
+        }
+        return result;
     }
 
     private void setRandomEntryOfOutputAsValue(GeneralInput inputData, List<Pair> inputValues) {
@@ -161,7 +156,6 @@ public class FunctionWithInputData {
         int entryNumber = rn.nextInt(list.size());
         return list.get(entryNumber);
     }
-
 
 
     private record Pair(String key, String value, int occurrence) {

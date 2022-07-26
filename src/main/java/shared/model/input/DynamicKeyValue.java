@@ -6,6 +6,9 @@ import com.github.curiousoddman.rgxgen.RgxGen;
 import java.util.List;
 import java.util.Random;
 
+import static shared.model.StringSeparators.BASE_64_PREFIX;
+import static shared.model.StringSeparators.BASE_64_SUFFIX;
+
 public class DynamicKeyValue extends GeneralInput {
     public DynamicKeyValue(String key, String dynamicValue, boolean base64) {
         super(key);
@@ -37,9 +40,8 @@ public class DynamicKeyValue extends GeneralInput {
             return "";
         } else {
             String value = this.getGeneratedValue();
-
             if (this.getJsonSavedAsBase64() != null && this.getJsonSavedAsBase64()) {
-                value = "##BASE64__" + value + "__BASE64##";
+                value = BASE_64_PREFIX+ value + BASE_64_SUFFIX;
             }
             return String.format("\"%s\" : \"%s\"", this.getKey(), value);
         }
