@@ -50,7 +50,7 @@ public final class Testcase {
     @Override
     public String toString() {
         return "Testcase{" +
-                "functions=\n" + functions.stream().map(f -> (f.getName() + String.join("+++", f.getExpectedOutputs()))).collect(Collectors.joining("\n")) +
+                "functions=\n" + functions.stream().map(f -> (f.getName() +"\nexpected Result: " + String.join("+++", f.getExpectedOutputs()))).collect(Collectors.joining("\n")) +
                 "\n, coverageLogs=" + coverageLogs +
                 ", target='" + target + '\'' +
                 ", expectedLogs=" + expectedLogs +
