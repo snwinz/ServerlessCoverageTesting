@@ -34,6 +34,10 @@ public class ConsoleController {
         mutationExecutor.setMutants(path);
     }
 
+    public void setOldMutationResults(Path path) {
+        mutationExecutor.setOldMutationResults(path);
+    }
+
     public void setTestSuits(Path path) {
         mutationExecutor.setTestSuits(path);
     }

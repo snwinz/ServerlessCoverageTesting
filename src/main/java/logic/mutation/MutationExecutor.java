@@ -13,16 +13,14 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MutationExecutor {
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final List<Mutant> mutants = new ArrayList<>();
     private final List<TestSuite> testSuites = new ArrayList<>();
+    private final List<MutationResult> oldMutationResults = new ArrayList<>();
 
     public void setMutants(Path mutantFolder) {
         this.mutants.clear();
@@ -36,6 +34,22 @@ public class MutationExecutor {
             }
         } catch (IOException e) {
             System.err.println("Could not read : " + mutantFolder.toAbsolutePath());
+        }
+        pcs.firePropertyChange("mutationsUpdated", null, mutants);
+    }
+
+    public void setOldMutationResults(Path oldMutationResultsFolder) {
+        this.oldMutationResults.clear();
+        try (var walk = Files.walk(oldMutationResultsFolder)) {
+            var files = walk
+                    .filter(Files::isRegularFile)   // is a file
+                    .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
+            for (Path entry : files) {
+                var mutationResults = PersistenceUtilities.loadMutationResults(entry);
+                oldMutationResults.addAll(mutationResults);
+            }
+        } catch (IOException e) {
+            System.err.println("Could not read : " + oldMutationResultsFolder.toAbsolutePath());
         }
         pcs.firePropertyChange("mutationsUpdated", null, mutants);
     }
@@ -85,11 +99,21 @@ public class MutationExecutor {
             var mutation = mutants.get(i);
             for (var testSuite : testSuites) {
                 System.out.println("Start Mutation " + i + " with test suite " + testSuite.getName());
-                var mutationResult = checkMutationForTestSuite(mutation, testSuite, allFunctions, testcaseExecutor, resetFunction);
+                var cachedResult = findCachedResult(mutation, testSuite.getName());
+                Path targetPath = Path.of(targetDirectory);
+                MutationResult mutationResult;
+                mutationResult = cachedResult.orElseGet(() -> checkMutationForTestSuite(mutation, testSuite, allFunctions, testcaseExecutor, resetFunction));
                 mutationResult.setMutantNumber(i);
-                PersistenceUtilities.saveMutationResult(mutationResult, Path.of(targetDirectory));
+                PersistenceUtilities.saveMutationResult(mutationResult, targetPath);
             }
         }
+    }
+
+    private Optional<MutationResult> findCachedResult(Mutant mutation, String testSuiteName) {
+        if (mutation == null || testSuiteName == null) {
+            return Optional.empty();
+        }
+        return oldMutationResults.stream().filter(entry -> entry.getMutant().equals(mutation) && testSuiteName.equals(entry.getTestSuiteName())).findAny();
     }
 
     private MutationResult checkMutationForTestSuite(Mutant mutant, TestSuite testSuite, List<String> allFunctions, TestcaseExecutor tcExecutor, String resetFunction) {

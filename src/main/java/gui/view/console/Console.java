@@ -24,6 +24,7 @@ public class Console {
 
     private final String TESTSUITE_OPTION = "t";
     private final String MUTATION_OPTION = "m";
+    private final String OLD_MUTATION_RESULT_OPTION = "om";
     private final String OUTPUT_OPTION = "o";
     private final String GRAPH_OPTION = "g";
     private final String RESET_FUNCTION_OPTION = "rf";
@@ -42,6 +43,7 @@ public class Console {
             if (areAllArgumentsAvailableForMutation(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String mutationPath = cmd.getOptionValue(MUTATION_OPTION);
+                String oldMutationResultPath = cmd.getOptionValue(OLD_MUTATION_RESULT_OPTION);
                 String outputPath = cmd.getOptionValue(OUTPUT_OPTION);
                 String graphPath = cmd.getOptionValue(GRAPH_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
@@ -50,6 +52,9 @@ public class Console {
                 Number endMutant = (Number) cmd.getParsedOptionValue(END_NUMBER_OPTION);
 
                 controller.setMutants(Path.of(mutationPath));
+                if (oldMutationResultPath != null) {
+                    controller.setOldMutationResults(Path.of(oldMutationResultPath));
+                }
                 controller.setTestSuits(Path.of(testsuitePath));
 
                 List<String> allFunctions;
@@ -66,16 +71,16 @@ public class Console {
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
                 controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction);
-            }else if (areAllArgumentsAvailableForReCalibration(cmd)) {
+            } else if (areAllArgumentsAvailableForReCalibration(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
                 controller.reCalibrateFolder(Path.of(testsuitePath), region, resetFunction);
-            }else if(areAllArgumentsAvailableForExecution(cmd)){
+            } else if (areAllArgumentsAvailableForExecution(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
-                controller.executeTestcases(testsuitePath,region,resetFunction);
+                controller.executeTestcases(testsuitePath, region, resetFunction);
             }
         } catch (ParseException pe) {
             HelpFormatter formatter = new HelpFormatter();
@@ -125,6 +130,12 @@ public class Console {
                 .longOpt("mutantFolder")
                 .hasArg(true)
                 .desc("path to mutants folder")
+                .required(false)
+                .build());
+        options.addOption(Option.builder(OLD_MUTATION_RESULT_OPTION)
+                .longOpt("oldMutationResult")
+                .hasArg(true)
+                .desc("path to folder of old mutation results")
                 .required(false)
                 .build());
         options.addOption(Option.builder(OUTPUT_OPTION)
