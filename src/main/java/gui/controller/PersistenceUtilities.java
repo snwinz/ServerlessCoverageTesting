@@ -164,13 +164,11 @@ public class PersistenceUtilities {
 
     }
 
-    public static List<MutationResult> loadMutationResults(Path entry) throws IOException {
+    public static MutationResult loadMutationResults(Path entry) throws IOException {
         List<String> allMutantsList = Files.readAllLines(entry);
         String allMutationResults = String.join("\n", allMutantsList);
         Gson gson = new Gson();
-        Type mutationListType = new TypeToken<ArrayList<MutationResult>>() {
-        }.getType();
-        return gson.fromJson(allMutationResults, mutationListType);
+        return gson.fromJson(allMutationResults, MutationResult.class);
     }
 
     public static void saveMutationResult(MutationResult mutationResult, Path target) {

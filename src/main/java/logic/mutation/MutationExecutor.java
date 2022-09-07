@@ -43,15 +43,14 @@ public class MutationExecutor {
         try (var walk = Files.walk(oldMutationResultsFolder)) {
             var files = walk
                     .filter(Files::isRegularFile)   // is a file
-                    .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
+                    .filter(p -> p.getFileName().toString().endsWith(".txt")).toList();
             for (Path entry : files) {
-                var mutationResults = PersistenceUtilities.loadMutationResults(entry);
-                oldMutationResults.addAll(mutationResults);
+                var mutationResult = PersistenceUtilities.loadMutationResults(entry);
+                oldMutationResults.add(mutationResult);
             }
         } catch (IOException e) {
             System.err.println("Could not read : " + oldMutationResultsFolder.toAbsolutePath());
         }
-        pcs.firePropertyChange("mutationsUpdated", null, mutants);
     }
 
     public void setTestSuits(Path folderOfTestSuits) {
@@ -126,6 +125,7 @@ public class MutationExecutor {
         for (Testcase testcase : testcases) {
             executor.resetApplication(resetFunction);
             if (tcExecutor.executeTC(testcase).isPresent()) {
+                //repeat if testcase does not cover
                 executor.resetApplication(resetFunction);
                 var partNotCoveredInformation = tcExecutor.executeTC(testcase);
                 if (partNotCoveredInformation.isPresent()) {
