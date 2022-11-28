@@ -26,7 +26,7 @@ public class MutationExecutor {
         this.mutants.clear();
         try (var walk = Files.walk(mutantFolder)) {
             var files = walk
-                    .filter(Files::isRegularFile)   // is a file
+                    .filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
             for (Path entry : files) {
                 var mutantsOfFile = PersistenceUtilities.loadMutants(entry);
@@ -42,7 +42,7 @@ public class MutationExecutor {
         this.oldMutationResults.clear();
         try (var walk = Files.walk(oldMutationResultsFolder)) {
             var files = walk
-                    .filter(Files::isRegularFile)   // is a file
+                    .filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().endsWith(".txt")).toList();
             for (Path entry : files) {
                 var mutationResult = PersistenceUtilities.loadMutationResults(entry);
