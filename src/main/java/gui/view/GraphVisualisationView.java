@@ -103,6 +103,7 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
         closeItem.setOnAction(event -> controller.closeWindow());
 
         saveGraphItemAs.setOnAction(event -> controller.saveGraphAs(nodes, arrows));
+        saveGraphItem.setOnAction(event -> controller.saveGraph(nodes, arrows));
         executeTestCase.setOnAction(event -> controller.executeTestcases());
         analyzeLogFile.setOnAction(event -> controller.evaluateLog(model));
         openNewGraphItem.setOnAction(event -> controller.openGraph());
