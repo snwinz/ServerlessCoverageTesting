@@ -26,9 +26,9 @@ public class ArrayKeyInput extends GeneralInput {
 
         var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).toList();
 
-        var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue))
+        var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue) && !(a instanceof DynamicValue) )
                 .map(child -> child.getJsonFormat(generalInputs)).collect(Collectors.joining(",", "{", "}"));
-        var allOnlyValueChildren = children.stream().filter(a -> (a instanceof ConstantValue))
+        var allOnlyValueChildren = children.stream().filter(a -> (a instanceof ConstantValue) || (a instanceof DynamicValue) )
                 .map(child -> child.getJsonFormat(generalInputs)).collect(Collectors.joining(",", "\"", "\""));
         return createEntries(allKeyValueChildren, allOnlyValueChildren);
     }
@@ -40,10 +40,10 @@ public class ArrayKeyInput extends GeneralInput {
             return "";
         } else {
             var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).toList();
-            var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue))
+            var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue) && !(a instanceof DynamicValue) )
                     .map(child -> child.getJsonWithData(generalInputs)).collect(Collectors.joining(",", "{", "}"));
-            var allOnlyValueChildren = children.stream().filter(a -> (a instanceof ConstantValue))
-                    .map(child -> child.getJsonWithData(generalInputs)).filter(entry -> !"".equals(entry)).collect(Collectors.joining(",", "\"", "\""));
+            var allOnlyValueChildren = children.stream().filter(a -> (a instanceof ConstantValue) || (a instanceof DynamicValue))
+                    .map(child -> child.getJsonWithData(generalInputs)).filter(entry -> !"".equals(entry)).collect(Collectors.joining("\",\"", "\"", "\""));
             return createEntries(allKeyValueChildren, allOnlyValueChildren);
         }
     }

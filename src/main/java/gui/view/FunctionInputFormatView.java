@@ -35,7 +35,7 @@ public class FunctionInputFormatView extends Stage {
         ObservableList<TypOfJsonContent> options =
                 FXCollections.observableArrayList(
                         TypOfJsonContent.KEY_DYNAMIC_VALUE, TypOfJsonContent.KEY_INTEGER_VALUE, TypOfJsonContent.ARRAY_KEY,
-                        TypOfJsonContent.PARENT_KEY, TypOfJsonContent.KEY_CONSTANT_VALUE, TypOfJsonContent.CONSTANT_VALUE
+                        TypOfJsonContent.PARENT_KEY, TypOfJsonContent.KEY_CONSTANT_VALUE, TypOfJsonContent.CONSTANT_VALUE, TypOfJsonContent.DYNAMIC_VALUE
                 );
         comboBoxTypOfKey = new ComboBox<>(options);
         comboBoxTypOfKey.getSelectionModel().selectFirst();
@@ -158,6 +158,11 @@ public class FunctionInputFormatView extends Stage {
                     addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
                     boxForInput.getChildren().remove(addStringInputJSON);
                     break;
+                case DYNAMIC_VALUE:
+                    nodeOfKeyControl.getChildren().add(0, addStringInputKey);
+                    addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
+                    boxForInput.getChildren().remove(addStringInputJSON);
+                    break;
                 case KEY_INTEGER_VALUE:
                     boxForInput.getChildren().removeAll(addMinValueField, addMaxValueField);
                     break;
@@ -181,6 +186,12 @@ public class FunctionInputFormatView extends Stage {
                 case CONSTANT_VALUE:
                     nodeOfKeyControl.getChildren().remove(addStringInputKey);
                     addStringInputJSON.setPromptText("constant value");
+                    boxForInput.getChildren().addAll(addStringInputJSON);
+                    nodeOfKeyControl.getChildren().removeAll(valueInJson, asBase64);
+                    break;
+                case DYNAMIC_VALUE:
+                    nodeOfKeyControl.getChildren().remove(addStringInputKey);
+                    addStringInputJSON.setPromptText("dynamic value");
                     boxForInput.getChildren().addAll(addStringInputJSON);
                     nodeOfKeyControl.getChildren().removeAll(valueInJson, asBase64);
                     break;
@@ -225,9 +236,11 @@ public class FunctionInputFormatView extends Stage {
         generatedInputValue = switch (selection) {
             case KEY_CONSTANT_VALUE -> new ConstantKeyValue(key, addStringInputJSON.getText());
             case CONSTANT_VALUE -> new ConstantValue(addStringInputJSON.getText());
+            case DYNAMIC_VALUE -> new DynamicValue(addStringInputJSON.getText());
             case KEY_INTEGER_VALUE ->
                     new IntegerInput(key, Integer.valueOf(addMinValueField.getText()), Integer.valueOf(addMaxValueField.getText()));
             case KEY_DYNAMIC_VALUE -> new DynamicKeyValue(key, addStringInputJSON.getText(), asBase64.isSelected());
+
             case ARRAY_KEY -> new ArrayKeyInput(key);
             case PARENT_KEY -> new ParentKeyInput(key, valueInJson.isSelected(), asBase64.isSelected());
         };
@@ -288,7 +301,7 @@ public class FunctionInputFormatView extends Stage {
     enum TypOfJsonContent {
         PARENT_KEY("Parent key of entries"), ARRAY_KEY("Array key of entries"), KEY_DYNAMIC_VALUE("Key with dynamic value"),
         KEY_INTEGER_VALUE("Key with integer content"), KEY_CONSTANT_VALUE("Constant key and value"),
-        CONSTANT_VALUE("Constant value");
+        CONSTANT_VALUE("Constant value"), DYNAMIC_VALUE("Dynamic value");
         private final String description;
 
         TypOfJsonContent(String s) {

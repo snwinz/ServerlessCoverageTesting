@@ -35,7 +35,7 @@ public class ParentKeyInput extends GeneralInput {
 
         var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).toList();
 
-        var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue))
+        var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue) && !(a instanceof DynamicValue) )
                 .map(child -> child.getJsonFormat(generalInputs)).collect(Collectors.joining(","));
         if (this.getJsonSavedAsString()) {
             allKeyValueChildren = allKeyValueChildren.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"");
@@ -53,7 +53,7 @@ public class ParentKeyInput extends GeneralInput {
             return "";
         } else {
             var children = generalInputs.stream().filter(entry -> this.getEntryID().equals(entry.getParentId())).toList();
-            var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue))
+            var allKeyValueChildren = children.stream().filter(a -> !(a instanceof ConstantValue) && !(a instanceof DynamicValue) )
                     .map(child -> child.getJsonWithData(generalInputs)).filter(entry -> !"".equals(entry)).collect(Collectors.joining(","));
             if (this.getJsonSavedAsString()) {
                 allKeyValueChildren = allKeyValueChildren.replaceAll("\\\\", "\\\\\\\\");
