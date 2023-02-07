@@ -48,6 +48,10 @@ public class FunctionInputFormat {
                 typedInputs.add(new IntegerInput(generalInput));
                 continue;
             }
+            if (generalInput.getKey() == null && generalInput.getDynamicValue() != null) {
+                typedInputs.add(new DynamicValue(generalInput));
+                continue;
+            }
             if (generalInput.getDynamicValue() != null) {
                 typedInputs.add(new DynamicKeyValue(generalInput));
                 continue;

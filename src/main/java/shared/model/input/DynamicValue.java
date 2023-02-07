@@ -17,7 +17,7 @@ public class DynamicValue extends GeneralInput {
 
     public DynamicValue(GeneralInput generalInput) {
         super(generalInput.getKey());
-        this.setDynamicValue(generalInput.getConstantValue());
+        this.setDynamicValue(generalInput.getDynamicValue());
         this.setParentId(generalInput.getParentId());
         this.setEntryID(generalInput.getEntryID());
     }
