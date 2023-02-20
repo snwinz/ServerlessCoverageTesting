@@ -2,6 +2,7 @@ package gui.controller.criteriaSelection;
 
 import gui.controller.DynamicTCSelectionController;
 import gui.model.Graph;
+import gui.view.SelectionDialogueOfTestTargets;
 import gui.view.criteriaSelection.CriteriaSelectionView;
 import logic.model.TestSuiteOfTargets;
 import logic.testcasegenerator.TestCaseGenerator;
@@ -57,8 +58,14 @@ public class CriteriaSelectionDynamicTestCaseController implements CriteriaSelec
             TestSuiteOfTargets testSuiteOfTargetsAllUse = tcGenerator.getAllUsesCoverage(modelAsJson);
             testSuiteOfTargets.add(testSuiteOfTargetsAllUse.getTestTargets());
         }
+
+        SelectionDialogueOfTestTargets dialogueOfTestTargets = new SelectionDialogueOfTestTargets(testSuiteOfTargets, this);
+        dialogueOfTestTargets.show();
+    }
+
+    public void showTestSuites(TestSuiteOfTargets selectedTestSuiteOfTargets) {
         DynamicTCSelectionController controller = new DynamicTCSelectionController();
-        controller.setup(testSuiteOfTargets);
+        controller.setup(selectedTestSuiteOfTargets);
         view.close();
     }
 }

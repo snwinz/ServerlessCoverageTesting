@@ -49,8 +49,12 @@ public class TestSuiteOfTargets {
         return testTargets;
     }
 
-    public void add(List<? extends CoverageTarget> coverageTarget) {
-        testTargets.addAll(coverageTarget);
+    public void add(List<? extends CoverageTarget> coverageTargets) {
+        testTargets.addAll(coverageTargets);
+    }
+
+    public void add(CoverageTarget coverageTarget) {
+        testTargets.add(coverageTarget);
     }
 
     public void calculateOracleNodes(LogicGraph logicGraph) {

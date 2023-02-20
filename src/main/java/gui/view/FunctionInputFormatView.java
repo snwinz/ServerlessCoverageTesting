@@ -153,12 +153,7 @@ public class FunctionInputFormatView extends Stage {
                     addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
                     boxForInput.getChildren().remove(addStringInputJSON);
                     break;
-                case CONSTANT_VALUE:
-                    nodeOfKeyControl.getChildren().add(0, addStringInputKey);
-                    addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
-                    boxForInput.getChildren().remove(addStringInputJSON);
-                    break;
-                case DYNAMIC_VALUE:
+                case CONSTANT_VALUE, DYNAMIC_VALUE:
                     nodeOfKeyControl.getChildren().add(0, addStringInputKey);
                     addStringInputJSON.setPromptText("regex, e.g. \"[a-zA-Z0-9]*\" for any String with common characters");
                     boxForInput.getChildren().remove(addStringInputJSON);
