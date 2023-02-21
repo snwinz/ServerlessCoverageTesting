@@ -1,10 +1,14 @@
 package gui.view.wrapper;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ExecutionSettings {
 
 
     private final String resetFunctionName;
     private final String region;
+    private final Set<String> authKeys;
 
 
     private int numberOfTries = 1;
@@ -18,9 +22,10 @@ public class ExecutionSettings {
     private double probRandomOutputAsValue;
     private double probSameValueEverywhere;
 
-    public ExecutionSettings(String region, String resetFunctionName) {
+    public ExecutionSettings(String region, String resetFunctionName, Set<String> authKeys) {
         this.region = region;
         this.resetFunctionName = resetFunctionName;
+        this.authKeys = authKeys;
     }
 
 
@@ -94,5 +99,13 @@ public class ExecutionSettings {
 
     public String getRegion() {
         return region;
+    }
+
+    public Set<String> getAuthKeys() {
+        return authKeys;
+    }
+
+    public ExecutionSettings getSimilarSettings() {
+        return new ExecutionSettings(this.region, this.resetFunctionName, new HashSet<>(authKeys));
     }
 }

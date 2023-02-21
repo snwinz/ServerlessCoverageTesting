@@ -5,6 +5,7 @@ import gui.model.TestcasesContainer;
 import gui.view.ExecutionView;
 import gui.view.StandardPresentationView;
 import gui.view.wrapper.TestcaseWrapper;
+import javafx.beans.property.StringProperty;
 import javafx.stage.FileChooser;
 import logic.evaluation.TestcaseEvaluator;
 import logic.executionplatforms.AWSInvoker;
@@ -74,9 +75,9 @@ public class TestCaseExecutionController {
         thread.start();
     }
 
-    public void executeTC(TestcaseWrapper testcase, String region) {
+    public void executeTC(TestcaseWrapper testcase, String region, String potentialToken) {
         TestcaseExecutor tcExecutor = new TestcaseExecutor(region);
-        var thread = new Thread(() -> tcExecutor.executeTC(testcase));
+        var thread = new Thread(() -> tcExecutor.executeTC(testcase, potentialToken));
         thread.start();
 
     }
@@ -98,9 +99,9 @@ public class TestCaseExecutionController {
         executor.deleteOldLogs();
     }
 
-    public void resetApplication(String resetFunction, String region) {
+    public void resetApplication(String resetFunction, String region, StringProperty potentialToken) {
         Executor executor = new AWSInvoker(region);
-        executor.resetApplication(resetFunction);
+        potentialToken.setValue(executor.resetApplication(resetFunction));
     }
 
     public void getLogsOnPlatform(String region) {

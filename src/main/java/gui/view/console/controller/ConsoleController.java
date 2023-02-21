@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -71,7 +72,7 @@ public class ConsoleController {
     record TestSuiteInfo(List<Testcase> testcase, Path path) {
     }
 
-    public void calibrateFolder(Path pathOfTestSuites, String region, String resetFunction) {
+    public void calibrateFolder(Path pathOfTestSuites, String region, String resetFunction, Set<String> authKeys) {
         BlockingQueue<TestSuiteInfo> testSuitesToExecute = getTestSuites(pathOfTestSuites);
         String[] regions = getRegions(region);
         for (var regionForExecutor : regions) {
@@ -134,8 +135,8 @@ public class ConsoleController {
                     if (testSuiteInfo != null) {
                         var testcases = testSuiteInfo.testcase;
                         for (var testcase : testcases) {
-
-                            var res = tcExecutor.executeTC(testcase);
+                            String potentialAuthentication = tcExecutor.resetApplication(resetFunction);
+                            var res = tcExecutor.executeTC(testcase, potentialAuthentication);
                             if (res.isPresent()) {
                                 res.ifPresent((t) -> System.out.printf("TestSuite of %s is not correct%nFailure: %s%nTestcase:%n %s%n%n",
                                         testSuiteInfo.path.toString(), t, testcase));
@@ -180,11 +181,11 @@ public class ConsoleController {
             Runnable runnable = () -> {
                 TestcaseExecutor tcExecutor = new TestcaseExecutor(regionForExecutor);
                 while (!testcasesToExecute.isEmpty()) {
-                    tcExecutor.resetApplication(resetFunction);
+                    String potentialAuthentication = tcExecutor.resetApplication(resetFunction);
                     var testcaseInfo = testcasesToExecute.poll();
                     if (testcaseInfo != null) {
                         var testcase = Objects.requireNonNull(testcaseInfo).testcase();
-                        var res = tcExecutor.executeTC(testcase);
+                        var res = tcExecutor.executeTC(testcase, potentialAuthentication);
                         res.ifPresent((t) -> System.out.printf("TestSuite of %s is not correct%nFailure: %s%nTestcase:%n %s%n%n",
                                 testcaseInfo.path.toString(), t, testcaseInfo.testcase));
                     }

@@ -1,10 +1,10 @@
 package logic.dynamicdatageneration;
 
 import gui.view.wrapper.ExecutionSettings;
-import logic.executionplatforms.AWSInvoker;
-import logic.executionplatforms.Executor;
 import logic.dynamicdatageneration.testrun.FunctionWithInputData;
 import logic.dynamicdatageneration.testrun.TestData;
+import logic.executionplatforms.AWSInvoker;
+import logic.executionplatforms.Executor;
 import logic.model.Testcase;
 
 import java.util.List;
@@ -35,8 +35,8 @@ public class TestcaseSimulator {
 
         for (int actualRun = 1; actualRun <= maximalNumberOfTries; actualRun++) {
             try {
-                resetApplication();
-                executeFunctions(testcase, testDataCreated, actualRun);
+                var potentialAuth = resetApplication();
+                executeFunctions(testcase, testDataCreated, actualRun, potentialAuth);
                 var logList = executor.getAllNewLogs(0L);
                 LOGGER.info("Logs for Call of run " + actualRun + ":\n" + String.join("\n", logList));
                 List<String> specificTargetsToBeCovered = getAllTestTargets(testcase);
@@ -70,8 +70,8 @@ public class TestcaseSimulator {
         return Optional.empty();
     }
 
-    public void resetApplication() {
-        executor.resetApplication(resetFunctionName);
+    public String resetApplication() {
+        return executor.resetApplication(resetFunctionName);
     }
 
     private List<String> getAllTestTargets(Testcase testcase) {
@@ -96,11 +96,13 @@ public class TestcaseSimulator {
         return allTestTargetsCovered;
     }
 
-    private void executeFunctions(Testcase testcase, TestData testData, int actualRun) {
+    private void executeFunctions(Testcase testcase, TestData testData, int actualRun, String potentialAuth) {
         String runInfo = String.format("run #%d:%n", actualRun);
         testcase.writeToOutput(runInfo);
         testData.resetOutputData();
         testData.resetInputData();
+        testData.resetAuthValues();
+        testData.setGeneralAuthenticationValue(potentialAuth);
         testData.checkToUseSameValues();
         for (var function : testData.getTestFunctions()) {
             function.changeData(testData);
@@ -115,8 +117,8 @@ public class TestcaseSimulator {
         String invocation = String.format("invoke function '%s' with json '%s'", functionName, jsonData);
         LOGGER.info(invocation);
         testcase.addTextToWriteOutput(invocation);
-        String result = executor.invokeFunction(functionName, jsonData, testData.getOutputValues());
-        testData.addResultToOutput(result);
+        String result = executor.invokeFunction(functionName, jsonData, testData.getOutputValues(), testData.getAuthValues());
+        testData.addResultToOutputAndAuth(result);
         String resultFormatted = String.format("result: %s", result);
         LOGGER.info(resultFormatted);
         testcase.addTextToWriteOutput(resultFormatted);
@@ -161,13 +163,14 @@ public class TestcaseSimulator {
     public void executeSingleTestCase(Testcase testcase) {
 
         testcase.resetCoverageIndicator();
-        resetApplication();
+        var potentialAuthentication = resetApplication();
 
         TestData testDataCreated = testcase.getTestData() == null ? testcase.getTestTargetData() : testcase.getTestData();
         if (testDataCreated == null) {
             testcase.writeToOutput("no test data created yet");
             return;
         }
+        testDataCreated.setGeneralAuthenticationValue(potentialAuthentication);
         executeFunctionsWithOldData(testcase, testDataCreated);
         var logList = executor.getAllNewLogs(0L);
         LOGGER.info("Logs for Call of run reexecution:\n" + String.join("\n", logList));

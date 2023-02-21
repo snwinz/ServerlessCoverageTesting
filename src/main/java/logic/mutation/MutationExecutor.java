@@ -123,11 +123,11 @@ public class MutationExecutor {
         var executor = tcExecutor.getExecutor();
         var testcases = testSuite.getTestcases();
         for (Testcase testcase : testcases) {
-            executor.resetApplication(resetFunction);
-            if (tcExecutor.executeTC(testcase).isPresent()) {
+            String potentialAuthentication = executor.resetApplication(resetFunction);
+            if (tcExecutor.executeTC(testcase, potentialAuthentication).isPresent()) {
                 //repeat if testcase does not cover
-                executor.resetApplication(resetFunction);
-                var partNotCoveredInformation = tcExecutor.executeTC(testcase);
+                potentialAuthentication = tcExecutor.resetApplication(resetFunction);
+                var partNotCoveredInformation = tcExecutor.executeTC(testcase, potentialAuthentication);
                 if (partNotCoveredInformation.isPresent()) {
                     missingParts.append(killCounter++).append(":\n").append(partNotCoveredInformation.get()).append("\n");
                     var tcNumber = testSuite.getTestcases().indexOf(testcase);

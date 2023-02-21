@@ -54,8 +54,7 @@ public class FunctionWithInputData {
         StringBuilder result = new StringBuilder();
 
         result.append('{');
-        var rootEntry = generalInputData.stream().filter(item -> item.getParentId() == null && !item.isUndefined())
-                .map(item -> item.getJsonWithData(generalInputData)).collect(Collectors.joining(","));
+        var rootEntry = generalInputData.stream().filter(item -> item.getParentId() == null && !item.isUndefined()).map(item -> item.getJsonWithData(generalInputData)).collect(Collectors.joining(","));
         result.append(rootEntry);
         result.append('}');
 
@@ -96,27 +95,27 @@ public class FunctionWithInputData {
                 continue;
             }
             if (inputData instanceof DynamicKeyValue || inputData instanceof IntegerInput) {
+
                 double decisionRandomInputAsValue = decisionEntryUndefined - testData.getProbEntryUndefined();
                 double decisionSimilarInputAsValue = decisionRandomInputAsValue - testData.getProbRandomInputAsValue();
                 double decisionRandomOutputAsValue = decisionSimilarInputAsValue - testData.getProbSimilarInputAsValue();
                 double decisionSimilarOutputAsValue = decisionRandomOutputAsValue - testData.getProbRandomOutputAsValue();
 
-                if (decisionRandomInputAsValue < testData.getProbRandomInputAsValue()) {
-                    var inputValues = testData.getInputValues().values().stream()
-                            .flatMap(Collection::stream).collect(Collectors.toList());
+                if (testData.containsAuthKey(inputData.getKey())) {
+                    setRandomEntryOfOutputAsAuthValue(inputData, testData.getAuthValues());
+
+                } else if (decisionRandomInputAsValue < testData.getProbRandomInputAsValue()) {
+                    var inputValues = testData.getInputValues().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
                     setRandomEntryOfListAsValue(inputData, inputValues);
                 } else if (decisionSimilarInputAsValue < testData.getProbSimilarInputAsValue()) {
                     var inputValues = testData.getInputValues().get(inputData.getKey());
                     setRandomEntryOfListAsValue(inputData, inputValues);
                 } else if (decisionRandomOutputAsValue < testData.getProbRandomOutputAsValue()) {
-                    var inputValues = testData.getOutputValues().entrySet().stream().map(
-                            this::createPairs).flatMap(List::stream).collect(Collectors.toList());
-                    setRandomEntryOfOutputAsValue(inputData, inputValues);
+                    var outputValues = testData.getOutputValues().entrySet().stream().map(this::createPairs).flatMap(List::stream).collect(Collectors.toList());
+                    setRandomEntryOfOutputAsValue(inputData, outputValues);
                 } else if (decisionSimilarOutputAsValue < testData.getProbSimilarOutputAsValue()) {
-                    var inputValues = testData.getOutputValues().entrySet().stream()
-                            .filter(entry -> entry.getKey().equals(inputData.getKey()))
-                            .map(this::createPairs).flatMap(List::stream).collect(Collectors.toList());
-                    setRandomEntryOfOutputAsValue(inputData, inputValues);
+                    var outputValues = testData.getOutputValues().entrySet().stream().filter(entry -> entry.getKey().equals(inputData.getKey())).map(this::createPairs).flatMap(List::stream).collect(Collectors.toList());
+                    setRandomEntryOfOutputAsValue(inputData, outputValues);
                 }
             }
         }
@@ -135,10 +134,19 @@ public class FunctionWithInputData {
         return result;
     }
 
-    private void setRandomEntryOfOutputAsValue(GeneralInput inputData, List<Pair> inputValues) {
-        if (inputValues != null && inputValues.size() > 0) {
-            var item = getRandomItem(inputValues);
+    private void setRandomEntryOfOutputAsValue(GeneralInput inputData, List<Pair> outputValues) {
+        if (outputValues != null && outputValues.size() > 0) {
+            var item = getRandomItem(outputValues);
             var inputText = String.format(PREVIOUSOUTPUT_PREFIX + "%s" + SEPARATOR + "%s" + PREVIOUSOUTPUT_SUFFIX, item.key(), item.occurrence());
+            inputData.setGeneratedValue(inputText);
+        }
+
+    }
+
+    private void setRandomEntryOfOutputAsAuthValue(GeneralInput inputData, List<String> authValues) {
+        if (authValues != null && authValues.size() > 0) {
+            var item = getRandomItem(authValues);
+            var inputText = String.format(AUTH_PREFIX + "%s" + AUTH_SUFFIX, authValues.indexOf(item));
             inputData.setGeneratedValue(inputText);
         }
 

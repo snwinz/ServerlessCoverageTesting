@@ -7,7 +7,8 @@ import org.apache.commons.cli.*;
 import shared.model.NodeType;
 
 import java.nio.file.Path;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Console {
 
@@ -28,6 +29,7 @@ public class Console {
     private final String OUTPUT_OPTION = "o";
     private final String GRAPH_OPTION = "g";
     private final String RESET_FUNCTION_OPTION = "rf";
+    private final String AUTH_VALUES_OPTION = "av";
     private final String REGION_OPTION = "re";
     private final String START_NUMBER_OPTION = "s";
     private final String END_NUMBER_OPTION = "e";
@@ -70,7 +72,14 @@ public class Console {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
-                controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction);
+                Set<String> authKeys = new HashSet<>();
+                if (cmd.hasOption(AUTH_VALUES_OPTION)) {
+                    String authValuesUnparsed = cmd.getOptionValue(AUTH_VALUES_OPTION);
+                    var authKeysArray = authValuesUnparsed.split(",");
+                    authKeys = Arrays.stream(authKeysArray).collect(Collectors.toSet());
+                }
+
+                controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction, authKeys);
             } else if (areAllArgumentsAvailableForReCalibration(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);

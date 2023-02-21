@@ -22,6 +22,9 @@ public class TestData {
     private final Map<String, List<String>> inputValues = new HashMap<>();
 
     private final Map<String, List<String>> outputValues = new HashMap<>();
+    private final Set<String> authKeys;
+    private final List<String> authValues = new ArrayList<>();
+
     final List<FunctionWithInputData> testFunctions = new ArrayList<>();
     private static final Random rn = new Random();
 
@@ -38,6 +41,7 @@ public class TestData {
         this.probSimilarOutputAsValue = executionSettings.getProbSimilarOutputAsValue();
         this.probRandomOutputAsValue = executionSettings.getProbRandomOutputAsValue();
         this.probSameValueEverywhere = executionSettings.getProbSameValueEverywhere();
+        this.authKeys = executionSettings.getAuthKeys();
         for (var function : functions) {
             this.addFunction(function);
         }
@@ -70,6 +74,10 @@ public class TestData {
 
     public void resetInputData() {
         this.inputValues.clear();
+    }
+
+    public void resetAuthValues() {
+        this.authValues.clear();
     }
 
     public Map<String, List<String>> getInputValues() {
@@ -132,9 +140,15 @@ public class TestData {
         inputValues.put(key, valueList);
     }
 
-    public void addResultToOutput(String result) {
+    public void addResultToOutputAndAuth(String result) {
         KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(result);
         var outputKeyValues = keyValueJsonGenerator.getKeyValues();
+        for (var authKey : authKeys) {
+            if (outputKeyValues.containsKey(authKey)) {
+                authValues.addAll(outputKeyValues.get(authKey));
+                outputKeyValues.remove(authKey);
+            }
+        }
         outputValues.putAll(outputKeyValues);
     }
 
@@ -147,7 +161,7 @@ public class TestData {
         return result.toString();
     }
 
-    public String getExecutableDataAsText(){
+    public String getExecutableDataAsText() {
         StringBuilder result = new StringBuilder();
         for (var testFunction : testFunctions) {
             result.append(testFunction.getName()).append(" ");
@@ -183,5 +197,28 @@ public class TestData {
         }
 
 
+    }
+
+    public void setGeneralAuthenticationValue(String potentialAuthentication) {
+        authValues.clear();
+        KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(potentialAuthentication);
+        var outputKeyValues = keyValueJsonGenerator.getKeyValues();
+        for (var authKey : authKeys) {
+            if (outputKeyValues.containsKey(authKey)) {
+                authValues.addAll(outputKeyValues.get(authKey));
+            }
+        }
+    }
+
+    public boolean containsAuthKey(String key) {
+        return authKeys.contains(key);
+    }
+
+    public List<String> getAuthValues() {
+        return List.copyOf(authValues);
+    }
+
+    public Set<String> getAuthKeys() {
+        return Set.copyOf(authKeys);
     }
 }

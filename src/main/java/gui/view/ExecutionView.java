@@ -4,6 +4,8 @@ import gui.controller.TestCaseExecutionController;
 import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
 import gui.view.wrapper.TestcaseWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -22,10 +24,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -38,6 +37,7 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
     private final List<CheckboxWrapper<TestcaseWrapper>> selectedTestcases = new ArrayList<>();
     private final CheckBox keepLogsCheckbox = new CheckBox("save logs");
     private Path path;
+    private final StringProperty potentialToken = new SimpleStringProperty("");
 
     public ExecutionView(TestCaseExecutionController controller, List<Testcase> testcases, Graph graph, Path path) {
         this.controller = controller;
@@ -90,7 +90,7 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
         var resetApplication = new Button("reset application");
         startResetButton.setOnAction(e -> controller.executeReset(resetFunctionName.getText(), regionAWS.getText()));
         deleteLog.setOnAction(e -> controller.deleteLogs(regionAWS.getText()));
-        resetApplication.setOnAction(e -> controller.resetApplication(resetFunctionName.getText(), regionAWS.getText()));
+        resetApplication.setOnAction(e -> controller.resetApplication(resetFunctionName.getText(), regionAWS.getText(),potentialToken));
         ViewHelper.addToGridInHBox(grid, regionLabel, regionAWS, resetLabel, resetFunctionName, keepLogsCheckbox, startResetButton, deleteLog, resetApplication);
 
         Label operationsLabel = new Label("Operations:");
@@ -137,7 +137,7 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
                 testcase.setSaveLogs(keepLogsCheckbox.isSelected());
                 testcases.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
                 testcase.reset();
-                controller.executeTC(testcase, regionAWS.getText());
+                controller.executeTC(testcase, regionAWS.getText(), potentialToken.getValue());
             });
             calibrateTC.setOnAction(e -> {
                 testcase.reset();
@@ -375,7 +375,8 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
         saveTCs.setOnAction(event -> {
             var testcasesOriginal = testcases.stream().map(TestcaseWrapper::getTestcase).toList();
             controller.saveTestcases(testcasesOriginal, this.path);
-        });saveTCsAs.setOnAction(event -> {
+        });
+        saveTCsAs.setOnAction(event -> {
             var testcasesOriginal = testcases.stream().map(TestcaseWrapper::getTestcase).toList();
             controller.saveTestcasesAs(testcasesOriginal);
         });
@@ -385,7 +386,7 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
             controller.saveTestcasesAs(selectedTestcasesToSave);
         });
 
-        file.getItems().addAll(saveTCs,saveTCsAs, saveSelectedTCsAs);
+        file.getItems().addAll(saveTCs, saveTCsAs, saveSelectedTCsAs);
         menuBar.getMenus().addAll(file);
         return menuBar;
     }

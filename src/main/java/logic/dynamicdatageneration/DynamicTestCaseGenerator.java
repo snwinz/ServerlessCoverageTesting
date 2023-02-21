@@ -58,23 +58,23 @@ public class DynamicTestCaseGenerator {
     private List<ExecutionSettings> getSettings(ExecutionSettings executionSettings) {
         List<ExecutionSettings> settings = new ArrayList<>();
 
-        ExecutionSettings allValuesSame = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        ExecutionSettings allValuesSame = executionSettings.getSimilarSettings();
         allValuesSame.setProbSameValueEverywhere(1.0);
         settings.add(allValuesSame);
 
-        ExecutionSettings similarInputAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        ExecutionSettings similarInputAsValue = executionSettings.getSimilarSettings();
         similarInputAsValue.setProbSimilarInputAsValue(1.0);
         settings.add(similarInputAsValue);
 
-        ExecutionSettings similarOutputAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        ExecutionSettings similarOutputAsValue = executionSettings.getSimilarSettings();
         similarOutputAsValue.setProbSimilarOutputAsValue(1.0);
         settings.add(similarOutputAsValue);
 
-        ExecutionSettings randomInputAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        ExecutionSettings randomInputAsValue =executionSettings.getSimilarSettings();
         randomInputAsValue.setProbRandomInputAsValue(1.0);
         settings.add(randomInputAsValue);
 
-        ExecutionSettings randomOutAsValue = new ExecutionSettings(executionSettings.getRegion(), executionSettings.getRegion());
+        ExecutionSettings randomOutAsValue = executionSettings.getSimilarSettings();
         randomOutAsValue.setProbRandomOutputAsValue(1.0);
         settings.add(randomOutAsValue);
 

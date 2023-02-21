@@ -22,9 +22,12 @@ public class TestcaseExecutor {
         this.executor = new AWSInvoker(region);
     }
 
-    public void executeTC(TestcaseWrapper testcase) {
+    public void executeTC(TestcaseWrapper testcase, String potentialAuthentication) {
         var functions = testcase.getFunctionsWrapped();
+        var originalTestcase = testcase.getTestcase();
+
         final Map<String, List<String>> outputValues = new HashMap<>();
+        final List<String> authValues = getAuthValues(originalTestcase.getAuthKeys(), potentialAuthentication);
         for (var function : functions) {
             var originalFunction = function.getFunction();
             String functionName = originalFunction.getName();
@@ -33,13 +36,13 @@ public class TestcaseExecutor {
             String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
             LOGGER.info(invocation);
 
-            String result = executor.invokeFunction(functionName, jsonData, outputValues);
+            String result = executor.invokeFunction(functionName, jsonData, outputValues, authValues);
 
 
             checkCorrectnessOfOutput(result, function, outputValues);
 
 
-            addResultToOutputValues(result, outputValues);
+            addResultToOutputValues(result, outputValues, originalTestcase.getAuthKeys(), authValues);
 
             String resultFormatted = String.format("result: %s", result);
 
@@ -50,18 +53,19 @@ public class TestcaseExecutor {
     }
 
 
-    public Optional<String> executeTC(Testcase testcase) {
+    public Optional<String> executeTC(Testcase testcase, String potentialAuthentication) {
         var functions = testcase.getFunctions();
         final Map<String, List<String>> outputValues = new HashMap<>();
+        final List<String> authValues = getAuthValues(testcase.getAuthKeys(), potentialAuthentication);
         for (var function : functions) {
             String functionName = function.getName();
             String jsonData = function.getParameter();
-            String result = executor.invokeFunction(functionName, jsonData, outputValues);
+            String result = executor.invokeFunction(functionName, jsonData, outputValues, authValues);
             var partNotCovered = getExecutionResultNotCovered(result, function, outputValues);
             if (partNotCovered.isPresent()) {
                 return partNotCovered;
             }
-            addResultToOutputValues(result, outputValues);
+            addResultToOutputValues(result, outputValues, testcase.getAuthKeys(), authValues);
         }
         return getLogPartNotCovered(testcase);
     }
@@ -96,14 +100,14 @@ public class TestcaseExecutor {
 
     public void executeTCs(List<TestcaseWrapper> testcases, String resetFunction) {
         for (var testcase : testcases) {
-            resetApplication(resetFunction);
-            this.executeTC(testcase);
+            String result = resetApplication(resetFunction);
+            this.executeTC(testcase, result);
         }
     }
 
-    public void resetApplication(String resetFunction) {
+    public String resetApplication(String resetFunction) {
         executor.deleteOldLogs();
-        executor.callResetFunction(resetFunction);
+        return executor.callResetFunction(resetFunction);
     }
 
 
@@ -253,9 +257,15 @@ public class TestcaseExecutor {
         return Optional.empty();
     }
 
-    private void addResultToOutputValues(String result, Map<String, List<String>> outputValues) {
+    private void addResultToOutputValues(String result, Map<String, List<String>> outputValues, Set<String> authKeys, List<String> authValues) {
         KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(result);
         var generatedKeyValues = keyValueJsonGenerator.getKeyValues();
+        for (var authKey : authKeys) {
+            if (generatedKeyValues.containsKey(authKey)) {
+                authValues.addAll(generatedKeyValues.get(authKey));
+                generatedKeyValues.remove(authKey);
+            }
+        }
         for (var entry : generatedKeyValues.entrySet()) {
             var generatedKey = entry.getKey();
             var generatedValues = entry.getValue();
@@ -277,12 +287,13 @@ public class TestcaseExecutor {
     }
 
     public void calibrate(TestcaseWrapper testcase, String resetFunction) {
+        var originalTestcase = testcase.getTestcase();
         executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
-        List<String> resultsFirstExecution = executeWrappedFunctions(functions);
+        List<String> resultsFirstExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys());
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
         executor.resetApplication(resetFunction);
-        List<String> resultsSecondExecution = executeWrappedFunctions(functions);
+        List<String> resultsSecondExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys());
         List<String> resultsSecondExecutionLogs = executor.getAllNewLogs(0L);
         calibrateWrappedFunctions(functions, resultsFirstExecution, resultsSecondExecution);
         resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
@@ -291,12 +302,12 @@ public class TestcaseExecutor {
     }
 
     public void calibrate(Testcase testcase, String resetFunction) {
-        executor.resetApplication(resetFunction);
+        var potentialAuthentication = executor.resetApplication(resetFunction);
         var functions = testcase.getFunctions();
-        List<String> resultsFirstExecution = executeFunctions(functions);
+        List<String> resultsFirstExecution = executeFunctions(functions, testcase.getAuthKeys(), potentialAuthentication);
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
         executor.resetApplication(resetFunction);
-        List<String> resultsSecondExecution = executeFunctions(functions);
+        List<String> resultsSecondExecution = executeFunctions(functions, testcase.getAuthKeys(), potentialAuthentication);
         List<String> resultsSecondExecutionLogs = executor.getAllNewLogs(0L);
         calibrateFunctions(functions, resultsFirstExecution, resultsSecondExecution);
         resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
@@ -306,9 +317,9 @@ public class TestcaseExecutor {
 
 
     public void recalibrate(Testcase testcase, String resetFunction) {
-        executor.resetApplication(resetFunction);
+        var potentialAuthentication = executor.resetApplication(resetFunction);
         var functions = testcase.getFunctions();
-        List<String> resultsFirstExecution = executeFunctions(functions);
+        List<String> resultsFirstExecution = executeFunctions(functions, testcase.getAuthKeys(), potentialAuthentication);
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
         List<String> oldResults = functions.stream().map(Function::getExpectedOutputs)
                 .map(entry -> String.join("", entry)).toList();
@@ -322,7 +333,8 @@ public class TestcaseExecutor {
     public void recalibrate(TestcaseWrapper testcase, String resetFunction) {
         executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
-        List<String> resultsFirstExecution = executeWrappedFunctions(functions);
+        var originalTestcase = testcase.getTestcase();
+        List<String> resultsFirstExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys());
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
         List<String> oldResults = functions.stream().map(FunctionWrapper::getFunction).map(Function::getExpectedOutputs)
                 .map(entry -> String.join("", entry)).toList();
@@ -435,9 +447,10 @@ public class TestcaseExecutor {
         return result;
     }
 
-    private List<String> executeWrappedFunctions(List<FunctionWrapper> functions) {
+    private List<String> executeWrappedFunctions(List<FunctionWrapper> functions, Set<String> authKeys) {
         var results = new ArrayList<String>();
         final Map<String, List<String>> outputValues = new HashMap<>();
+        final List<String> authValues = new ArrayList<>();
         for (var function : functions) {
             var originalFunction = function.getFunction();
             String functionName = originalFunction.getName();
@@ -445,10 +458,10 @@ public class TestcaseExecutor {
             String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
             LOGGER.info(invocation);
             function.addTextToOutput(invocation);
-            String result = executor.invokeFunction(functionName, jsonData, outputValues);
+            String result = executor.invokeFunction(functionName, jsonData, outputValues, authValues);
             System.out.println(result);
             String resultWithParameters = replaceResultsOfPreviousOutput(result, outputValues);
-            addResultToOutputValues(result, outputValues);
+            addResultToOutputValues(result, outputValues, authKeys, authValues);
             String resultInfoMessage = String.format("result: %s", resultWithParameters);
             function.addTextToOutput(resultInfoMessage);
             LOGGER.info(String.format(resultInfoMessage));
@@ -457,7 +470,8 @@ public class TestcaseExecutor {
         return results;
     }
 
-    private List<String> executeFunctions(List<Function> functions) {
+    private List<String> executeFunctions(List<Function> functions, Set<String> authKeys, String potentialAuthJson) {
+        final List<String> authValues = getAuthValues(authKeys, potentialAuthJson);
         var results = new ArrayList<String>();
         final Map<String, List<String>> outputValues = new HashMap<>();
         for (var function : functions) {
@@ -465,15 +479,29 @@ public class TestcaseExecutor {
             String jsonData = function.getParameter();
             String invocation = String.format("invoke function '%s' with parameter '%s'", functionName, jsonData);
             LOGGER.info(invocation);
-            String result = executor.invokeFunction(functionName, jsonData, outputValues);
+            String result = executor.invokeFunction(functionName, jsonData, outputValues, authValues);
             System.out.println(result);
             String resultWithParameters = replaceResultsOfPreviousOutput(result, outputValues);
-            addResultToOutputValues(result, outputValues);
+            addResultToOutputValues(result, outputValues, authKeys, authValues);
             String resultInfoMessage = String.format("result: %s", resultWithParameters);
             LOGGER.info(String.format(resultInfoMessage));
             results.add(resultWithParameters);
         }
         return results;
+    }
+
+    private static List<String> getAuthValues(Set<String> authKeys, String potentialAuthJson) {
+        final List<String> authValues = new ArrayList<>();
+        if (potentialAuthJson != null) {
+            KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(potentialAuthJson);
+            var outputKeyValues = keyValueJsonGenerator.getKeyValues();
+            for (var authKey : authKeys) {
+                if (outputKeyValues.containsKey(authKey)) {
+                    authValues.addAll(outputKeyValues.get(authKey));
+                }
+            }
+        }
+        return authValues;
     }
 
 

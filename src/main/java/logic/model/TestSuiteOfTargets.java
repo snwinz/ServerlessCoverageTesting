@@ -172,6 +172,8 @@ public class TestSuiteOfTargets {
         var logsToCoverForExecution = testcase.getLogsToCover();
         String targetForExecution = target.getCoverageTargetDescription();
         var testcaseForExecution = new Testcase(functionsForExecution, logsToCoverForExecution, targetForExecution);
+        var authKeys = testData.getAuthKeys();
+        testcaseForExecution.addAuthKeys(authKeys);
         testcaseForExecution.setManualCreated(false);
         result.add(testcaseForExecution);
     }

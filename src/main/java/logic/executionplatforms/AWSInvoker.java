@@ -24,12 +24,12 @@ public class AWSInvoker implements Executor {
 
 
     @Override
-    public String invokeFunction(String functionName, String json, Map<String, List<String>> outputValues) {
+    public String invokeFunction(String functionName, String json, Map<String, List<String>> outputValues, List<String> authValues) {
         InvokeRequest invokeRequest = new InvokeRequest()
                 .withFunctionName(functionName);
         json = json.replaceAll("'", "\"");
-
         json = setOutputsOfPreviousFunctions(json, outputValues);
+        json = setAuth(json, authValues);
         json = applyBase64(json);
 
         invokeRequest.setPayload(json);
@@ -41,6 +41,21 @@ public class AWSInvoker implements Executor {
             Thread.currentThread().interrupt();
         }
         return new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
+    }
+
+    private String setAuth(String json, List<String> authValues) {
+        while (json.indexOf(AUTH_PREFIX) < json.indexOf(AUTH_SUFFIX) && json.contains(AUTH_PREFIX) && json.contains(AUTH_SUFFIX)) {
+            int authStart = json.indexOf(AUTH_PREFIX);
+            int authEnd = json.indexOf(AUTH_SUFFIX);
+            int numberOfAuthValue = Integer.parseInt(json.substring(authStart + AUTH_PREFIX.length(), authEnd));
+            if (numberOfAuthValue < authValues.size()) {
+                String value = authValues.get(numberOfAuthValue);
+                json = json.substring(0, authStart) + value + json.substring(authEnd + AUTH_SUFFIX.length());
+            } else {
+                break;
+            }
+        }
+        return json;
     }
 
     private String applyBase64(String json) {
@@ -77,7 +92,7 @@ public class AWSInvoker implements Executor {
     private int getOccurrencesOfPreviousContent(String json) {
         int indexStart = json.indexOf(PREVIOUSOUTPUT_PREFIX);
         String content = json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length());
-        int indexSeparator = content.indexOf(SEPARATOR)+indexStart+ PREVIOUSOUTPUT_PREFIX.length();
+        int indexSeparator = content.indexOf(SEPARATOR) + indexStart + PREVIOUSOUTPUT_PREFIX.length();
         int indexEnd = json.indexOf(PREVIOUSOUTPUT_SUFFIX);
         return Integer.parseInt(json.substring(indexSeparator + SEPARATOR.length(), indexEnd));
     }
@@ -85,7 +100,7 @@ public class AWSInvoker implements Executor {
     private String getKeyOfPreviousContent(String json) {
         int indexStart = json.indexOf(PREVIOUSOUTPUT_PREFIX);
         String content = json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length());
-        int indexSeparator = content.indexOf(SEPARATOR)+indexStart+ PREVIOUSOUTPUT_PREFIX.length();
+        int indexSeparator = content.indexOf(SEPARATOR) + indexStart + PREVIOUSOUTPUT_PREFIX.length();
         return json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length(), indexSeparator);
     }
 
@@ -95,7 +110,7 @@ public class AWSInvoker implements Executor {
             return false;
         }
         String content = json.substring(indexStart + PREVIOUSOUTPUT_PREFIX.length());
-        int indexSeparator = content.indexOf(SEPARATOR)+indexStart+ PREVIOUSOUTPUT_PREFIX.length();
+        int indexSeparator = content.indexOf(SEPARATOR) + indexStart + PREVIOUSOUTPUT_PREFIX.length();
         int indexEnd = json.indexOf(PREVIOUSOUTPUT_SUFFIX);
         return indexStart < indexSeparator && indexSeparator < indexEnd;
     }
@@ -151,15 +166,18 @@ public class AWSInvoker implements Executor {
     }
 
     @Override
-    public void resetApplication(String resetFunctionName) {
-        callResetFunction(resetFunctionName);
+    public String resetApplication(String resetFunctionName) {
+        String potentialAuth = callResetFunction(resetFunctionName);
         deleteOldLogs();
+        return potentialAuth;
     }
 
     @Override
-    public void callResetFunction(String resetFunctionName) {
+    public String callResetFunction(String resetFunctionName) {
         if (resetFunctionName != null) {
-            invokeFunction(resetFunctionName, "{}", new HashMap<>());
+            return invokeFunction(resetFunctionName, "{}", new HashMap<>(), new ArrayList<>());
+        } else {
+            return null;
         }
     }
 

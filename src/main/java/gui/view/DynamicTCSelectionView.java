@@ -26,9 +26,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -48,6 +46,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
     private final Spinner<Double> probSameValueEverywhere = new Spinner<>(0, 1, 0.1, 0.01);
     private final TextField resetFunctionName = new TextField();
     private final TextField regionAWS = new TextField();
+    private final TextField authKeys = new TextField();
 
     public DynamicTCSelectionView(TestSuiteOfTargets testSuiteOfTargets, DynamicTCSelectionController controller) {
         this.controller = controller;
@@ -72,7 +71,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         startButton.setOnAction(getActionEventEventHandlerForStartButton());
         cancelButton.setOnAction(e -> controller.closeView());
         createCoverageForAllTargets.setOnAction(e -> {
-            var settings = new ExecutionSettings(regionAWS.getText(), resetFunctionName.getText());
+            var settings = new ExecutionSettings(regionAWS.getText(), resetFunctionName.getText(), getAuthKeys());
             settings.setNumberOfTries(numberOfTries.getValue());
             controller.coverAllTargets(
                     testSuiteOfTargets.getTestTargets(), settings);
@@ -88,7 +87,12 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
         var regionLabel = new Label("AWS region:");
         HBox regionBox = new HBox();
         regionBox.getChildren().addAll(regionLabel, regionAWS);
-        ViewHelper.addToGridInHBox(grid, startButton, cancelButton, createCoverageForAllTargets, resetFunctionBox, regionBox);
+
+        var authLabel = new Label("authentication keys:");
+        HBox authBox = new HBox();
+        authBox.getChildren().addAll(authLabel, authKeys);
+
+        ViewHelper.addToGridInHBox(grid, startButton, cancelButton, createCoverageForAllTargets, resetFunctionBox, regionBox, authBox);
 
 
         Label infoOfTestCaseLabel = new Label("Summary of test case:");
@@ -278,7 +282,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
                     testcasesToBeCreated.add(checkboxWrapper.getEntry());
                 }
             }
-            ExecutionSettings executionSettings = new ExecutionSettings(regionAWS.getText(), resetFunctionName.getText());
+            ExecutionSettings executionSettings = new ExecutionSettings(regionAWS.getText(), resetFunctionName.getText(), getAuthKeys());
             executionSettings.setNumberOfTries(numberOfTries.getValue());
             executionSettings.setProbChangeGoodData(probChangeGoodData.getValue());
             executionSettings.setProbEntryUndefined(probEntryUndefined.getValue());
@@ -314,6 +318,7 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
             properties.setProperty("probSameValueEverywhere", String.valueOf(probSameValueEverywhere.getValue()));
             properties.setProperty("resetFunctionName", resetFunctionName.getText());
             properties.setProperty("regionAWS", regionAWS.getText());
+            properties.setProperty("authKeys", authKeys.getText());
 
             Path path = Path.of(pathOfProperties);
             properties.storeToXML(Files.newOutputStream(path), null);
@@ -365,10 +370,20 @@ public class DynamicTCSelectionView extends Stage implements PropertyChangeListe
 
             String regionAWSText = properties.getProperty("regionAWS");
             regionAWS.setText(regionAWSText);
+
+
+            String authKeysText = properties.getProperty("authKeys");
+            authKeys.setText(authKeysText);
         } catch (IOException | NumberFormatException e) {
             System.err.println("Problem while reading " + pathOfProperties);
             e.printStackTrace();
         }
+    }
+
+    private Set<String> getAuthKeys() {
+        var authText = authKeys.getText();
+        var authKeys = authText.split(",");
+        return Arrays.stream(authKeys).collect(Collectors.toSet());
     }
 
     @Override

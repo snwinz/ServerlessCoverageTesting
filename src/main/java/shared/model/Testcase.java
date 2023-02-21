@@ -1,17 +1,14 @@
 package shared.model;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public final class Testcase {
     private final List<Function> functions;
     private final List<String> coverageLogs;
     private final String target;
     private final List<String> expectedLogs = new ArrayList<>();
+    private final Set<String> authKeys = new HashSet<>();
     private boolean manualCreated = true;
 
     public Testcase(List<Function> functions, List<String> coverageLogs, String target) {
@@ -26,6 +23,14 @@ public final class Testcase {
 
     public List<String> getExpectedLogs() {
         return List.copyOf(expectedLogs);
+    }
+
+    public Set<String> getAuthKeys() {
+        return authKeys;
+    }
+
+    public void addAuthKeys(Set<String> authKeys) {
+        this.authKeys.addAll(authKeys);
     }
 
     public String target() {
@@ -50,10 +55,11 @@ public final class Testcase {
     @Override
     public String toString() {
         return "Testcase{" +
-                "functions=\n" + functions.stream().map(f -> (f.getName() +"\nexpected Result: " + String.join("+++", f.getExpectedOutputs()))).collect(Collectors.joining("\n")) +
-                "\n, coverageLogs=" + coverageLogs +
+                "functions=" + functions +
+                ", coverageLogs=" + coverageLogs +
                 ", target='" + target + '\'' +
                 ", expectedLogs=" + expectedLogs +
+                ", authKeys=" + authKeys +
                 ", manualCreated=" + manualCreated +
                 '}';
     }
