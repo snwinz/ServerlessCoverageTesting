@@ -72,7 +72,7 @@ public class ConsoleController {
     record TestSuiteInfo(List<Testcase> testcase, Path path) {
     }
 
-    public void calibrateFolder(Path pathOfTestSuites, String region, String resetFunction, Set<String> authKeys) {
+    public void calibrateFolder(Path pathOfTestSuites, String region, String resetFunction) {
         BlockingQueue<TestSuiteInfo> testSuitesToExecute = getTestSuites(pathOfTestSuites);
         String[] regions = getRegions(region);
         for (var regionForExecutor : regions) {

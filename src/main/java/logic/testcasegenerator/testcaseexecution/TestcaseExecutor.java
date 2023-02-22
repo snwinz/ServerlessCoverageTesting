@@ -288,12 +288,12 @@ public class TestcaseExecutor {
 
     public void calibrate(TestcaseWrapper testcase, String resetFunction) {
         var originalTestcase = testcase.getTestcase();
-        executor.resetApplication(resetFunction);
+        var potentialAuthentication = executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
-        List<String> resultsFirstExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys());
+        List<String> resultsFirstExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys(), potentialAuthentication);
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
-        executor.resetApplication(resetFunction);
-        List<String> resultsSecondExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys());
+        potentialAuthentication = executor.resetApplication(resetFunction);
+        List<String> resultsSecondExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys(), potentialAuthentication);
         List<String> resultsSecondExecutionLogs = executor.getAllNewLogs(0L);
         calibrateWrappedFunctions(functions, resultsFirstExecution, resultsSecondExecution);
         resultsFirstExecutionLogs = filterLogs(resultsFirstExecutionLogs);
@@ -331,10 +331,10 @@ public class TestcaseExecutor {
 
 
     public void recalibrate(TestcaseWrapper testcase, String resetFunction) {
-        executor.resetApplication(resetFunction);
+        var potentialAuthentication = executor.resetApplication(resetFunction);
         var functions = testcase.getFunctionsWrapped();
         var originalTestcase = testcase.getTestcase();
-        List<String> resultsFirstExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys());
+        List<String> resultsFirstExecution = executeWrappedFunctions(functions, originalTestcase.getAuthKeys(), potentialAuthentication);
         List<String> resultsFirstExecutionLogs = executor.getAllNewLogs(0L);
         List<String> oldResults = functions.stream().map(FunctionWrapper::getFunction).map(Function::getExpectedOutputs)
                 .map(entry -> String.join("", entry)).toList();
@@ -447,10 +447,10 @@ public class TestcaseExecutor {
         return result;
     }
 
-    private List<String> executeWrappedFunctions(List<FunctionWrapper> functions, Set<String> authKeys) {
+    private List<String> executeWrappedFunctions(List<FunctionWrapper> functions, Set<String> authKeys, String potentialAuthJson) {
         var results = new ArrayList<String>();
         final Map<String, List<String>> outputValues = new HashMap<>();
-        final List<String> authValues = new ArrayList<>();
+        final List<String> authValues = getAuthValues(authKeys, potentialAuthJson);
         for (var function : functions) {
             var originalFunction = function.getFunction();
             String functionName = originalFunction.getName();

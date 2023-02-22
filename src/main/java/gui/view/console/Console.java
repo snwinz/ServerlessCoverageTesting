@@ -72,14 +72,8 @@ public class Console {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
-                Set<String> authKeys = new HashSet<>();
-                if (cmd.hasOption(AUTH_VALUES_OPTION)) {
-                    String authValuesUnparsed = cmd.getOptionValue(AUTH_VALUES_OPTION);
-                    var authKeysArray = authValuesUnparsed.split(",");
-                    authKeys = Arrays.stream(authKeysArray).collect(Collectors.toSet());
-                }
 
-                controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction, authKeys);
+                controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction);
             } else if (areAllArgumentsAvailableForReCalibration(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
@@ -90,6 +84,15 @@ public class Console {
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
                 controller.executeTestcases(testsuitePath, region, resetFunction);
+            } else if(false){
+                /* Set<String> authKeys = new HashSet<>();
+                if (cmd.hasOption(AUTH_VALUES_OPTION)) {
+                    String authValuesUnparsed = cmd.getOptionValue(AUTH_VALUES_OPTION);
+                    var authKeysArray = authValuesUnparsed.split(",");
+                    authKeys = Arrays.stream(authKeysArray).collect(Collectors.toSet());
+                }
+                 */
+
             }
         } catch (ParseException pe) {
             HelpFormatter formatter = new HelpFormatter();
