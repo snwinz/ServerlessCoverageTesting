@@ -1,8 +1,8 @@
 package logic.testcasegenerator.coveragetargets.coverageelements;
 
-import shared.model.NodeType;
 import logic.model.NodeModel;
 import logic.model.SourceCodeLine;
+import shared.model.NodeType;
 
 import java.util.Objects;
 

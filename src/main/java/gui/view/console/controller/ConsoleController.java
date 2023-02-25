@@ -2,7 +2,13 @@ package gui.view.console.controller;
 
 import gui.controller.PersistenceUtilities;
 import gui.view.console.Console;
+import gui.view.wrapper.ExecutionSettings;
+import logic.dynamicdatageneration.DynamicTestCaseGenerator;
+import logic.model.TestSuiteOfTargets;
 import logic.mutation.MutationExecutor;
+import logic.testcasegenerator.TestCaseGenerator;
+import logic.testcasegenerator.TestCaseGeneratorImpl;
+import logic.testcasegenerator.coveragetargets.CoverageTarget;
 import logic.testcasegenerator.testcaseexecution.TestcaseExecutor;
 import shared.model.Mutant;
 import shared.model.Testcase;
@@ -67,6 +73,98 @@ public class ConsoleController {
             thread.start();
         }
 
+    }
+
+    public void createDynamicTestcases(String graphPath, String resetFunction, Set<String> authKeys, String regionsAsParameter, int startNumber, int endNumber, String outputPath, String metric) {
+        TestCaseGenerator testCaseGenerator = new TestCaseGeneratorImpl();
+        String graphJson = null;
+        try {
+            graphJson = Files.readString(Path.of(graphPath));
+        } catch (IOException e) {
+            System.out.printf("File of graph with path %s could not be loaded", graphPath);
+            return;
+        }
+        TestSuiteOfTargets testSuiteOfTargets = new TestSuiteOfTargets();
+        if (metric == null) {
+            testSuiteOfTargets.add(testCaseGenerator.getResourceCoverage(graphJson).getTestTargets());
+            testSuiteOfTargets.add(testCaseGenerator.getRelationCoverage(graphJson).getTestTargets());
+            testSuiteOfTargets.add(testCaseGenerator.getAllDefsCoverage(graphJson).getTestTargets());
+            testSuiteOfTargets.add(testCaseGenerator.getDefUseCoverage(graphJson).getTestTargets());
+            testSuiteOfTargets.add(testCaseGenerator.getAllUsesCoverage(graphJson).getTestTargets());
+        }
+        switch (metric) {
+            case "allResources" ->
+                    testSuiteOfTargets.add(testCaseGenerator.getResourceCoverage(graphJson).getTestTargets());
+            case "allRelations" ->
+                    testSuiteOfTargets.add(testCaseGenerator.getRelationCoverage(graphJson).getTestTargets());
+            case "allDefs" -> testSuiteOfTargets.add(testCaseGenerator.getAllDefsCoverage(graphJson).getTestTargets());
+            case "allDefUse" -> testSuiteOfTargets.add(testCaseGenerator.getDefUseCoverage(graphJson).getTestTargets());
+            case "allUses" -> testSuiteOfTargets.add(testCaseGenerator.getAllUsesCoverage(graphJson).getTestTargets());
+            default -> System.out.println("Parameter not correct, choose on of the following: allResources, allRelations, allDefs, allDefUse, allUses");
+        }
+
+        DynamicTestCaseGenerator dynamicTestCaseGenerator = new DynamicTestCaseGenerator();
+
+
+        var regions = getRegions(regionsAsParameter);
+        var targetQueue = new LinkedBlockingQueue<CoverageTarget>();
+        var testTargets = testSuiteOfTargets.getTestTargets();
+        if (startNumber > endNumber || testTargets == null || testTargets.size() <= endNumber) {
+            return;
+        }
+        for (int i = startNumber; i < endNumber; i++) {
+            var target = testTargets.get(i);
+            try {
+                targetQueue.put(target);
+            } catch (InterruptedException e) {
+                System.out.printf("Target %s could not be added", target);
+            }
+        }
+        for (var region : regions) {
+            var settings = new ExecutionSettings(region, resetFunction, authKeys);
+            settings.setProbSimilarOutputAsValue(1.0);
+            settings.setNumberOfTries(1);
+            Runnable runnable = () -> {
+                while (!targetQueue.isEmpty()) {
+                    var testTarget = targetQueue.poll();
+                    if (testTarget != null) {
+
+                        var testcases = testTarget.getTestcases();
+                        for (var testcase : testcases) {
+                            var logsToCover = testcase.getLogsOfTarget();
+                            String fileName = String.join("", logsToCover);
+                            try {
+
+                                var result = dynamicTestCaseGenerator.generateTestcase(testcase, settings);
+                                if (result.isPresent()) {
+
+                                    saveTestCase(outputPath, fileName, testTarget, testcase, settings.getAuthKeys());
+                                    break;
+                                }
+                            } catch (Exception e) {
+                                System.out.println("retry of : " + testTarget);
+                                var result = dynamicTestCaseGenerator.generateTestcase(testcase, settings);
+                                if (result.isPresent()) {
+
+                                    saveTestCase(outputPath, fileName, testTarget, testcase, settings.getAuthKeys());
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                }
+            };
+            var thread = new Thread(runnable);
+            thread.start();
+        }
+
+
+    }
+
+    private static void saveTestCase(String outputPath, String fileName, CoverageTarget testTarget, logic.model.Testcase testcase, Set<String> authKeys) {
+        var testcaseForExecution = testcase.getSharedTestcaseCopy(testTarget.getCoverageTargetDescription(), authKeys);
+        PersistenceUtilities.saveTestSuite(List.of(testcaseForExecution), Path.of(outputPath, fileName));
     }
 
     record TestSuiteInfo(List<Testcase> testcase, Path path) {

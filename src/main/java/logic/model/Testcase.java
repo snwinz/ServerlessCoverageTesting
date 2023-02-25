@@ -6,12 +6,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import logic.dynamicdatageneration.testrun.TestData;
 import shared.model.AccessMode;
+import shared.model.Function;
 import shared.model.NodeType;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Testcase {
     private final List<ServerlessFunction> functionNames;
@@ -53,11 +51,11 @@ public class Testcase {
         testCovered.set(covered);
     }
 
-    public boolean isCovered(){
+    public boolean isCovered() {
         return testCovered.get();
     }
 
-    public boolean isSpecificTargetCovered(){
+    public boolean isSpecificTargetCovered() {
         return specificTargetCovered.get();
     }
 
@@ -90,7 +88,6 @@ public class Testcase {
     public List<String> getLogsToCover() {
         return new ArrayList<>(logsToCover);
     }
-
 
 
     public void writeToOutput(String text) {
@@ -224,5 +221,21 @@ public class Testcase {
 
     public int getNumberOfRuns() {
         return numberOfRuns;
+    }
+
+    public shared.model.Testcase getSharedTestcaseCopy(String target, Set<String> authKeys) {
+        var functionsForExecution = new LinkedList<Function>();
+        var testData = this.getTestData();
+        for (var function : testData.getTestFunctions()) {
+            var functionName = function.getFunction().getName();
+            var argument = function.getJSON();
+            functionsForExecution.add(new Function(functionName, argument));
+        }
+        var logsToCoverForExecution = this.getLogsToCover();
+        String targetForExecution = target;
+        var result =
+                new shared.model.Testcase(functionsForExecution, logsToCoverForExecution, targetForExecution);
+        result.addAuthKeys(authKeys);
+        return result;
     }
 }

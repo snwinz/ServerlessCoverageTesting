@@ -7,7 +7,10 @@ import org.apache.commons.cli.*;
 import shared.model.NodeType;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Console {
@@ -30,6 +33,7 @@ public class Console {
     private final String GRAPH_OPTION = "g";
     private final String RESET_FUNCTION_OPTION = "rf";
     private final String AUTH_VALUES_OPTION = "av";
+    private final String COVERAGE_METRIC_OPTION = "cm";
     private final String REGION_OPTION = "re";
     private final String START_NUMBER_OPTION = "s";
     private final String END_NUMBER_OPTION = "e";
@@ -84,14 +88,30 @@ public class Console {
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
                 controller.executeTestcases(testsuitePath, region, resetFunction);
-            } else if(false){
-                /* Set<String> authKeys = new HashSet<>();
+            } else if (areAllArgumentsAvailableForDynamicTestcaseGeneration(cmd)) {
+                String outputPath = cmd.getOptionValue(OUTPUT_OPTION);
+                String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
+                String regions = cmd.getOptionValue(REGION_OPTION);
+                String graphPath = cmd.getOptionValue(GRAPH_OPTION);
+                Set<String> authKeys = new HashSet<>();
+                int startNumber = -1;
+                int endNumber = -1;
+                String metric = null;
                 if (cmd.hasOption(AUTH_VALUES_OPTION)) {
                     String authValuesUnparsed = cmd.getOptionValue(AUTH_VALUES_OPTION);
                     var authKeysArray = authValuesUnparsed.split(",");
                     authKeys = Arrays.stream(authKeysArray).collect(Collectors.toSet());
                 }
-                 */
+                if (cmd.hasOption(START_NUMBER_OPTION)) {
+                    startNumber = ((Number) cmd.getParsedOptionValue(START_NUMBER_OPTION)).intValue();
+                }
+                if (cmd.hasOption(END_NUMBER_OPTION)) {
+                    endNumber = ((Number) cmd.getParsedOptionValue(END_NUMBER_OPTION)).intValue();
+                }
+                if (cmd.hasOption(COVERAGE_METRIC_OPTION)) {
+                    metric = cmd.getOptionValue(COVERAGE_METRIC_OPTION);
+                }
+                controller.createDynamicTestcases(graphPath, resetFunction, authKeys, regions, startNumber, endNumber, outputPath, metric);
 
             }
         } catch (ParseException pe) {
@@ -100,24 +120,35 @@ public class Console {
         }
     }
 
+    private boolean areAllArgumentsAvailableForDynamicTestcaseGeneration(CommandLine cmd) {
+        return cmd.hasOption(MODE) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
+                && cmd.hasOption(OUTPUT_OPTION) && cmd.hasOption(GRAPH_OPTION)
+                && "create".equals(cmd.getOptionValue(MODE));
+    }
+
     private boolean areAllArgumentsAvailableForReCalibration(CommandLine cmd) {
-        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION)
+                && cmd.hasOption(RESET_FUNCTION_OPTION)
                 && "recalibrate".equals(cmd.getOptionValue(MODE));
     }
 
     private boolean areAllArgumentsAvailableForMutation(CommandLine cmd) {
-        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(MUTATION_OPTION) && cmd.hasOption(OUTPUT_OPTION)
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(MUTATION_OPTION)
+                && cmd.hasOption(OUTPUT_OPTION)
                 && cmd.hasOption(GRAPH_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION) && cmd.hasOption(REGION_OPTION)
-                && cmd.hasOption(START_NUMBER_OPTION) && cmd.hasOption(END_NUMBER_OPTION) && "mutate".equals(cmd.getOptionValue(MODE));
+                && cmd.hasOption(START_NUMBER_OPTION) && cmd.hasOption(END_NUMBER_OPTION)
+                && "mutate".equals(cmd.getOptionValue(MODE));
     }
 
     private boolean areAllArgumentsAvailableForCalibration(CommandLine cmd) {
-        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION)
+                && cmd.hasOption(RESET_FUNCTION_OPTION)
                 && "calibrate".equals(cmd.getOptionValue(MODE));
     }
 
     private boolean areAllArgumentsAvailableForExecution(CommandLine cmd) {
-        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION)
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION)
+                && cmd.hasOption(RESET_FUNCTION_OPTION)
                 && "execute".equals(cmd.getOptionValue(MODE));
     }
 

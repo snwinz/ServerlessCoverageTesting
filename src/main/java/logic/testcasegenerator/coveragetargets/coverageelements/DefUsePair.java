@@ -29,4 +29,10 @@ public record DefUsePair(FunctionWithDefSourceLine def,
                 def.getSourceCodeLine().getDefTracker("", def.getFunction().getIdentifier()),
                 use.getSourceCodeLine().getUseTracker("", use.getFunction().getIdentifier()));
     }
+
+    public String getSimpleDescription() {
+        return String.format("%s%s",
+                def.getSourceCodeLine().getDefTracker("", def.getFunction().getIdentifier()),
+                use.getSourceCodeLine().getUseTracker("", use.getFunction().getIdentifier()));
+    }
 }

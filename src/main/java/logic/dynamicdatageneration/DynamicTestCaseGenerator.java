@@ -1,11 +1,13 @@
 package logic.dynamicdatageneration;
 
 import gui.view.wrapper.ExecutionSettings;
+import logic.dynamicdatageneration.testrun.TestData;
 import logic.model.Testcase;
 import logic.testcasegenerator.coveragetargets.CoverageTarget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -29,6 +31,21 @@ public class DynamicTestCaseGenerator {
 
 
     }
+
+    public Optional<TestData> generateTestcase(Testcase testcase, ExecutionSettings executionSettings) {
+        TestcaseSimulator testcaseSimulator = new TestcaseSimulator(executionSettings.getNumberOfRuns(), executionSettings.getRegion());
+        testcaseSimulator.setResetFunction(executionSettings.getResetFunctionName());
+
+        var res = testcaseSimulator.simulateTestcase(testcase, executionSettings);
+        if (res.isPresent()) {
+            var testData = res.get();
+            System.out.println("Valid test case: ");
+            System.out.println(testData);
+        }
+
+        return res;
+    }
+
 
     public void generateTestcasesForTarget(List<CoverageTarget> testTargets, ExecutionSettings executionSettings) {
         TestcaseSimulator testcaseSimulator = new TestcaseSimulator(1, executionSettings.getRegion());
@@ -70,7 +87,7 @@ public class DynamicTestCaseGenerator {
         similarOutputAsValue.setProbSimilarOutputAsValue(1.0);
         settings.add(similarOutputAsValue);
 
-        ExecutionSettings randomInputAsValue =executionSettings.getSimilarSettings();
+        ExecutionSettings randomInputAsValue = executionSettings.getSimilarSettings();
         randomInputAsValue.setProbRandomInputAsValue(1.0);
         settings.add(randomInputAsValue);
 

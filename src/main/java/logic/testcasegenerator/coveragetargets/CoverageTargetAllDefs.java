@@ -40,7 +40,7 @@ public class CoverageTargetAllDefs implements CoverageTarget {
         return coverageElement.getCoverageTargetDescription();
     }
 
-    public void addTestcases(List<Testcase> testcases) {
+       public void addTestcases(List<Testcase> testcases) {
         this.testcases.addAll(testcases);
     }
 

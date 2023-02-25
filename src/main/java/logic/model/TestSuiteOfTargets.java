@@ -162,18 +162,9 @@ public class TestSuiteOfTargets {
     }
 
     private void addValidTestcaseToResult(List<Testcase> result, CoverageTarget target, logic.model.Testcase testcase) {
-        var functionsForExecution = new LinkedList<Function>();
         var testData = testcase.getTestData();
-        for (var function : testData.getTestFunctions()) {
-            var functionName = function.getFunction().getName();
-            var argument = function.getJSON();
-            functionsForExecution.add(new Function(functionName, argument));
-        }
-        var logsToCoverForExecution = testcase.getLogsToCover();
-        String targetForExecution = target.getCoverageTargetDescription();
-        var testcaseForExecution = new Testcase(functionsForExecution, logsToCoverForExecution, targetForExecution);
         var authKeys = testData.getAuthKeys();
-        testcaseForExecution.addAuthKeys(authKeys);
+        var testcaseForExecution = testcase.getSharedTestcaseCopy(target.getCoverageTargetDescription(), authKeys);
         testcaseForExecution.setManualCreated(false);
         result.add(testcaseForExecution);
     }
