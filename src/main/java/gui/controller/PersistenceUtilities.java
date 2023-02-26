@@ -148,6 +148,10 @@ public class PersistenceUtilities {
         String json = gson.toJson(testSuite);
 
         try {
+            var directory = destination.getParent();
+            if (Files.notExists(directory)) {
+                Files.createDirectory(directory);
+            }
             Files.writeString(destination, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             System.err.printf("Could not write the following to %s:%n%s ", destination.toAbsolutePath(), json);

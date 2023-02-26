@@ -75,7 +75,7 @@ public class ConsoleController {
 
     }
 
-    public void createDynamicTestcases(String graphPath, String resetFunction, Set<String> authKeys, String regionsAsParameter, int startNumber, int endNumber, String outputPath, String metric) {
+    public void createDynamicTestcases(String graphPath, String resetFunction, Set<String> authKeys, String regionsAsParameter, int startNumberIncluding, int endNumberExcluding, String outputPath, String metric) {
         TestCaseGenerator testCaseGenerator = new TestCaseGeneratorImpl();
         String graphJson = null;
         try {
@@ -109,10 +109,10 @@ public class ConsoleController {
         var regions = getRegions(regionsAsParameter);
         var targetQueue = new LinkedBlockingQueue<CoverageTarget>();
         var testTargets = testSuiteOfTargets.getTestTargets();
-        if (startNumber > endNumber || testTargets == null || testTargets.size() <= endNumber) {
+        if (startNumberIncluding > endNumberExcluding || testTargets == null || testTargets.size() <= endNumberExcluding) {
             return;
         }
-        for (int i = startNumber; i < endNumber; i++) {
+        for (int i = startNumberIncluding; i < endNumberExcluding; i++) {
             var target = testTargets.get(i);
             try {
                 targetQueue.put(target);
@@ -164,6 +164,7 @@ public class ConsoleController {
 
     private static void saveTestCase(String outputPath, String fileName, CoverageTarget testTarget, logic.model.Testcase testcase, Set<String> authKeys) {
         var testcaseForExecution = testcase.getSharedTestcaseCopy(testTarget.getCoverageTargetDescription(), authKeys);
+        testcaseForExecution.setManualCreated(false);
         PersistenceUtilities.saveTestSuite(List.of(testcaseForExecution), Path.of(outputPath, fileName));
     }
 

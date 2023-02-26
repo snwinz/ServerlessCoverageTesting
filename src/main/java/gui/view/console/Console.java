@@ -94,8 +94,8 @@ public class Console {
                 String regions = cmd.getOptionValue(REGION_OPTION);
                 String graphPath = cmd.getOptionValue(GRAPH_OPTION);
                 Set<String> authKeys = new HashSet<>();
-                int startNumber = -1;
-                int endNumber = -1;
+                int startNumberIncluding = -1;
+                int endNubmerExcluding = -1;
                 String metric = null;
                 if (cmd.hasOption(AUTH_VALUES_OPTION)) {
                     String authValuesUnparsed = cmd.getOptionValue(AUTH_VALUES_OPTION);
@@ -103,15 +103,15 @@ public class Console {
                     authKeys = Arrays.stream(authKeysArray).collect(Collectors.toSet());
                 }
                 if (cmd.hasOption(START_NUMBER_OPTION)) {
-                    startNumber = ((Number) cmd.getParsedOptionValue(START_NUMBER_OPTION)).intValue();
+                    startNumberIncluding = ((Number) cmd.getParsedOptionValue(START_NUMBER_OPTION)).intValue();
                 }
                 if (cmd.hasOption(END_NUMBER_OPTION)) {
-                    endNumber = ((Number) cmd.getParsedOptionValue(END_NUMBER_OPTION)).intValue();
+                    endNubmerExcluding = ((Number) cmd.getParsedOptionValue(END_NUMBER_OPTION)).intValue();
                 }
                 if (cmd.hasOption(COVERAGE_METRIC_OPTION)) {
                     metric = cmd.getOptionValue(COVERAGE_METRIC_OPTION);
                 }
-                controller.createDynamicTestcases(graphPath, resetFunction, authKeys, regions, startNumber, endNumber, outputPath, metric);
+                controller.createDynamicTestcases(graphPath, resetFunction, authKeys, regions, startNumberIncluding, endNubmerExcluding, outputPath, metric);
 
             }
         } catch (ParseException pe) {
@@ -159,7 +159,7 @@ public class Console {
         options.addOption(Option.builder(MODE)
                 .longOpt("mode")
                 .hasArg(true)
-                .desc("calibrate testcases or mutate testcases")
+                .desc("calibrate testcases or mutate testcases or create testcases")
                 .required(false)
                 .build());
 
@@ -206,18 +206,30 @@ public class Console {
                 .required(true)
                 .build());
         options.addOption(Option.builder(START_NUMBER_OPTION)
-                .longOpt("startMutant")
+                .longOpt("startNumber")
                 .hasArg(true)
                 .desc("number of first mutant")
                 .required(false)
                 .type(Number.class)
                 .build());
         options.addOption(Option.builder(END_NUMBER_OPTION)
-                .longOpt("endMutant")
+                .longOpt("endNumber")
                 .hasArg(true)
                 .desc("number of last mutant")
                 .required(false)
                 .type(Number.class)
+                .build());
+        options.addOption(Option.builder(AUTH_VALUES_OPTION)
+                .longOpt("authorizationValues")
+                .hasArg(true)
+                .desc("keys for authorization")
+                .required(false)
+                .build());
+        options.addOption(Option.builder(COVERAGE_METRIC_OPTION)
+                .longOpt("coverageMetric")
+                .hasArg(true)
+                .desc("coverage criterion to be used")
+                .required(false)
                 .build());
         return options;
     }
