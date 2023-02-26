@@ -226,10 +226,12 @@ public class Testcase {
     public shared.model.Testcase getSharedTestcaseCopy(String target, Set<String> authKeys) {
         var functionsForExecution = new LinkedList<Function>();
         var testData = this.getTestData();
-        for (var function : testData.getTestFunctions()) {
-            var functionName = function.getFunction().getName();
-            var argument = function.getJSON();
-            functionsForExecution.add(new Function(functionName, argument));
+        if (testData != null) {
+            for (var function : testData.getTestFunctions()) {
+                var functionName = function.getFunction().getName();
+                var argument = function.getJSON();
+                functionsForExecution.add(new Function(functionName, argument));
+            }
         }
         var logsToCoverForExecution = this.getLogsToCover();
         String targetForExecution = target;

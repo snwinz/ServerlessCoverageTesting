@@ -100,7 +100,8 @@ public class ConsoleController {
             case "allDefs" -> testSuiteOfTargets.add(testCaseGenerator.getAllDefsCoverage(graphJson).getTestTargets());
             case "allDefUse" -> testSuiteOfTargets.add(testCaseGenerator.getDefUseCoverage(graphJson).getTestTargets());
             case "allUses" -> testSuiteOfTargets.add(testCaseGenerator.getAllUsesCoverage(graphJson).getTestTargets());
-            default -> System.out.println("Parameter not correct, choose on of the following: allResources, allRelations, allDefs, allDefUse, allUses");
+            default ->
+                    System.out.println("Parameter not correct, choose on of the following: allResources, allRelations, allDefs, allDefUse, allUses");
         }
 
         DynamicTestCaseGenerator dynamicTestCaseGenerator = new DynamicTestCaseGenerator();
@@ -109,7 +110,7 @@ public class ConsoleController {
         var regions = getRegions(regionsAsParameter);
         var targetQueue = new LinkedBlockingQueue<CoverageTarget>();
         var testTargets = testSuiteOfTargets.getTestTargets();
-        if (startNumberIncluding > endNumberExcluding || testTargets == null || testTargets.size() <= endNumberExcluding) {
+        if (startNumberIncluding > endNumberExcluding || testTargets == null || testTargets.size() < endNumberExcluding) {
             return;
         }
         for (int i = startNumberIncluding; i < endNumberExcluding; i++) {
@@ -132,7 +133,7 @@ public class ConsoleController {
                         var testcases = testTarget.getTestcases();
                         for (var testcase : testcases) {
                             var logsToCover = testcase.getLogsOfTarget();
-                            String fileName = String.join("", logsToCover);
+                            String fileName = String.join("", logsToCover) + ".json";
                             try {
 
                                 var result = dynamicTestCaseGenerator.generateTestcase(testcase, settings);
@@ -150,7 +151,10 @@ public class ConsoleController {
                                     break;
                                 }
                             }
-
+                            if (testcase == testcases.get(testcases.size() - 1)) {
+                                System.out.println("not covered : " + testTarget);
+                                saveTestCase(outputPath, "NotCovered" + fileName, testTarget, testcase, settings.getAuthKeys());
+                            }
                         }
                     }
                 }
@@ -165,7 +169,9 @@ public class ConsoleController {
     private static void saveTestCase(String outputPath, String fileName, CoverageTarget testTarget, logic.model.Testcase testcase, Set<String> authKeys) {
         var testcaseForExecution = testcase.getSharedTestcaseCopy(testTarget.getCoverageTargetDescription(), authKeys);
         testcaseForExecution.setManualCreated(false);
-        PersistenceUtilities.saveTestSuite(List.of(testcaseForExecution), Path.of(outputPath, fileName));
+        var outputFile = PersistenceUtilities.createUniquePath(outputPath, fileName);
+
+        PersistenceUtilities.saveTestSuite(List.of(testcaseForExecution), outputFile);
     }
 
     record TestSuiteInfo(List<Testcase> testcase, Path path) {

@@ -7,12 +7,16 @@ import gui.view.GraphVisualisationView;
 import gui.view.StandardPresentationView;
 import gui.view.graphcomponents.DraggableArrow;
 import gui.view.graphcomponents.DraggableNode;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import logic.model.LogicGraph;
+import shared.model.Testcase;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GraphVisualisationController {
@@ -159,6 +163,31 @@ public class GraphVisualisationController {
                 var testcases = PersistenceUtilities.loadTCs(tcFile.toPath());
                 TestCaseExecutionController controller = new TestCaseExecutionController(testcases, model, tcFile.toPath());
                 controller.setup();
+            }
+        }
+    }
+
+    public void executeTestcasesOfFolder() {
+        var directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        var folder = directoryChooser.showDialog(view);
+
+        if (folder != null) {
+            var folderPath = folder.toPath();
+            try (var walk = Files.walk(folderPath)) {
+                var files = walk
+                        .filter(Files::isRegularFile)
+                        .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
+                List<Testcase> allTestcases = new ArrayList<>();
+                for (Path file : files) {
+                    var testcases = PersistenceUtilities.loadTCs(file);
+                    allTestcases.addAll(testcases);
+                }
+
+                TestCaseExecutionController controller = new TestCaseExecutionController(allTestcases, model, folderPath.resolve("allTCs.json"));
+                controller.setup();
+            } catch (IOException e) {
+                System.err.println("Could not read : " + folder);
             }
         }
     }

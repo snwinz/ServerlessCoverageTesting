@@ -97,6 +97,7 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
         var saveGraphItem = new MenuItem("Save Graph");
         var closeItem = new MenuItem("Close");
         var executeTestCase = new MenuItem("Execute TestCases");
+        var executeTestCasesFolder = new MenuItem("Execute TestCases of Folder");
         var analyzeLogFile = new MenuItem("Analyze Log File");
         var runMutants = new MenuItem("Run mutants");
         var openNewGraphItem = new MenuItem("Open Graph");
@@ -105,10 +106,11 @@ public class GraphVisualisationView extends Stage implements PropertyChangeListe
         saveGraphItemAs.setOnAction(event -> controller.saveGraphAs(nodes, arrows));
         saveGraphItem.setOnAction(event -> controller.saveGraph(nodes, arrows));
         executeTestCase.setOnAction(event -> controller.executeTestcases());
+        executeTestCasesFolder.setOnAction(event -> controller.executeTestcasesOfFolder());
         analyzeLogFile.setOnAction(event -> controller.evaluateLog(model));
         openNewGraphItem.setOnAction(event -> controller.openGraph());
-        runMutants.setOnAction(event-> controller.runMutants());
-        file.getItems().addAll(saveGraphItem, saveGraphItemAs, openNewGraphItem, analyzeLogFile,runMutants, executeTestCase, closeItem);
+        runMutants.setOnAction(event -> controller.runMutants());
+        file.getItems().addAll(saveGraphItem, saveGraphItemAs, openNewGraphItem, analyzeLogFile, runMutants, executeTestCase, executeTestCasesFolder, closeItem);
         menuBar.getMenus().addAll(file);
         return menuBar;
     }

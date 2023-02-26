@@ -191,4 +191,12 @@ public class PersistenceUtilities {
             System.err.printf("Could not write the following to %s:%n%s ", destination, json);
         }
     }
+
+    public static Path createUniquePath(String outputPath, String fileName) {
+        var fullPath = Path.of(outputPath, fileName);
+        while (Files.exists(fullPath)) {
+            fullPath = Path.of(fullPath.toString().substring(0, fullPath.toString().indexOf(".json")) + "_new.json");
+        }
+        return fullPath;
+    }
 }

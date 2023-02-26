@@ -61,7 +61,7 @@ public class TestcaseSimulator {
                 }
                 /* quite generic and has to be more specific */
             } catch (Exception e) {
-                String message = String.format("Error occurred in run%d: %s", actualRun, e.getMessage());
+                String message = String.format("Error occurred in run %d: %s", actualRun, e.getMessage());
                 System.err.println(message);
                 LOGGER.warning(message);
             }
