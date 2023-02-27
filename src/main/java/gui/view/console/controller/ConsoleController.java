@@ -134,6 +134,10 @@ public class ConsoleController {
                         for (var testcase : testcases) {
                             var logsToCover = testcase.getLogsOfTarget();
                             String fileName = String.join("", logsToCover) + ".json";
+                            if(Files.exists(Path.of(outputPath,fileName))){
+                                System.out.println("Following logs are already covered: " + logsToCover);
+                                break;
+                            }
                             try {
 
                                 var result = dynamicTestCaseGenerator.generateTestcase(testcase, settings);
