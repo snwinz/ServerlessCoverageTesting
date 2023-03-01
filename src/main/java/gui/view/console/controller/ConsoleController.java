@@ -110,7 +110,7 @@ public class ConsoleController {
         var regions = getRegions(regionsAsParameter);
         var targetQueue = new LinkedBlockingQueue<CoverageTarget>();
         var testTargets = testSuiteOfTargets.getTestTargets();
-        if (startNumberIncluding > endNumberExcluding || testTargets == null || testTargets.size() < endNumberExcluding) {
+        if (startNumberIncluding > endNumberExcluding || testTargets == null) {
             return;
         }
         if (endNumberExcluding > testTargets.size()) {
