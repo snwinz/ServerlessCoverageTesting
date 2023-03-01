@@ -113,6 +113,9 @@ public class ConsoleController {
         if (startNumberIncluding > endNumberExcluding || testTargets == null || testTargets.size() < endNumberExcluding) {
             return;
         }
+        if (endNumberExcluding > testTargets.size()) {
+            endNumberExcluding = testTargets.size();
+        }
         for (int i = startNumberIncluding; i < endNumberExcluding; i++) {
             var target = testTargets.get(i);
             try {
@@ -134,7 +137,7 @@ public class ConsoleController {
                         for (var testcase : testcases) {
                             var logsToCover = testcase.getLogsOfTarget();
                             String fileName = String.join("", logsToCover) + ".json";
-                            if(Files.exists(Path.of(outputPath,fileName))){
+                            if (Files.exists(Path.of(outputPath, fileName))) {
                                 System.out.println("Following logs are already covered: " + logsToCover);
                                 break;
                             }
