@@ -29,7 +29,7 @@ public class LogEvaluatorDefs extends LogEvaluator {
     }
 
     public Map<String, Integer> getUnitsCovered() {
-        List<String> coveredResources = logs.stream().map(LogEvaluatorDefs::cutDef).map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[0]).collect(Collectors.toList());
+        List<String> coveredResources = logs.stream().map(LogEvaluatorDefs::cutDef).map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[0]).map(entry -> entry.replaceAll("#", "")).collect(Collectors.toList());
         return countNumberOfOccurrences(coveredResources);
     }
 
@@ -50,7 +50,7 @@ public class LogEvaluatorDefs extends LogEvaluator {
     public List<String> getTargets(LogicGraph logicGraph) {
         TargetGenerator testcaseGenerator = new TargetGenerator();
         var targets = testcaseGenerator.getAllTargetsToBeCoveredByAllDefs(logicGraph);
-        return targets.stream().map(CoverageTargetAllDefs::getCoverageElement).map(FunctionWithDefSourceLine::getLogMessage).toList();
+        return targets.stream().map(CoverageTargetAllDefs::getCoverageElement).map(FunctionWithDefSourceLine::getLogMessage).map(entry -> entry.replaceAll("#", "")).toList();
     }
 
 }
