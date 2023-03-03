@@ -29,7 +29,7 @@ public class LogEvaluatorUses extends LogEvaluator {
 
     public Map<String, Integer> getUnitsCovered() {
         List<String> coveredUnits =
-                logs.stream().map(LogEvaluatorUses::cutDef)
+                logs.stream().map(LogEvaluatorUses::cutDef).map(entry -> entry.replaceAll("#", ""))
                         .collect(Collectors.toList());
         return countNumberOfOccurrences(coveredUnits);
     }
@@ -60,7 +60,7 @@ public class LogEvaluatorUses extends LogEvaluator {
                         use.getSourceCodeLine().getUseTracker("", use.getFunction().getIdentifier());
             }
             return targetText;
-        }).toList();
+        }).map(entry -> entry.replaceAll("#", "")).toList();
     }
 
 }

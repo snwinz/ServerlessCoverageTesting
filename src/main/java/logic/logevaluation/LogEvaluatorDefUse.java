@@ -32,10 +32,12 @@ public class LogEvaluatorDefUse extends LogEvaluator {
                 logs.stream()
                         .map(LogEvaluatorDefUse::cutDef)
                         .map(entry -> entry.split(LogNameConfiguration.USELOG_MARKER)[0])
+                        .map(entry -> entry.replaceAll("#", ""))
                         .toList();
         List<String> coveredUses =
                 logs.stream().filter(entry -> entry.contains(LogNameConfiguration.USELOG_MARKER)).
-                        map(entry -> entry.substring(entry.indexOf(LogNameConfiguration.USELOG_MARKER))).toList();
+                        map(entry -> entry.substring(entry.indexOf(LogNameConfiguration.USELOG_MARKER)))
+                        .map(entry -> entry.replaceAll("#", "")).toList();
 
         Map<String, Integer> unitsCovered = countNumberOfOccurrences(coveredDefs);
         Map<String, Integer> unitsCoveredUses = countNumberOfOccurrences(coveredUses);
@@ -60,7 +62,8 @@ public class LogEvaluatorDefUse extends LogEvaluator {
     public List<String> getTargets(LogicGraph logicGraph) {
         TargetGenerator testcaseGenerator = new TargetGenerator();
         var targets = testcaseGenerator.getAllTargetsToBeCoveredByAllDefUse(logicGraph);
-        return targets.stream().map(CoverageTargetAllDefUse::getCoverageElement).map(FunctionWithSourceLine::getLogMessage).toList();
+        return targets.stream().map(CoverageTargetAllDefUse::getCoverageElement).map(FunctionWithSourceLine::getLogMessage)
+                .map(entry -> entry.replaceAll("#", "")).toList();
     }
 
 }
