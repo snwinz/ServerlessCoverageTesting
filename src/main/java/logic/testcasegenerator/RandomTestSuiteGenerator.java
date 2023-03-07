@@ -42,6 +42,7 @@ public class RandomTestSuiteGenerator {
         }
         var randomTestcase = new Testcase(randomFunctions, List.of(""), "random Testcase");
         randomTestcase.setManualCreated(testcase.isManualCreated());
+        randomTestcase.addAuthKeys(testcase.getAuthKeys());
         return randomTestcase;
     }
 
