@@ -37,7 +37,7 @@ public class Console {
     private final String REGION_OPTION = "re";
     private final String START_NUMBER_OPTION = "s";
     private final String END_NUMBER_OPTION = "e";
-
+    private final String FILTER_ACTIVATED_OPTION = "f";
 
     public void handleInput(String[] args) {
         Options options = getOptions();
@@ -76,8 +76,11 @@ public class Console {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
-
-                controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction);
+                if (cmd.hasOption(FILTER_ACTIVATED_OPTION)) {
+                    controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction, true);
+                } else {
+                    controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction, false);
+                }
             } else if (areAllArgumentsAvailableForReCalibration(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
@@ -229,6 +232,12 @@ public class Console {
                 .longOpt("coverageMetric")
                 .hasArg(true)
                 .desc("coverage criterion to be used")
+                .required(false)
+                .build());
+        options.addOption(Option.builder(FILTER_ACTIVATED_OPTION)
+                .longOpt("activateFilter")
+                .hasArg(false)
+                .desc("us filter function for calibration")
                 .required(false)
                 .build());
         return options;

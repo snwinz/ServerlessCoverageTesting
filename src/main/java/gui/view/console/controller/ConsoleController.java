@@ -92,7 +92,7 @@ public class ConsoleController {
             testSuiteOfTargets.add(testCaseGenerator.getDefUseCoverage(graphJson).getTestTargets());
             testSuiteOfTargets.add(testCaseGenerator.getAllUsesCoverage(graphJson).getTestTargets());
         }
-        switch (metric) {
+        switch (Objects.requireNonNull(metric)) {
             case "allResources" ->
                     testSuiteOfTargets.add(testCaseGenerator.getResourceCoverage(graphJson).getTestTargets());
             case "allRelations" ->
@@ -184,7 +184,7 @@ public class ConsoleController {
     record TestSuiteInfo(List<Testcase> testcase, Path path) {
     }
 
-    public void calibrateFolder(Path pathOfTestSuites, String region, String resetFunction) {
+    public void calibrateFolder(Path pathOfTestSuites, String region, String resetFunction, boolean filterActivated) {
         BlockingQueue<TestSuiteInfo> testSuitesToExecute = getTestSuites(pathOfTestSuites);
         String[] regions = getRegions(region);
         for (var regionForExecutor : regions) {
@@ -194,7 +194,11 @@ public class ConsoleController {
                     var testSuiteInfo = testSuitesToExecute.poll();
                     if (testSuiteInfo != null) {
                         var testcases = testSuiteInfo.testcase;
-                        for (var testcase : testcases) {
+                        var relevantTestcases = testcases;
+                        if (filterActivated) {
+                            relevantTestcases = testcases.stream().filter(ConsoleController::filterFunction).toList();
+                        }
+                        for (var testcase : relevantTestcases) {
                             try {
                                 tcExecutor.calibrate(testcase, resetFunction);
                             } catch (Exception e) {
@@ -210,6 +214,28 @@ public class ConsoleController {
             thread.start();
         }
 
+    }
+
+    private static boolean filterFunction(Testcase tc) {
+        var functions = tc.getFunctions();
+
+        for (var function : functions) {
+            var expectedOutput = function.getExpectedOutputs();
+            for (var output : expectedOutput) {
+                if (output == null) {
+                    continue;
+                }
+                int occurences = 0;
+                while (output.contains("PREVIOUSOUTPUT")) {
+                    output = output.substring((output.indexOf("PREVIOUSOUTPUT") + "PREVIOUSOUTPUT".length()-1));
+                    occurences++;
+                }
+                if (occurences % 2 != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private BlockingQueue<TestSuiteInfo> getTestSuites(Path pathOfTestSuites) {
