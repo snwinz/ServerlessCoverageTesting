@@ -120,10 +120,9 @@ public class MutationExecutor {
         StringBuilder missingParts = new StringBuilder();
         int killCounter = 0;
         List<Integer> killingTestcases = new ArrayList<>();
-        var executor = tcExecutor.getExecutor();
         var testcases = testSuite.getTestcases();
         for (Testcase testcase : testcases) {
-            String potentialAuthentication = executor.resetApplication(resetFunction);
+            String potentialAuthentication = tcExecutor.resetApplication(resetFunction,testcase);
             if (tcExecutor.executeTC(testcase, potentialAuthentication).isPresent()) {
                 //repeat if testcase does not cover
                 potentialAuthentication = tcExecutor.resetApplication(resetFunction);

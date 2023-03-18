@@ -111,6 +111,13 @@ public class TestcaseExecutor {
     }
 
 
+    public String resetApplication(String resetFunction, Testcase testcase) {
+        if (testcase != null && testcase.getLogsToBeCovered().size() != 0) {
+            executor.deleteOldLogs();
+        }
+        return executor.callResetFunction(resetFunction);
+    }
+
     private void checkCorrectnessOfOutput(String result, FunctionWrapper function, Map<String, List<String>> outputValues) {
         boolean passed = true;
         List<String> incorrectParts = new LinkedList<>();
@@ -527,4 +534,6 @@ public class TestcaseExecutor {
     public AWSInvoker getExecutor() {
         return executor;
     }
+
+
 }
