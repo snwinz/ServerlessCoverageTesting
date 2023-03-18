@@ -36,7 +36,7 @@ public class AWSInvoker implements Executor {
 
         InvokeResult invokeResult = amazonLambda.invoke(invokeRequest);
         try {
-            Thread.sleep(2000);
+            Thread.sleep(50);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
