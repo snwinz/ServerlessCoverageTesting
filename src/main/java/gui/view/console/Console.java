@@ -76,11 +76,7 @@ public class Console {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
-                if (cmd.hasOption(FILTER_ACTIVATED_OPTION)) {
-                    controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction, true);
-                } else {
-                    controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction, false);
-                }
+                controller.calibrateFolder(Path.of(testsuitePath), region, resetFunction, cmd.hasOption(FILTER_ACTIVATED_OPTION));
             } else if (areAllArgumentsAvailableForReCalibration(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);

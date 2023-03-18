@@ -16,14 +16,18 @@ import shared.model.Testcase;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConsoleController {
 
+    volatile long timeStart = System.currentTimeMillis();
+    AtomicInteger numberTC = new AtomicInteger(0);
 
     private final MutationExecutor mutationExecutor;
 
@@ -225,12 +229,12 @@ public class ConsoleController {
                 if (output == null) {
                     continue;
                 }
-                int occurences = 0;
+                int occurrences = 0;
                 while (output.contains("PREVIOUSOUTPUT")) {
-                    output = output.substring((output.indexOf("PREVIOUSOUTPUT") + "PREVIOUSOUTPUT".length()-1));
-                    occurences++;
+                    output = output.substring((output.indexOf("PREVIOUSOUTPUT") + "PREVIOUSOUTPUT".length() - 1));
+                    occurrences++;
                 }
-                if (occurences % 2 != 0) {
+                if (occurrences % 2 != 0) {
                     return true;
                 }
             }
@@ -293,6 +297,8 @@ public class ConsoleController {
 
 
     public void executeTestcases(String pathOfTestSuites, String region, String resetFunction) {
+        timeStart = System.currentTimeMillis();
+        numberTC.set(0);
         record TestcaseInfo(Testcase testcase, Path path) {
         }
         Path folderContainingTestSuites = Path.of(pathOfTestSuites);
@@ -309,18 +315,18 @@ public class ConsoleController {
                 for (var testcase : testcases) {
                     testcasesToExecute.put(new TestcaseInfo(testcase, path));
                 }
-                PersistenceUtilities.saveTestSuite(testcases, path);
             }
         } catch (IOException | InterruptedException e) {
             System.err.println("Could not read : " + pathOfTestSuites);
         }
+        List<Thread> threadList = new ArrayList<>();
         String[] regions = getRegions(region);
         for (var regionForExecutor : regions) {
             Runnable runnable = () -> {
                 TestcaseExecutor tcExecutor = new TestcaseExecutor(regionForExecutor);
                 while (!testcasesToExecute.isEmpty()) {
-                    String potentialAuthentication = tcExecutor.resetApplication(resetFunction);
                     var testcaseInfo = testcasesToExecute.poll();
+                    String potentialAuthentication = tcExecutor.resetApplication(resetFunction, testcaseInfo.testcase);
                     if (testcaseInfo != null) {
                         var testcase = Objects.requireNonNull(testcaseInfo).testcase();
                         var res = tcExecutor.executeTC(testcase, potentialAuthentication);
@@ -328,10 +334,22 @@ public class ConsoleController {
                                 testcaseInfo.path.toString(), t, testcaseInfo.testcase));
                     }
                 }
+
             };
             var thread = new Thread(runnable);
+            threadList.add(thread);
             thread.start();
         }
+        for (var thread : threadList) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        long finalTime = System.currentTimeMillis() - timeStart;
+        System.out.println("Time needed: " + finalTime + " milliseconds");
+        System.out.println("Time needed: " + (finalTime / 60000) + " minutes");
     }
 
 }
