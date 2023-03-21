@@ -53,7 +53,7 @@ public class ConsoleController {
         mutationExecutor.setTestSuits(path);
     }
 
-    public void startMutations(List<String> allFunctions, int mutantStartNumber, int mutantEndNumber, String region, String resetFunction, String outputPath) {
+    public void startMutations(List<String> allFunctions, String region, String resetFunction, String outputPath) {
 
         String[] regions = getRegions(region);
 
@@ -67,9 +67,7 @@ public class ConsoleController {
                     var mutant = mutants.poll();
                     if (mutant != null) {
                         int mutantNumber = mutantList.indexOf(mutant);
-                        if (mutantNumber >= mutantStartNumber && mutantNumber <= mutantEndNumber && mutantNumber < mutantList.size()) {
-                            mutationExecutor.startMutations(allFunctions, mutantNumber, mutantNumber, regionForExecutor, resetFunction, outputPath);
-                        }
+                            mutationExecutor.startMutations(allFunctions, regionForExecutor, resetFunction, outputPath, mutantNumber);
                     }
                 }
             };

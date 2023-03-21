@@ -92,21 +92,26 @@ public class MutationExecutor {
         return testSuites;
     }
 
-    public void startMutations(List<String> allFunctions, int minValue, int maxValue, String region, String resetFunction, String targetDirectory) {
-        TestcaseExecutor testcaseExecutor = new TestcaseExecutor(region);
-        for (int i = minValue; i <= maxValue; i++) {
-            var mutation = mutants.get(i);
-            for (var testSuite : testSuites) {
-                System.out.println("Start Mutation " + i + " with test suite " + testSuite.getName());
-                var cachedResult = findCachedResult(mutation, testSuite.getName());
-                Path targetPath = Path.of(targetDirectory);
-                MutationResult mutationResult;
-                mutationResult = cachedResult.orElseGet(() -> checkMutationForTestSuite(mutation, testSuite, allFunctions, testcaseExecutor, resetFunction));
-                mutationResult.setMutantNumber(i);
-                PersistenceUtilities.saveMutationResult(mutationResult, targetPath);
-            }
+    public void startMutations(List<String> allFunctions, String region, String resetFunction, String targetDirectory) {
+        for (int i = 0; i < mutants.size(); i++) {
+            startMutations(allFunctions, region, resetFunction, targetDirectory, i);
         }
     }
+
+    public void startMutations(List<String> allFunctions, String region, String resetFunction, String targetDirectory, int mutantNumber) {
+        TestcaseExecutor testcaseExecutor = new TestcaseExecutor(region);
+        var mutation = mutants.get(mutantNumber);
+        for (var testSuite : testSuites) {
+            System.out.println("Start Mutation " + mutantNumber + " with test suite " + testSuite.getName());
+            var cachedResult = findCachedResult(mutation, testSuite.getName());
+            Path targetPath = Path.of(targetDirectory);
+            MutationResult mutationResult;
+            mutationResult = cachedResult.orElseGet(() -> checkMutationForTestSuite(mutation, testSuite, allFunctions, testcaseExecutor, resetFunction));
+            mutationResult.setMutantNumber(mutantNumber);
+            PersistenceUtilities.saveMutationResult(mutationResult, targetPath);
+        }
+    }
+
 
     private Optional<MutationResult> findCachedResult(Mutant mutation, String testSuiteName) {
         if (mutation == null || testSuiteName == null) {
@@ -122,7 +127,7 @@ public class MutationExecutor {
         List<Integer> killingTestcases = new ArrayList<>();
         var testcases = testSuite.getTestcases();
         for (Testcase testcase : testcases) {
-            String potentialAuthentication = tcExecutor.resetApplication(resetFunction,testcase);
+            String potentialAuthentication = tcExecutor.resetApplication(resetFunction, testcase);
             if (tcExecutor.executeTC(testcase, potentialAuthentication).isPresent()) {
                 //repeat if testcase does not cover
                 potentialAuthentication = tcExecutor.resetApplication(resetFunction);
@@ -158,4 +163,6 @@ public class MutationExecutor {
 
         executor.setEnvironmentVariables(allFunctions, envVariables);
     }
+
+
 }

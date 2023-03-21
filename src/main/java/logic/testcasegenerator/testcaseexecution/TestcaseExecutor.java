@@ -193,7 +193,14 @@ public class TestcaseExecutor {
                     return Optional.of("number could not be parsed in " + function.getName() + ": " + result);
                 }
                 String partBeforeOutputValue = part.substring(0, startPositionMarker);
+
+                var outputValueKeyList = outputValues.get(key);
+                if (number >= outputValueKeyList.size()) {
+                    return Optional.of("number not found in potential keys " + function.getName() + ": " + result);
+                }
+
                 var outputValue = outputValues.get(key).get(number);
+
                 var potentialPartAfterOutputValue = part.substring(endPositionMarker + PREVIOUSOUTPUT_PREFIX.length());
                 potentialPartAfterOutputValue = potentialPartAfterOutputValue.substring(potentialPartAfterOutputValue.indexOf(PREVIOUSOUTPUT_SUFFIX) + PREVIOUSOUTPUT_SUFFIX.length());
                 part = partBeforeOutputValue + outputValue + potentialPartAfterOutputValue;

@@ -54,8 +54,6 @@ public class Console {
                 String graphPath = cmd.getOptionValue(GRAPH_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
                 String regions = cmd.getOptionValue(REGION_OPTION);
-                Number startMutant = (Number) cmd.getParsedOptionValue(START_NUMBER_OPTION);
-                Number endMutant = (Number) cmd.getParsedOptionValue(END_NUMBER_OPTION);
 
                 controller.setMutants(Path.of(mutationPath));
                 if (oldMutationResultPath != null) {
@@ -70,8 +68,7 @@ public class Console {
                     throw new IllegalStateException("no nodes available");
                 }
                 allFunctions = nodes.stream().filter(node -> NodeType.FUNCTION.equals(node.getType())).map(NodeModel::getNameOfNode).toList();
-                controller.startMutations(allFunctions, startMutant.intValue()
-                        , endMutant.intValue(), regions, resetFunction, outputPath);
+                controller.startMutations(allFunctions, regions, resetFunction, outputPath);
             } else if (areAllArgumentsAvailableForCalibration(cmd)) {
                 String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
                 String region = cmd.getOptionValue(REGION_OPTION);
@@ -135,7 +132,6 @@ public class Console {
         return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(MUTATION_OPTION)
                 && cmd.hasOption(OUTPUT_OPTION)
                 && cmd.hasOption(GRAPH_OPTION) && cmd.hasOption(RESET_FUNCTION_OPTION) && cmd.hasOption(REGION_OPTION)
-                && cmd.hasOption(START_NUMBER_OPTION) && cmd.hasOption(END_NUMBER_OPTION)
                 && "mutate".equals(cmd.getOptionValue(MODE));
     }
 

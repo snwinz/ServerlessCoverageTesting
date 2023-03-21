@@ -127,8 +127,8 @@ public class MutationView extends Stage implements PropertyChangeListener {
 
             final Label startLabelMutant = new Label("Start mutants at:");
             final Label endLabelMutant = new Label("End mutants at:");
-            final Spinner<Integer> mutantsNumberMin = new Spinner<>(0, mutants.size()-1, 0, 1);
-            final Spinner<Integer> mutantsNumberMax = new Spinner<>(0, mutants.size()-1, 0, 1);
+            final Spinner<Integer> mutantsNumberMin = new Spinner<>(0, mutants.size() - 1, 0, 1);
+            final Spinner<Integer> mutantsNumberMax = new Spinner<>(0, mutants.size() - 1, 0, 1);
             mutantsNumberMin.setEditable(true);
             mutantsNumberMax.setEditable(true);
             ViewHelper.addToGridInHBox(grid, startLabelMutant, mutantsNumberMin, endLabelMutant, mutantsNumberMax);
@@ -152,8 +152,7 @@ public class MutationView extends Stage implements PropertyChangeListener {
             startMutations.setOnAction(event -> {
                 saveConfigProperties();
                 var allFunctions = Arrays.asList(applicationFunctions.getText().split(Pattern.quote("\n")));
-                controller.startMutations(allFunctions, mutantsNumberMin.getValue(),
-                        mutantsNumberMax.getValue(), regionAWS.getText(), resetFunctionName.getText(), resultFolder.getText());
+                controller.startMutations(allFunctions, regionAWS.getText(), resetFunctionName.getText(), resultFolder.getText());
             });
             ViewHelper.addToGridInHBox(grid, startMutations);
 

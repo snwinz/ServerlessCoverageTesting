@@ -33,7 +33,7 @@ public class MutationController {
     }
 
 
-    public void startMutations(List<String> allFunctions, int minValue, int maxValue, String region, String resetFunction, String targetDirectory) {
-        mutationExecutor.startMutations(allFunctions, minValue, maxValue, region, resetFunction, targetDirectory);
+    public void startMutations(List<String> allFunctions, String region, String resetFunction, String targetDirectory) {
+        mutationExecutor.startMutations(allFunctions, region, resetFunction, targetDirectory);
     }
 }
