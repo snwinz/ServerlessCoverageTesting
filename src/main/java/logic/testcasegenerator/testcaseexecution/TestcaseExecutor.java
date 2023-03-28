@@ -274,10 +274,12 @@ public class TestcaseExecutor {
     private void addResultToOutputValues(String result, Map<String, List<String>> outputValues, Set<String> authKeys, List<String> authValues) {
         KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(result);
         var generatedKeyValues = keyValueJsonGenerator.getKeyValues();
-        for (var authKey : authKeys) {
-            if (generatedKeyValues.containsKey(authKey)) {
-                authValues.addAll(generatedKeyValues.get(authKey));
-                generatedKeyValues.remove(authKey);
+        if (authKeys != null) {
+            for (var authKey : authKeys) {
+                if (generatedKeyValues.containsKey(authKey)) {
+                    authValues.addAll(generatedKeyValues.get(authKey));
+                    generatedKeyValues.remove(authKey);
+                }
             }
         }
         for (var entry : generatedKeyValues.entrySet()) {
@@ -506,6 +508,9 @@ public class TestcaseExecutor {
 
     private static List<String> getAuthValues(Set<String> authKeys, String potentialAuthJson) {
         final List<String> authValues = new ArrayList<>();
+        if (authKeys == null) {
+            return authValues;
+        }
         if (potentialAuthJson != null) {
             KeyValueJsonGenerator keyValueJsonGenerator = new KeyValueJsonGenerator(potentialAuthJson);
             var outputKeyValues = keyValueJsonGenerator.getKeyValues();
