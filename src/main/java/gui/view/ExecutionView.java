@@ -4,8 +4,6 @@ import gui.controller.TestCaseExecutionController;
 import gui.model.Graph;
 import gui.view.wrapper.CheckboxWrapper;
 import gui.view.wrapper.TestcaseWrapper;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -24,7 +22,10 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -134,7 +135,6 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
 
             executeTC.setOnAction(e -> {
                 testcase.setSaveLogs(keepLogsCheckbox.isSelected());
-                testcases.forEach(tc -> tc.setSaveLogs(keepLogsCheckbox.isSelected()));
                 testcase.reset();
                 controller.executeTC(testcase, regionAWS.getText(), resetFunctionName.getText());
             });
