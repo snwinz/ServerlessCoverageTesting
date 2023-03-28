@@ -150,6 +150,15 @@ public class TestData {
             }
         }
         outputValues.putAll(outputKeyValues);
+
+        for (var entry : outputKeyValues.entrySet()) {
+            var generatedKey = entry.getKey();
+            var generatedValues = entry.getValue();
+            List<String> existingValues = outputValues.containsKey(generatedKey) ? outputValues.get(generatedKey) : new ArrayList<>();
+            existingValues.addAll(generatedValues);
+            outputValues.put(generatedKey, existingValues);
+        }
+
     }
 
     public String getDataAsText() {
