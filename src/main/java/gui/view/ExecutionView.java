@@ -344,10 +344,15 @@ public class ExecutionView extends Stage implements PropertyChangeListener {
         Button getAllLogsOnPlatform = new Button("get all logs on platform");
         getAllLogsOnPlatform.setOnAction(e -> controller.getLogsOnPlatform(regionAWS.getText()));
 
-        Button evaluateLogs = new Button("Evaluate logs");
+        Button evaluateLogs = new Button("Evaluate logs of current run");
         evaluateLogs.setOnAction(e -> controller.evaluateLogs(testcases, graph));
 
-        ViewHelper.addToGridInHBox(grid, deleteLogs, getLogsOfTestcases, getAllLogsOnPlatform, evaluateLogs);
+
+        Button evaluateLogsOfPreviousRun = new Button("Evaluate logs of assigned logs");
+        evaluateLogsOfPreviousRun.setOnAction(e -> controller.evaluateLogsOfPreviousRun(testcases.stream().map(TestcaseWrapper::getTestcase).toList(), graph));
+
+
+        ViewHelper.addToGridInHBox(grid, deleteLogs, getLogsOfTestcases, getAllLogsOnPlatform, evaluateLogs, evaluateLogsOfPreviousRun);
 
 
         Label tcGenerationLabel = new Label("Testcase generation:");

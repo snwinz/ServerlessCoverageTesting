@@ -5,7 +5,7 @@ import java.util.*;
 
 public final class Testcase {
     private final List<Function> functions;
-    private final List<String> coverageLogs;
+    private final List<String> coverageLogs = new ArrayList<>();
     private final String target;
     private final List<String> expectedLogs = new ArrayList<>();
     private final Set<String> authKeys = new HashSet<>();
@@ -13,9 +13,20 @@ public final class Testcase {
 
     public Testcase(List<Function> functions, List<String> coverageLogs, String target) {
         this.functions = functions;
-        this.coverageLogs = coverageLogs;
+        this.coverageLogs.clear();
+        this.coverageLogs.addAll(coverageLogs);
         this.target = target;
     }
+
+    public List<String> getCoverageLogs() {
+        return coverageLogs;
+    }
+
+    public void setCoverageLogs(List<String> coverageLogs) {
+        this.coverageLogs.clear();
+        this.coverageLogs.addAll(coverageLogs);
+    }
+
 
     public List<Function> getFunctions() {
         return functions;
@@ -98,4 +109,6 @@ public final class Testcase {
     public boolean isManualCreated() {
         return manualCreated;
     }
+
+
 }

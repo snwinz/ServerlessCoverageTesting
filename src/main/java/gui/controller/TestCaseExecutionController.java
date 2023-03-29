@@ -144,6 +144,12 @@ public class TestCaseExecutionController {
 
     }
 
+    public void evaluateLogsOfPreviousRun(List<Testcase> testcases, Graph graph) {
+        var allLogs = testcases.stream().map(Testcase::getCoverageLogs)
+                .filter(Objects::nonNull).flatMap(Collection::stream).toList();
+        LogEvaluationController controller = new LogEvaluationController(graph);
+        controller.setup(allLogs);
+    }
 
     public void createTestSuite(Graph graph, List<Testcase> testSuite) {
         if (graph != null) {

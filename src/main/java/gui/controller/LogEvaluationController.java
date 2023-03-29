@@ -23,7 +23,6 @@ public class LogEvaluationController {
     public void setup(List<String> allLogs) {
         view.setup(this, model);
         view.show();
-        model.addPropertyChangeListener(view);
         model.setLogs(allLogs);
     }
 

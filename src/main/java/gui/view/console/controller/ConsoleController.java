@@ -67,7 +67,7 @@ public class ConsoleController {
                     var mutant = mutants.poll();
                     if (mutant != null) {
                         int mutantNumber = mutantList.indexOf(mutant);
-                            mutationExecutor.startMutations(allFunctions, regionForExecutor, resetFunction, outputPath, mutantNumber);
+                        mutationExecutor.startMutations(allFunctions, regionForExecutor, resetFunction, outputPath, mutantNumber);
                     }
                 }
             };
@@ -183,6 +183,7 @@ public class ConsoleController {
         PersistenceUtilities.saveTestSuite(List.of(testcaseForExecution), outputFile);
     }
 
+
     record TestSuiteInfo(List<Testcase> testcase, Path path) {
     }
 
@@ -293,8 +294,70 @@ public class ConsoleController {
 
     }
 
+    public void createLogs(String pathOfTestSuites, String allRegions, String resetFunction, String outputPath) {
+        timeStart = System.currentTimeMillis();
+        numberTC.set(0);
+        record TestcaseInfo(List<Testcase> testcases, Path path) {
+        }
+        Path folderContainingTestSuites = Path.of(pathOfTestSuites);
+        if (!Files.isDirectory(folderContainingTestSuites) || Files.notExists(folderContainingTestSuites)) {
+            throw new IllegalArgumentException("Invalid path to folder");
+        }
+        var testcasesToExecute = new LinkedBlockingQueue<TestcaseInfo>();
+        try (var walk = Files.walk(folderContainingTestSuites)) {
+            var files = walk
+                    .filter(Files::isRegularFile)   // is a file
+                    .filter(p -> p.getFileName().toString().endsWith(".json")).toList();
+            for (var path : files) {
+                var testcases = PersistenceUtilities.loadTCs(path);
+                testcasesToExecute.put(new TestcaseInfo(testcases, path));
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Could not read : " + pathOfTestSuites);
+        }
+        List<Thread> threadList = new ArrayList<>();
+        String[] regions = getRegions(allRegions);
+        for (var regionForExecutor : regions) {
+            Runnable runnable = () -> {
+                TestcaseExecutor tcExecutor = new TestcaseExecutor(regionForExecutor);
+                while (!testcasesToExecute.isEmpty()) {
+                    var testcaseInfo = testcasesToExecute.poll();
+                    if ((testcaseInfo != null) && testcaseInfo.testcases != null) {
 
-    public void executeTestcases(String pathOfTestSuites, String region, String resetFunction) {
+
+                        var filename = testcaseInfo.path.getFileName().toString();
+                        var outputFile = Path.of(outputPath, filename);
+                        if (Files.exists(outputFile)) {
+                            continue;
+                        }
+
+                        var testcases = testcaseInfo.testcases;
+                        for (var testcase : testcases) {
+                            String potentialAuthentication = tcExecutor.resetApplication(resetFunction);
+                            tcExecutor.addCoverageLogToTestcase(testcase, potentialAuthentication);
+                        }
+                        PersistenceUtilities.saveTestSuite(testcases, outputFile);
+                    }
+                }
+            };
+            var thread = new Thread(runnable);
+            threadList.add(thread);
+            thread.start();
+        }
+        for (var thread : threadList) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        long finalTime = System.currentTimeMillis() - timeStart;
+        System.out.println("Time needed: " + finalTime + " milliseconds");
+        System.out.println("Time needed: " + (finalTime / 60000) + " minutes");
+    }
+
+
+    public void executeTestcases(String pathOfTestSuites, String allRegions, String resetFunction) {
         timeStart = System.currentTimeMillis();
         numberTC.set(0);
         record TestcaseInfo(Testcase testcase, Path path) {
@@ -318,7 +381,7 @@ public class ConsoleController {
             System.err.println("Could not read : " + pathOfTestSuites);
         }
         List<Thread> threadList = new ArrayList<>();
-        String[] regions = getRegions(region);
+        String[] regions = getRegions(allRegions);
         for (var regionForExecutor : regions) {
             Runnable runnable = () -> {
                 TestcaseExecutor tcExecutor = new TestcaseExecutor(regionForExecutor);

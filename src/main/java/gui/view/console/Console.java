@@ -39,6 +39,7 @@ public class Console {
     private final String END_NUMBER_OPTION = "e";
     private final String FILTER_ACTIVATED_OPTION = "f";
 
+
     public void handleInput(String[] args) {
         Options options = getOptions();
 
@@ -84,6 +85,13 @@ public class Console {
                 String region = cmd.getOptionValue(REGION_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
                 controller.executeTestcases(testsuitePath, region, resetFunction);
+            } else if (areAllArgumentsAvailableForLogCreation(cmd)) {
+                String testsuitePath = cmd.getOptionValue(TESTSUITE_OPTION);
+                String region = cmd.getOptionValue(REGION_OPTION);
+                String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
+                String outputPath = cmd.getOptionValue(OUTPUT_OPTION);
+                controller.createLogs(testsuitePath, region, resetFunction, outputPath);
+
             } else if (areAllArgumentsAvailableForDynamicTestcaseGeneration(cmd)) {
                 String outputPath = cmd.getOptionValue(OUTPUT_OPTION);
                 String resetFunction = cmd.getOptionValue(RESET_FUNCTION_OPTION);
@@ -145,6 +153,13 @@ public class Console {
         return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION)
                 && cmd.hasOption(RESET_FUNCTION_OPTION)
                 && "execute".equals(cmd.getOptionValue(MODE));
+    }
+
+    private boolean areAllArgumentsAvailableForLogCreation(CommandLine cmd) {
+        return cmd.hasOption(MODE) && cmd.hasOption(TESTSUITE_OPTION) && cmd.hasOption(REGION_OPTION)
+                && cmd.hasOption(OUTPUT_OPTION)
+                && cmd.hasOption(RESET_FUNCTION_OPTION)
+                && "log".equals(cmd.getOptionValue(MODE));
     }
 
     private Options getOptions() {
@@ -229,7 +244,7 @@ public class Console {
         options.addOption(Option.builder(FILTER_ACTIVATED_OPTION)
                 .longOpt("activateFilter")
                 .hasArg(false)
-                .desc("us filter function for calibration")
+                .desc("use filter function for calibration")
                 .required(false)
                 .build());
         return options;

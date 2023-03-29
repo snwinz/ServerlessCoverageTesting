@@ -36,7 +36,7 @@ public class AWSInvoker implements Executor {
 
         InvokeResult invokeResult = amazonLambda.invoke(invokeRequest);
         try {
-            Thread.sleep(50);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -129,7 +129,7 @@ public class AWSInvoker implements Executor {
     @Override
     public List<String> getAllNewLogs(long startTime) {
         try {
-            Thread.sleep(10000);
+            Thread.sleep(12000);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }

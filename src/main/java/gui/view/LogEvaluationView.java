@@ -12,7 +12,7 @@ import logic.logevaluation.EvaluationLogic;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class LogEvaluationView extends Stage implements PropertyChangeListener {
+public class LogEvaluationView extends Stage {
     private final TextArea log = new TextArea();
     private final TextArea output = new TextArea();
     private LogEvaluationController controller;
@@ -82,10 +82,6 @@ public class LogEvaluationView extends Stage implements PropertyChangeListener {
         file.getItems().addAll(openLogFile, close);
         menuBar.getMenus().addAll(file);
         return menuBar;
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
     }
 
 }

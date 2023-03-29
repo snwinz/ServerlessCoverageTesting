@@ -4,6 +4,7 @@ import gui.view.wrapper.FunctionWrapper;
 import gui.view.wrapper.TestcaseWrapper;
 import logic.executionplatforms.AWSInvoker;
 import logic.executionplatforms.KeyValueJsonGenerator;
+import logic.testcasegenerator.coveragetargets.LogNameConfiguration;
 import shared.model.Function;
 import shared.model.Testcase;
 
@@ -70,6 +71,27 @@ public class TestcaseExecutor {
         return getLogPartNotCovered(testcase);
     }
 
+    public void addCoverageLogToTestcase(Testcase testcase, String potentialAuthentication) {
+        var functions = testcase.getFunctions();
+        final Map<String, List<String>> outputValues = new HashMap<>();
+        final List<String> authValues = getAuthValues(testcase.getAuthKeys(), potentialAuthentication);
+        for (var function : functions) {
+            String functionName = function.getName();
+            String jsonData = function.getParameter();
+            String result = executor.invokeFunction(functionName, jsonData, outputValues, authValues);
+            addResultToOutputValues(result, outputValues, testcase.getAuthKeys(), authValues);
+        }
+        List<String> coveredTargets = getCoveredLogs(testcase);
+        testcase.setCoverageLogs(coveredTargets);
+    }
+
+    private List<String> getCoveredLogs(Testcase testcase) {
+        var logs = executor.getAllNewLogs(0L);
+        var logsInfoRemoved = filterLogs(logs);
+        return removeNoCoverLines(logsInfoRemoved);
+    }
+
+
     private boolean notRemovedFromList(List<String> logsCompare, String part) {
         boolean removed = true;
         for (int i = 0; i < logsCompare.size(); i++) {
@@ -93,6 +115,20 @@ public class TestcaseExecutor {
                 String entry = log.substring(log.indexOf("\tINFO\t") + 6);
                 entry = entry.substring(0, entry.length() - 1);
                 listFiltered.add(entry);
+            }
+        }
+        return listFiltered;
+    }
+
+    private List<String> removeNoCoverLines(List<String> logs) {
+        List<String> listFiltered = new LinkedList<>();
+        for (var log : logs) {
+            if (log.contains(LogNameConfiguration.DEFLOG_MARKER) && log.contains(LogNameConfiguration.USELOG_MARKER)) {
+                listFiltered.add(log);
+            } else if (log.contains(LogNameConfiguration.RESOURCE_MARKER)) {
+                listFiltered.add(log);
+            } else if (log.contains(LogNameConfiguration.RELATION_MARKER)) {
+                listFiltered.add(log);
             }
         }
         return listFiltered;
