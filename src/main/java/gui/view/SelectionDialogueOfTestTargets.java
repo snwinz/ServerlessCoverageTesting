@@ -87,7 +87,7 @@ public class SelectionDialogueOfTestTargets extends Stage {
             if (minCounter.getValue() < maxCounter.getValue()) {
                 var targets = testSuiteOfTargets.getTestTargets();
                 TestSuiteOfTargets filteredTestSuiteOfTargets = new TestSuiteOfTargets();
-                for (int i = minCounter.getValue(); i < maxCounter.getValue(); i++) {
+                for (int i = minCounter.getValue(); i <= maxCounter.getValue(); i++) {
                     filteredTestSuiteOfTargets.add(targets.get(i - 1));
                 }
                 controller.showTestSuites(filteredTestSuiteOfTargets);

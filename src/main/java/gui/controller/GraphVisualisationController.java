@@ -3,6 +3,7 @@ package gui.controller;
 import gui.controller.criteriaSelection.CriteriaSelectionDynamicTestCaseController;
 import gui.controller.criteriaSelection.CriteriaSelectionTestCaseTemplateController;
 import gui.model.Graph;
+import gui.model.modelcreation.Creator;
 import gui.view.GraphVisualisationView;
 import gui.view.StandardPresentationView;
 import gui.view.graphcomponents.DraggableArrow;
@@ -72,6 +73,17 @@ public class GraphVisualisationController {
         if (file != null) {
             model.clearGraph();
             var result = PersistenceUtilities.loadGraph(file.getAbsolutePath(), model);
+            view.setModel(result);
+            fileAliasOfView = file;
+        }
+    }
+    public void createGraphFromApplication() {
+        var fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        var file = fileChooser.showOpenDialog(view);
+        if (file != null) {
+            model.clearGraph();
+            var result = Creator.createGraph(file.toPath());
             view.setModel(result);
             fileAliasOfView = file;
         }
